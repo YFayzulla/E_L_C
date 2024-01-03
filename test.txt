@@ -1,0 +1,2 @@
+Client error: `POST http://notify.eskiz.uz/api/message/sms/send` resulted in a `400 Bad Request` response:
+{"status":"error","message":{"mobile_phone":["The mobile phone must be 12 digits."]}}

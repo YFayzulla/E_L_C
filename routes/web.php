@@ -34,26 +34,7 @@ Route::middleware('auth')->group(function () {
 
 /*                          USER                */
 Route::middleware('auth')->group(function () {
-
     Route::get('dashboard', [Controller::class, 'index'])->name('user');
-
-    // Room
-
-    Route::resource('room' ,RoomController::class);
-    Route::resource('doctor' ,DoctorController::class);
-
-    //test
-
-    Route::get('test',[Controller::class,'test']);
-
-    // Clinics
-
-    Route::get('user/clinic/index', [ClinicsController::class, 'index'])->name('clinic.index');
-    Route::get('user/clinic/create', [ClinicsController::class, 'create'])->name('clinic.create');
-    Route::post('user/clinic/store', [ClinicsController::class, 'store'])->name('clinic.store');
-    Route::get('user/clinic/{clinic}/edit', [ClinicsController::class, 'edit'])->name('clinic.edit');
-    Route::put('user/clinic/{clinic}', [ClinicsController::class, 'update'])->name('clinic.update');
-    Route::delete('user/clinic/{clinic}', [ClinicsController::class, 'destroy'])->name('clinic.delete');
 });
 
 require __DIR__.'/auth.php';

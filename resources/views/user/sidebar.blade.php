@@ -74,11 +74,5 @@
                 <div data-i18n="Analytics">Asosiy sahifa</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('clinic.index')) active @endif">
-            <a href="{{ route('clinic.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-clinic"></i>
-                <div data-i18n="Analytics">Klinikalar</div>
-            </a>
-        </li>
     </ul>
 </aside>

@@ -1,6 +1,8 @@
+<!-- Menu -->
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="" class="app-brand-link">
               <span class="app-brand-logo demo">
                 <svg
                     width="25"
@@ -68,17 +70,12 @@
 
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
-        <li class="menu-item @if(request()->routeIs('user')) active @endif">
-            <a href="{{ route('user') }}" class="menu-link">
+        <li class="menu-item active">
+            <a href="index.html" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Asosiy sahifa</div>
-            </a>
-        </li>
-        <li class="menu-item @if(request()->routeIs('clinic.index')) active @endif">
-            <a href="{{ route('clinic.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-clinic"></i>
-                <div data-i18n="Analytics">Klinikalar</div>
+                <div data-i18n="Analytics">Dashboard</div>
             </a>
         </li>
     </ul>
 </aside>
+<!-- / Menu -->

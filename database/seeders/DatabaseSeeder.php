@@ -2,15 +2,15 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Run the database seeds.
      *
      * @return void
      */
@@ -18,9 +18,8 @@ class DatabaseSeeder extends Seeder
     {
         User::insert([
             'name' => 'admin',
-            'phone' => '+998930430959',
+            'tel' => '+998930430959',
             'password' => Hash::make('password'),
-            'status' => '0',
         ]);
     }
 }

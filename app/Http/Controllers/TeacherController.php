@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Clinic;
-use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class RoomController extends Controller
+class TeacherController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-
     public function index()
     {
-        return view('user.room.index');
+
     }
 
     /**
@@ -25,10 +22,10 @@ class RoomController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function create()
     {
-        $clinics=Clinic::all();
-        return view('user.room.create',compact('clinics'));
+        return view('user.teacher.create');
     }
 
     /**
@@ -39,27 +36,37 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
-//        dd($request);
-        $formFields = $request->validate([
+        $request->validate([
             'name' => 'required',
-            'clinic_id' => 'required'
+            'tel' => 'required',
+            'password' => 'required',
         ]);
 
-//        dd($formFields);
+        if ($request->hasFile('image')){
+            $name = $request->file('image')->getClientOriginalName();
+            $path = $request->file('image')->storeAs('Photo',$name);
+        }
 
-        Room::create($formFields);
+        User::create([
+            'name'=> $request->name,
+            'password'=> bcrypt($request->password),
+            'passport'=> $request->passport,
+            'tel'=> $request->tel,
+            'parents_name'=>$request->parents_name,
+            'parents_tel'=>$request->parents_tel,
+            'image'=> $path ?? null,
+        ]);
 
-        return redirect()->route('clinic.index')->with('success', 'Yangi xona yaratildi');
-
+        return redirect()->route('teacher.index')->with('success','data created');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Room  $room
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Room $room)
+    public function show($id)
     {
         //
     }
@@ -67,43 +74,33 @@ class RoomController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Room  $room
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Room $room)
+    public function edit($id)
     {
-        $clinics=Clinic::all();
-        return view('user.room.edit',compact('room','clinics'));
+        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Room  $room
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Room $room)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required'
-            ]);
-
-        $room->update($request->all());
-
-        return redirect()->route('clinic.index')
-            ->with('success', 'Xona malumotlari yangilandi');
-
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Room  $room
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-
-    public function destroy(Room $room)
+    public function destroy($id)
     {
         //
     }

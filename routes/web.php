@@ -5,6 +5,7 @@ use App\Http\Controllers\ClinicsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,25 +36,10 @@ Route::middleware('auth')->group(function () {
 /*                          USER                */
 Route::middleware('auth')->group(function () {
 
+    Route::resource('teacher',TeacherController::class);
     Route::get('dashboard', [Controller::class, 'index'])->name('user');
 
     // Room
-
-    Route::resource('room' ,RoomController::class);
-    Route::resource('doctor' ,DoctorController::class);
-
-    //test
-
-    Route::get('test',[Controller::class,'test']);
-
-    // Clinics
-
-    Route::get('user/clinic/index', [ClinicsController::class, 'index'])->name('clinic.index');
-    Route::get('user/clinic/create', [ClinicsController::class, 'create'])->name('clinic.create');
-    Route::post('user/clinic/store', [ClinicsController::class, 'store'])->name('clinic.store');
-    Route::get('user/clinic/{clinic}/edit', [ClinicsController::class, 'edit'])->name('clinic.edit');
-    Route::put('user/clinic/{clinic}', [ClinicsController::class, 'update'])->name('clinic.update');
-    Route::delete('user/clinic/{clinic}', [ClinicsController::class, 'destroy'])->name('clinic.delete');
 });
 
 require __DIR__.'/auth.php';

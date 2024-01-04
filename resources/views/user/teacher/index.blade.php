@@ -21,7 +21,6 @@
                 <th>Telefon raqami</th>
                 <th>Ota-onasining telefon raqami</th>
                 <th>Ota-onasining ismi</th>
-                <th>image</th>
                 <th class="">action</th>
             </tr>
             </thead>
@@ -33,7 +32,6 @@
                     <th>{{$teacher->phone}}</th>
                     <th>{{$teacher->parents_tel}}</th>
                     <th>{{$teacher->parents_name}}</th>
-                    <th><img src="{{asset('storage/'.$teacher->photo)}}" alt="" width="40px"></th>
                     <th class="d-flex">
                         <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"

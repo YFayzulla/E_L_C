@@ -32,7 +32,7 @@
 {{--                @enderror--}}
 
                 <label for="phone" class="text-dark">Telefon raqam</label>
-                <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control">
+                <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control" placeholder="+998(__)_______">
 
                 @error('phone')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>

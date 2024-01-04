@@ -7,39 +7,41 @@
         <div class="max-w-xl">
             <h1 class="text-center"> O`qituvchi malumotlarini o`zgartirish </h1>
 
-            <form action="{{route('teacher.store')}}" method="post" enctype="multipart/form-data">
+            <form action="{{route('teacher.update',$teacher->id)}}" method="post" enctype="multipart/form-data">
+
                 @csrf
+                @method('PUT')
 
                 <label for="name" class="text-dark">Ismi</label>
-                <input id="name" name="name" value="{{old('name')}}" type="text" class="form-control">
+                <input id="name" name="name" value="{{$teacher->name}}" type="text" class="form-control">
 
                 @error('name')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
                 <label for="password" class="text-dark">Parol</label>
-                <input id="password" name="password" value="{{old('password')}}" type="text" class="form-control">
+                <input id="password" name="password" type="password" class="form-control">
 
                 @error('password')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
                 <label for="passport" class="text-dark">Pasport seria</label>
-                <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
+                <input id="passport" name="passport" value="{{$teacher->passport}}" type="text" class="form-control" >
 
                 {{--                @error('passport')--}}
                 {{--                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>--}}
                 {{--                @enderror--}}
 
                 <label for="phone" class="text-dark">Telefon raqam</label>
-                <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control">
+                <input id="phone" name="phone" value="{{$teacher->phone}}" type="text" class="form-control">
 
                 @error('phone')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va formatini tog`ri kiriting!</div>
                 @enderror
 
                 <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
-                <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text"
+                <input id="parents_name" name="parents_name" value="{{$teacher->parents_name}}" type="text"
                        class="form-control">
 
                 @error('parents_name')
@@ -47,7 +49,7 @@
                 @enderror
 
                 <label for="parents_tel" class="text-dark">Ota-onasining Telefon raqami</label>
-                <input id="parents_tel" name="parents_tel" value="{{old('parents_tel')}}" type="text"
+                <input id="parents_tel" name="parents_tel" value="{{$teacher->parents_tel}}" type="text"
                        class="form-control">
 
                 @error('parents_tel')

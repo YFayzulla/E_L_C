@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         User::insert([
             'name' => 'admin',
             'phone' => '+998930430959',
-            'password' => Hash::make('password'),
+            'password' => bcrypt('password'),
         ]);
     }
 }

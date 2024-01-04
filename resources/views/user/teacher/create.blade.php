@@ -18,7 +18,7 @@
                 @enderror
 
                 <label for="password" class="text-dark">Parol</label>
-                <input id="password" name="password" value="{{old('password')}}" type="text" class="form-control">
+                <input id="password" name="password" value="{{old('password')}}" type="password" class="form-control">
 
                 @error('password')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
@@ -31,10 +31,10 @@
 {{--                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>--}}
 {{--                @enderror--}}
 
-                <label for="tel" class="text-dark">Telefon raqam</label>
-                <input id="tel" name="tel" value="{{old('tel')}}" type="text" class="form-control">
+                <label for="phone" class="text-dark">Telefon raqam</label>
+                <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control">
 
-                @error('tel')
+                @error('phone')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 

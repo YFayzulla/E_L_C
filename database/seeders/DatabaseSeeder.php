@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         User::insert([
             'name' => 'admin',
-            'tel' => '+998930430959',
+            'phone' => '+998930430959',
             'password' => Hash::make('password'),
         ]);
     }

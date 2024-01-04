@@ -14,7 +14,8 @@ class TeacherController extends Controller
      */
     public function index()
     {
-
+        $teachers=User::all();
+        return view('user.teacher.index',compact('teachers'));
     }
 
     /**
@@ -38,23 +39,23 @@ class TeacherController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'tel' => 'required',
+            'phone' => 'required',
             'password' => 'required',
         ]);
 
-        if ($request->hasFile('image')){
-            $name = $request->file('image')->getClientOriginalName();
-            $path = $request->file('image')->storeAs('Photo',$name);
+        if ($request->hasFile('photo')){
+            $name = $request->file('photo')->getClientOriginalName();
+            $path = $request->file('photo')->storeAs('Photo',$name);
         }
 
         User::create([
             'name'=> $request->name,
             'password'=> bcrypt($request->password),
             'passport'=> $request->passport,
-            'tel'=> $request->tel,
+            'phone'=> $request->phone,
             'parents_name'=>$request->parents_name,
             'parents_tel'=>$request->parents_tel,
-            'image'=> $path ?? null,
+            'photo'=> $path ?? null,
         ]);
 
         return redirect()->route('teacher.index')->with('success','data created');
@@ -79,7 +80,12 @@ class TeacherController extends Controller
      */
     public function edit($id)
     {
-        //
+        $teacher=User::find($id);
+//        dd($id,$teacher);
+        if ($teacher !== null )
+            return view('user.teacher.edit',compact('teacher'));
+        else
+            return abort('403');
     }
 
     /**
@@ -91,7 +97,7 @@ class TeacherController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
     }
 
     /**

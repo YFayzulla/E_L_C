@@ -70,7 +70,7 @@
         <!-- Dashboard -->
         <li class="menu-item @if(request()->routeIs('user')) active @endif">
             <a href="{{ route('user') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                    <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">Asosiy sahifa</div>
             </a>
         </li>
@@ -78,6 +78,12 @@
             <a href="{{ route('teacher.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Analytics">O`qituvchilar</div>
+            </a>
+        </li>
+        <li class="menu-item @if(request()->routeIs('group')) active @endif">
+            <a href="{{ route('group.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                <div data-i18n="Analytics">Guruhlar</div>
             </a>
         </li>
     </ul>

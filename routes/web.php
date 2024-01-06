@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ClinicsController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\RoomController;
@@ -37,6 +38,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::resource('teacher',TeacherController::class);
+    Route::resource('group',GroupController::class);
+
     Route::get('dashboard', [Controller::class, 'index'])->name('user');
 
     // Room

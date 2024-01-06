@@ -5,9 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+class AdminTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,9 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        User::create([
+            'name' => 'admin',
+            'phone' => '+998930430959',
+            'password' => bcrypt('password'),
+        ])->assignRole('admin');
 
-        $this->call(RolesTableSeeder::class);
-        $this->call(AdminTableSeeder::class);
     }
 }
-

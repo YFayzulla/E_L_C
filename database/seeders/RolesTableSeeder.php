@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
-class DatabaseSeeder extends Seeder
+
+class RolesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,9 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-
-        $this->call(RolesTableSeeder::class);
-        $this->call(AdminTableSeeder::class);
+        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'user']);
     }
 }
-

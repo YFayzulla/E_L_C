@@ -5,7 +5,7 @@
 
         <h1 class="text-center">Guruhlar</h1>
 
-        <a href="{{route('teacher.create')}}" type="button" class="btn-outline-success btn m-2">
+        <a href="{{route('group.create')}}" type="button" class="btn-outline-success btn m-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor"
                  class="bi bi-plus-lg" viewBox="0 0 16 16">
                 <path fill-rule="evenodd"
@@ -19,22 +19,19 @@
                 <th>id</th>
                 <th>Guruh nomi</th>
                 <th>Boshlanish vaqti</th>
-                <th>Boshlanish vaqti</th>
+                <th>Tugash vaqti</th>
                 <th>Guruh narxi</th>
                 <th class="">action</th>
             </tr>
             </thead>
             @foreach($groups as $group)
                 <tr>
-                    <th>{{$loop->index++}}</th>
+                <tbody id="myTable" class="table-group-divider">
+                    <th>{{$loop->index+1}}</th>
                     <th>{{$group->name}}</th>
                     <th>{{$group->start_time}}</th>
                     <th>{{$group->finish_time}}</th>
                     <th>{{$group->monthly_payment}}</th>
-                </tr>
-                <tbody id="myTable" class="table-group-divider">
-                <tr>
-                    <th>{{$loop->index+1}}</th>
                     <th class="d-flex">
                         <a href="{{route('group.edit',$group->id)}}" class="btn-outline-warning btn m-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -59,17 +56,5 @@
             @endforeach
         </table>
 
-    <script>
-        @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: '{{session('success')}}',
-            showConfirmButton: false,
-            timer: 1500
-        })
-        @endif
-
-
-    </script>
 
 @endsection

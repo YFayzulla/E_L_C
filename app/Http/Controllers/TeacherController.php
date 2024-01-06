@@ -57,7 +57,7 @@ class TeacherController extends Controller
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
             'photo' => $path ?? null,
-        ]);
+        ])->assignRole('user');
 
         return redirect()->route('teacher.index')->with('success', 'malumot qo`lshildi');
     }
@@ -104,7 +104,6 @@ class TeacherController extends Controller
 //            'password' => 'required',
         ]);
 
-        $request->password = bcrypt($request->password);
 
         $teacher = User::find($id);
 
@@ -119,8 +118,8 @@ class TeacherController extends Controller
         $teacher->update([
             'name' => $request->name,
             'phone' => $request->phone,
+            'password' => bcrypt($request->password),
             'passport' => $request->passport,
-            'password' => bcrypt($request->password) ?? $teacher->password,
             'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,

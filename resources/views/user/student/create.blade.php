@@ -5,9 +5,9 @@
 
 
         <div class="max-w-xl">
-            <h1 class="text-center"> O`qituvchi qo`shish </h1>
+            <h1 class="text-center"> O`quvchi qo`shish </h1>
 
-            <form action="{{route('teacher.store')}}" method="post" enctype="multipart/form-data">
+            <form action="{{route('student.store')}}" method="post" enctype="multipart/form-data">
                 @csrf
 
                 <label for="name" class="text-dark">Ismi</label>
@@ -17,12 +17,8 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
-                <label for="password" class="text-dark">Parol</label>
-                <input id="password" name="password" value="{{old('password')}}" type="password" class="form-control">
-
-                @error('password')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
-                @enderror
+                <label for="passport" class="text-dark">Pasport seria</label>
+                <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
 
 
                 <label for="phone" class="text-dark">Telefon raqam</label>
@@ -32,13 +28,19 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas yoki kiritilgan raqam takrorlangan  !</div>
                 @enderror
 
-                <label for="passport" class="text-dark">Pasport seria</label>
-                <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
+                <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
+                <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text" class="form-control">
 
-{{--                @error('passport')--}}
-{{--                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>--}}
-{{--                @enderror--}}
+                @error('parents_name')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
 
+                <label for="parents_tel" class="text-dark">Ota-onasining Telefon raqami</label>
+                <input id="parents_tel" name="parents_tel" value="{{old('parents_tel')}}" type="text" class="form-control">
+
+                @error('parents_tel')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
 
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
@@ -47,7 +49,7 @@
                 <div class="alert alert-danger" role="alert">rasm yuklanish shart!</div>
                 @enderror
 
-                <button class="btn btn-warning m-4 "> Yuklash </button>
+                <button type="submit" class="btn btn-warning m-4 "> Yuklash </button>
 
             </form>
         </div>

@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class TeacherController extends Controller
+class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +15,8 @@ class TeacherController extends Controller
      */
     public function index()
     {
-        $teachers = User::role('user')->get();
-        return view('user.teacher.index', compact('teachers'));
+        $students = User::role('student')->get();
+        return view('user.student.index', compact('students'));
     }
 
     /**
@@ -27,7 +27,7 @@ class TeacherController extends Controller
 
     public function create()
     {
-        return view('user.teacher.create');
+        return view('user.student.create');
     }
 
     /**
@@ -41,7 +41,6 @@ class TeacherController extends Controller
         $request->validate([
             'name' => 'required',
             'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
-            'password' => 'required',
         ]);
 
         if ($request->hasFile('photo')) {
@@ -54,10 +53,12 @@ class TeacherController extends Controller
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
             'phone' => $request->phone,
+            'parents_name' => $request->parents_name,
+            'parents_tel' => $request->parents_tel,
             'photo' => $path ?? null,
-        ])->assignRole('user');
+        ])->assignRole('student');
 
-        return redirect()->route('teacher.index')->with('success', 'malumot qo`lshildi');
+        return redirect()->route('student.index')->with('success', 'malumot qo`lshildi');
     }
 
     /**
@@ -79,10 +80,10 @@ class TeacherController extends Controller
      */
     public function edit($id)
     {
-        $teacher = User::find($id);
-//        dd($id,$teacher);
-        if ($teacher !== null)
-            return view('user.teacher.edit', compact('teacher'));
+        $student = User::find($id);
+//        dd($id,$student);
+        if ($student !== null)
+            return view('user.student.edit', compact('student'));
         else
             return abort('403');
     }
@@ -98,31 +99,35 @@ class TeacherController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
-//            'password' => 'required',
+            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/'],
         ]);
 
 
-        $teacher = User::find($id);
+        $student = User::find($id);
 
         if ($request->hasFile('photo')) {
-            if (isset($teacher->photo)) {
-                Storage::delete($teacher->photo);
+            if (isset($student->photo)) {
+                Storage::delete($student->photo);
             }
             $name = $request->file('photo')->getClientOriginalName();
             $path = $request->file('photo')->storeAs('Photo', $name);
         }
 
-        $teacher->update([
+        $student->update([
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
-            'photo' => $path ?? $teacher->photo ?? null,
+//            'group_id' => $request->group_id,
+            'parents_name' => $request->parents_name,
+            'parents_tel' => $request->parents_tel,
+//            'money' => $request->money,
+//            'status' => $request->status,
+            'photo' => $path ?? $student->photo ?? null,
         ]);
 
 
-        return redirect()->route('teacher.index')->with('success','malumot yangilandi');
+        return redirect()->route('student.index')->with('success','malumot yangilandi');
 
     }
 
@@ -134,8 +139,12 @@ class TeacherController extends Controller
      */
     public function destroy($id)
     {
-        $teacher=User::find($id);
-        $teacher->delete();
+
+        $student=User::find($id);
+        if (isset($student->photo)) {
+            Storage::delete($student->photo);
+        }
+        $student->delete();
         return redirect()->back()->with('success','malumot o`chirildi');
     }
 }

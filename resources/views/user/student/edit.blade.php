@@ -5,41 +5,51 @@
 
 
         <div class="max-w-xl">
-            <h1 class="text-center"> O`qituvchi malumotlarini o`zgartirish </h1>
+            <h1 class="text-center"> O`quvchi malumotlarini o`zgartirish </h1>
 
-            <form action="{{route('teacher.update',$teacher->id)}}" method="post" enctype="multipart/form-data">
+            <form action="{{route('student.update',$student->id)}}" method="post" enctype="multipart/form-data">
 
                 @csrf
                 @method('PUT')
 
                 <label for="name" class="text-dark">Ismi</label>
-                <input id="name" name="name" value="{{$teacher->name}}" type="text" class="form-control">
+                <input id="name" name="name" value="{{$student->name}}" type="text" class="form-control">
 
                 @error('name')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
-                <label for="password" class="text-dark">Parol</label>
-                <input id="password" name="password" type="password" class="form-control">
 
-                @error('password')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
-                @enderror
                 <label for="phone" class="text-dark">Telefon raqam</label>
-                <input id="phone" name="phone" value="{{$teacher->phone}}" type="text" class="form-control">
+                <input id="phone" name="phone" value="{{$student->phone}}" type="text" class="form-control">
 
                 @error('phone')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va yoki kiritilgan raqam takrorlangan</div>
                 @enderror
 
-
                 <label for="passport" class="text-dark">Pasport seria</label>
-                <input id="passport" name="passport" value="{{$teacher->passport}}" type="text" class="form-control" >
+                <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control" >
 
                 {{--                @error('passport')--}}
                 {{--                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>--}}
                 {{--                @enderror--}}
 
+
+                <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
+                <input id="parents_name" name="parents_name" value="{{$student->parents_name}}" type="text"
+                       class="form-control">
+
+                @error('parents_name')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
+
+                <label for="parents_tel" class="text-dark">Ota-onasining Telefon raqami</label>
+                <input id="parents_tel" name="parents_tel" value="{{$student->parents_tel}}" type="text"
+                       class="form-control">
+
+                @error('parents_tel')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
 
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">

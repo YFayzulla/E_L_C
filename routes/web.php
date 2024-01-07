@@ -6,6 +6,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,9 +37,9 @@ Route::middleware('auth')->group(function () {
 
 /*                          USER                */
 Route::middleware('auth')->group(function () {
-
     Route::resource('teacher',TeacherController::class);
     Route::resource('group',GroupController::class);
+    Route::resource('student',StudentController::class);
 
     Route::get('dashboard', [Controller::class, 'index'])->name('user');
 

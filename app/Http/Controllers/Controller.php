@@ -13,12 +13,16 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public function index()
     {
-        return view('user.index');
+        $user=auth()->user();
+        if($user->hasRole('admin'))
+
+            return view('user.index');
+        else
+            return abort('403');
     }
     public function test()
     {
-        $test=ClinicDoctor::find(1);
-        return(view('user.test',compact('test')));
+
     }
 
 }

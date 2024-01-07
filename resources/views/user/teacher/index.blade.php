@@ -19,8 +19,6 @@
                 <th>id</th>
                 <th>Ismi</th>
                 <th>Telefon raqami</th>
-                <th>Ota-onasining telefon raqami</th>
-                <th>Ota-onasining ismi</th>
                 <th class="">action</th>
             </tr>
             </thead>
@@ -30,8 +28,6 @@
                     <th>{{$loop->index+1}}</th>
                     <th>{{$teacher->name}}</th>
                     <th>{{$teacher->phone}}</th>
-                    <th>{{$teacher->parents_tel}}</th>
-                    <th>{{$teacher->parents_name}}</th>
                     <th class="d-flex">
                         <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"

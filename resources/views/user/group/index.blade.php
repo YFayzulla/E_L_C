@@ -18,6 +18,7 @@
             <tr>
                 <th>id</th>
                 <th>Guruh nomi</th>
+                <th>Guruh ochilgan kun</th>
                 <th>Boshlanish vaqti</th>
                 <th>Tugash vaqti</th>
                 <th>Guruh narxi</th>
@@ -29,6 +30,7 @@
                 <tbody id="myTable" class="table-group-divider">
                     <th>{{$loop->index+1}}</th>
                     <th>{{$group->name}}</th>
+                    <th>{{$group->beginning}}</th>
                     <th>{{$group->start_time}}</th>
                     <th>{{$group->finish_time}}</th>
                     <th>{{$group->monthly_payment}}</th>

@@ -8,5 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Group extends Model
 {
     use HasFactory;
-    protected $fillable=['name','start_time','finish_time','level','monthly_payment'];
+    protected $fillable=['name','beginning','start_time','finish_time','level','monthly_payment'];
+
+    public function teacherhasGroup(){
+        return $this->hasMany(User::class);
+    }
 }

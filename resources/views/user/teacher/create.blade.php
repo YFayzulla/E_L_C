@@ -32,6 +32,20 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas yoki kiritilgan raqam takrorlangan  !</div>
                 @enderror
 
+                <label for="date_born" class="text-dark">Tug`ulgan sana</label>
+                <input id="date_born" name="date_born" value="{{old('date_born')}}" type="date" class="form-control">
+
+                @error('date_born')
+                <div class="alert alert-danger" role="alert">Maydonni to`ldiring!</div>
+                @enderror
+
+                <label for="location" class="text-dark">Yashash manzil</label>
+                <input id="location" name="location" value="{{old('location')}}" type="text" class="form-control">
+
+                @error('location')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas! </div>
+                @enderror
+
                 <label for="passport" class="text-dark">Pasport seria</label>
                 <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
 

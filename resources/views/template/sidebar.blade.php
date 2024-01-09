@@ -74,20 +74,22 @@
                 <div data-i18n="Analytics">Asosiy sahifa</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('teacher')) active @endif">
+
+        <li class="menu-item @if(request()->routeIs('teacher.index' , 'teacher.create' , 'teacher.edit', 'teacher.show')) active @endif">
             <a href="{{ route('teacher.index') }}" class="menu-link">
                 <i class='bx bx-user'></i>
                 <div data-i18n="Analytics">O`qituvchilar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('student')) active @endif">
+
+        <li class="menu-item @if(request()->routeIs('student.index' , 'student.create' , 'student.edit'  )) active @endif">
             <a href="{{ route('student.index') }}" class="menu-link">
                 <i class='bx bxs-graduation'></i>
                 <div data-i18n="Analytics">O`quvchilar</div>
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('group')) active @endif">
+        <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class='bx bxs-group' ></i>
                 <div data-i18n="Analytics">Guruhlar</div>

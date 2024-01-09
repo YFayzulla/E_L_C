@@ -27,6 +27,7 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va yoki kiritilgan raqam takrorlangan</div>
                 @enderror
 
+
                 <label for="passport" class="text-dark">Pasport seria</label>
                 <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control" >
 

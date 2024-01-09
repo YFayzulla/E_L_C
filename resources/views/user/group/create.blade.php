@@ -17,6 +17,13 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
+                <label for="beginning" class="text-dark">Guruh ochilgan vaqti</label>
+                <input id="beginning" name="beginning" value="{{old('beginning')}}" type="date" class="form-control">
+
+                @error('beginning')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
+
                 <label for="start_time" class="text-dark">Guruhning boshlanish vaqti</label>
                 <input id="start_time" name="start_time" value="{{old('start_time')}}" type="text" class="form-control">
 

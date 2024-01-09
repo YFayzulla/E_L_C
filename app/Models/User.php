@@ -23,6 +23,8 @@ class User extends Authenticatable
         'phone',
         'password',
         'passport',
+        'date_born',
+        'location',
         'parents_name',
         'parents_tel',
         'group_id',
@@ -30,6 +32,10 @@ class User extends Authenticatable
         'money',
         'status',
     ];
+
+    public function teacherhasGroup(){
+        return $this->hasMany(Group::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

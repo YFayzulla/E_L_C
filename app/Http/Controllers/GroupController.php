@@ -41,6 +41,7 @@ class GroupController extends Controller
             'start_time' => 'required',
             'finish_time' => 'required',
             'monthly_payment' => 'required',
+            'beginning' => 'required',
         ]);
 
         Group::create([
@@ -48,6 +49,7 @@ class GroupController extends Controller
             'start_time' => $request->start_time,
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,
+            'beginning' => $request->beginning,
         ]);
 
         return redirect()->route('group.index')->with('success', 'malumot qo`lshildi');
@@ -89,6 +91,7 @@ class GroupController extends Controller
             'start_time' => 'required',
             'finish_time' => 'required',
             'monthly_payment' => 'required',
+            'beginning' => 'required',
         ]);
 
         $group->update([
@@ -96,6 +99,7 @@ class GroupController extends Controller
             'start_time' => $request->start_time,
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,
+            'beginning' => $request->beginning,
         ]);
 
         return redirect()->route('group.index')->with('success', 'malumot yangilandi');

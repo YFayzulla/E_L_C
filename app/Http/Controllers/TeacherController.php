@@ -42,6 +42,9 @@ class TeacherController extends Controller
             'name' => 'required',
             'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
             'password' => 'required',
+            'location' => 'required',
+            'date_born' => 'required',
+
         ]);
 
         if ($request->hasFile('photo')) {
@@ -53,6 +56,8 @@ class TeacherController extends Controller
             'name' => $request->name,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
+            'date_born' => $request->date_born,
+            'location' => $request->location,
             'phone' => $request->phone,
             'photo' => $path ?? null,
         ])->assignRole('user');
@@ -68,7 +73,8 @@ class TeacherController extends Controller
      */
     public function show($id)
     {
-        //
+        $teacher=User::role('user');
+        return view('user.teacher.show',compact('teacher'));
     }
 
     /**
@@ -98,8 +104,10 @@ class TeacherController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
-//            'password' => 'required',
+            'date_born' => 'required',
+            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/'],
+            'password' => 'required',
+            'location'=>'required',
         ]);
 
 
@@ -117,6 +125,8 @@ class TeacherController extends Controller
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
+            'date_born' => $request->date_born,
+            'location' => $request->location,
             'passport' => $request->passport,
             'photo' => $path ?? $teacher->photo ?? null,
         ]);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
+use App\Models\GroupTeacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -73,8 +75,13 @@ class TeacherController extends Controller
      */
     public function show($id)
     {
-        $teacher=User::role('user');
-        return view('user.teacher.show',compact('teacher'));
+
+        $groups=Group::all();
+
+        $teachers=GroupTeacher::where('teacher_id','=',$id)->get();
+
+        return view('user.teacher.show',compact('teachers','groups','id'));
+
     }
 
     /**

@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\ClinicsController;
+use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
@@ -30,18 +28,21 @@ Route::get('/', function () {
 //})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('dashboard', [Controller::class, 'index'])->name('user');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 /*                          USER                */
-Route::middleware('auth')->group(function () {
-    Route::resource('teacher',TeacherController::class);
-    Route::resource('group',GroupController::class);
-    Route::resource('student',StudentController::class);
+Route::group(['middleware' => ['auth','role:admin']], function () {
 
-    Route::get('dashboard', [Controller::class, 'index'])->name('user');
+    Route::resource('teacher', TeacherController::class);
+    Route::resource('group', GroupController::class);
+    Route::resource('student', StudentController::class);
+    Route::put('teacher/group/{id}/store',[ExtraTeacherController::class,'add_group'])->name('teacher_group.store');
+    Route::delete('teacher/group/delete/{id}',[ExtraTeacherController::class,'group_delete'])->name('teacher_group.delete');
+
 
     // Room
 });

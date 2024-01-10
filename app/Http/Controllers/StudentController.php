@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Level;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -27,7 +28,7 @@ class StudentController extends Controller
 
     public function create()
     {
-        return view('user.student.create');
+        return view('user.student.create',);
     }
 
     /**
@@ -81,9 +82,10 @@ class StudentController extends Controller
     public function edit($id)
     {
         $student = User::find($id);
+
 //        dd($id,$student);
         if ($student !== null)
-            return view('user.student.edit', compact('student'));
+            return view('user.student.edit', compact('student','level'));
         else
             return abort('403');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\Level;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -25,7 +26,9 @@ class GroupController extends Controller
      */
     public function create()
     {
-        return view('user.group.create');
+        $level=Level::all();
+
+        return view('user.group.create',compact('level'));
     }
 
     /**
@@ -50,6 +53,7 @@ class GroupController extends Controller
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,
             'beginning' => $request->beginning,
+            'level' => $request->level,
         ]);
 
         return redirect()->route('group.index')->with('success', 'malumot qo`lshildi');
@@ -74,7 +78,8 @@ class GroupController extends Controller
      */
     public function edit(Group $group)
     {
-        return view('user.group.edit',compact('group'));
+        $level=Level::all();
+        return view('user.group.edit',compact('group','level'));
     }
 
     /**
@@ -100,6 +105,7 @@ class GroupController extends Controller
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,
             'beginning' => $request->beginning,
+            'level' => $request->level,
         ]);
 
         return redirect()->route('group.index')->with('success', 'malumot yangilandi');

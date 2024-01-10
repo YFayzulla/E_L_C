@@ -46,6 +46,16 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
+                <select name="level"  class="form-control" id="">
+                    @foreach($level as $l)
+                        <option value="{{$l->id}}">{{$l->name}}</option>
+                    @endforeach
+                </select>
+                @error('level')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
+
+
                 <button class="btn btn-warning m-4 "> Yuklash</button>
 
             </form>

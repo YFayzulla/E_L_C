@@ -85,7 +85,7 @@ class StudentController extends Controller
 
 //        dd($id,$student);
         if ($student !== null)
-            return view('user.student.edit', compact('student','level'));
+            return view('user.student.edit', compact('student'));
         else
             return abort('403');
     }

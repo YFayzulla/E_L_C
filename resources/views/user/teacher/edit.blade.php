@@ -20,7 +20,7 @@
                 @enderror
 
                 <label for="password" class="text-dark">Parol</label>
-                <input id="password" name="password" type="password" class="form-control">
+                <input id="password" name="password" type="password"  class="form-control">
 
                 @error('password')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>

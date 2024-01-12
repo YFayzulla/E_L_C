@@ -42,6 +42,9 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
+                <label for="parents_tel" class="text-dark">Guruxni tanlang</label>
+                <select class="form-control" name="group_id"></select>
+
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 

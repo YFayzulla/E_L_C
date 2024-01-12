@@ -18,12 +18,6 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
-                <label for="beginning" class="text-dark">Guruh ochilgan vaqti</label>
-                <input id="beginning" name="beginning" value="{{$group->beginningG}}" type="text" class="form-control">
-
-                @error('beginning')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
-                @enderror
 
                 <label for="start_time" class="text-dark">Guruhning boshlanish vaqti</label>
                 <input id="start_time" name="start_time" value="{{$group->start_time}}" type="text" class="form-control">

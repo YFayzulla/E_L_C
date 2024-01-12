@@ -30,7 +30,7 @@
                 <tbody id="myTable" class="table-group-divider">
                     <th>{{$loop->index+1}}</th>
                     <th>{{$group->name}}</th>
-                    <th>{{$group->beginning}}</th>
+                    <th>{{$group->created_at}}</th>
                     <th>{{$group->start_time}}</th>
                     <th>{{$group->finish_time}}</th>
                     <th>{{$group->monthly_payment}}</th>

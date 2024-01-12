@@ -19,6 +19,9 @@
                 <th>id</th>
                 <th>Ismi</th>
                 <th>Telefon raqami</th>
+                <th>Turar joyi</th>
+                <th>tugulgan sanas</th>
+                <th>rasimi</th>
                 <th class="">action</th>
             </tr>
             </thead>
@@ -28,6 +31,9 @@
                     <th>{{$loop->index+1}}</th>
                     <th>{{$teacher->name}}</th>
                     <th>{{$teacher->phone}}</th>
+                    <th>{{$teacher->location}}</th>
+                    <th>{{$teacher->date_born}}</th>
+                    <th><img src="{{asset("storage/".$teacher->photo)}}"  width="40px" alt="??"></th>
                     <th class="d-flex">
                         <a href="{{route('teacher.show',$teacher->id)}}" class="btn-outline-warning btn m-2">
                             <i class='bx bx-show' ></i>

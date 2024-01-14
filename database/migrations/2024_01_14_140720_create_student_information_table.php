@@ -13,13 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('group_teachers', function (Blueprint $table) {
+        Schema::create('student_information', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('teacher_id');
-            $table->foreign('teacher_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('group_id');
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-
+//            $table->unsignedInteger('group_id');
+//            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
+            $table->string('level');
+            $table->string('description');
+            $table->integer('money_status')->default(0);
+            $table->string('overall_result')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('group_teachers');
+        Schema::dropIfExists('student_information');
     }
 };

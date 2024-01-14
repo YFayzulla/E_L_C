@@ -82,7 +82,7 @@
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('student.index' , 'student.create' , 'student.edit'  )) active @endif">
+        <li class="menu-item @if(request()->routeIs('student.index' , 'student.create' , 'student.edit', 'student.show'  )) active @endif">
             <a href="{{ route('student.index') }}" class="menu-link">
                 <i class='bx bxs-graduation'></i>
                 <div data-i18n="Analytics">O`quvchilar</div>

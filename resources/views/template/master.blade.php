@@ -21,6 +21,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}"/>
 
+    <link rel="stylesheet" href="{{ asset('assets/css/index.css')}}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>

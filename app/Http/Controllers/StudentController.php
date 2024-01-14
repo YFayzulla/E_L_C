@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\Level;
+use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -28,7 +30,8 @@ class StudentController extends Controller
 
     public function create()
     {
-        return view('user.student.create',);
+        $groups = Group::all();
+        return view('user.student.create', compact('groups'));
     }
 
     /**
@@ -41,7 +44,8 @@ class StudentController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
+            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
+            'group_id' => 'required'
         ]);
 
         if ($request->hasFile('photo')) {
@@ -49,15 +53,26 @@ class StudentController extends Controller
             $path = $request->file('photo')->storeAs('Photo', $name);
         }
 
-        User::create([
+
+
+        $user=User::create([
             'name' => $request->name,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
             'phone' => $request->phone,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
+            'location' => $request->location,
             'photo' => $path ?? null,
         ])->assignRole('student');
+
+        StudentInformation::create([
+            'user_id' => $user ->id,
+            'group_id' => $request->group_id,
+            'level' =>  $request->name,
+            'description' => $request->description
+        ]);
+
 
         return redirect()->route('student.index')->with('success', 'malumot qo`lshildi');
     }
@@ -70,7 +85,8 @@ class StudentController extends Controller
      */
     public function show($id)
     {
-        //
+        $student=User::find($id);
+        return view('user.student.show',compact('student'));
     }
 
     /**
@@ -81,6 +97,7 @@ class StudentController extends Controller
      */
     public function edit($id)
     {
+
         $student = User::find($id);
 
 //        dd($id,$student);
@@ -120,6 +137,7 @@ class StudentController extends Controller
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
+            'location' => $request->location,
 //            'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
@@ -129,7 +147,7 @@ class StudentController extends Controller
         ]);
 
 
-        return redirect()->route('student.index')->with('success','malumot yangilandi');
+        return redirect()->route('student.index')->with('success', 'malumot yangilandi');
 
     }
 
@@ -142,11 +160,11 @@ class StudentController extends Controller
     public function destroy($id)
     {
 
-        $student=User::find($id);
+        $student = User::find($id);
         if (isset($student->photo)) {
             Storage::delete($student->photo);
         }
         $student->delete();
-        return redirect()->back()->with('success','malumot o`chirildi');
+        return redirect()->back()->with('success', 'malumot o`chirildi');
     }
 }

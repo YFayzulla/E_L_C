@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->hasMany(Group::class);
     }
 
+    public function studentinformation(){
+        return $this->hasOne(StudentInformation::class);
+//        return $query->StudentInformation::where('user_id','id')->first();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

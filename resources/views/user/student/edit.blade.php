@@ -28,6 +28,7 @@
                 @enderror
 
 
+
                 <label for="passport" class="text-dark">Pasport seria</label>
                 <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control" >
 
@@ -39,6 +40,14 @@
                 <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
                 <input id="parents_name" name="parents_name" value="{{$student->parents_name}}" type="text"
                        class="form-control">
+
+                <label for="location" class="text-dark">Yashash manzili</label>
+                <input id="location" name="location" value="{{$student->location}}" type="text" class="form-control">
+
+                @error('location')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas</div>
+                @enderror
+
 
                 @error('parents_name')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>

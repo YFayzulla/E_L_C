@@ -28,6 +28,13 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas yoki kiritilgan raqam takrorlangan  !</div>
                 @enderror
 
+                <label for="location" class="text-dark">Yashash manzili</label>
+                <input id="location" name="location" value="{{old('location')}}" type="text" class="form-control">
+
+                @error('location')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas</div>
+                @enderror
+
                 <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
                 <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text" class="form-control">
 
@@ -41,9 +48,15 @@
                 @error('parents_tel')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
+                <label for="description" class="text-dark">Qo`shimcha malumot "muxum emas"</label>
+                <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
 
                 <label for="parents_tel" class="text-dark">Guruxni tanlang</label>
-                <select class="form-control" name="group_id"></select>
+                <select class="form-control" name="group_id">
+                    @foreach($groups as $group)
+                    <option value="{{$group->id}}">{{$group->name}}</option>
+                    @endforeach
+                </select>
 
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">

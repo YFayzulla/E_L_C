@@ -42,17 +42,16 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
-            'group_id' => 'required'
-        ]);
+//        $request->validate([
+//            'name' => 'required',
+//            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
+//            'group_id' => 'required'
+//        ]);
 
         if ($request->hasFile('photo')) {
             $name = $request->file('photo')->getClientOriginalName();
             $path = $request->file('photo')->storeAs('Photo', $name);
         }
-
 
 
         $user=User::create([
@@ -66,11 +65,13 @@ class StudentController extends Controller
             'photo' => $path ?? null,
         ])->assignRole('student');
 
+        $group=Group::where('id',$request->group_id)->first();
+
         StudentInformation::create([
             'user_id' => $user ->id,
             'group_id' => $request->group_id,
-            'level' =>  $request->name,
-            'description' => $request->description
+            'description' => $request->description,
+            'level' =>  $group->level,
         ]);
 
 
@@ -138,9 +139,9 @@ class StudentController extends Controller
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
             'location' => $request->location,
-//            'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
+            'description' => $request->description,
 //            'money' => $request->money,
 //            'status' => $request->status,
             'photo' => $path ?? $student->photo ?? null,

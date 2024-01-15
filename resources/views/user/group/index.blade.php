@@ -21,6 +21,7 @@
                 <th>Guruh ochilgan kun</th>
                 <th>Boshlanish vaqti</th>
                 <th>Tugash vaqti</th>
+                <th>daraja</th>
                 <th>Guruh narxi</th>
                 <th class="">action</th>
             </tr>
@@ -33,6 +34,7 @@
                     <th>{{$group->created_at}}</th>
                     <th>{{$group->start_time}}</th>
                     <th>{{$group->finish_time}}</th>
+                    <th>{{$group->level}}</th>
                     <th>{{$group->monthly_payment}}</th>
                     <th class="d-flex">
                         <a href="{{route('group.edit',$group->id)}}" class="btn-outline-warning btn m-2">

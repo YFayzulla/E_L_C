@@ -27,18 +27,17 @@ class User extends Authenticatable
         'location',
         'parents_name',
         'parents_tel',
-        'group_id',
         'photo',
-        'money',
         'status',
     ];
+
 
     public function teacherhasGroup(){
         return $this->hasMany(Group::class);
     }
 
     public function studentinformation(){
-        return $this->hasOne(StudentInformation::class);
+        return $this->hasmany(StudentInformation::class);
 //        return $query->StudentInformation::where('user_id','id')->first();
     }
 

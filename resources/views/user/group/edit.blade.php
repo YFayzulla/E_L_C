@@ -40,9 +40,10 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
+                <label for="level" class="text-dark">Guruh darajasi</label>
                 <select name="level"  class="form-control" id="">
                     @foreach($level as $l)
-                        <option value="{{$l->id}}">{{$l->name}}</option>
+                        <option value="{{$l->name}}">{{$l->name}}</option>
                     @endforeach
                 </select>
                 @error('level')

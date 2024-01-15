@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('passport')->nullable();
             $table->date('date_born')->nullable();
             $table->string('location')->nullable();
+            $table->string('description')->nullable();
             $table->string('parents_name')->nullable();
             $table->string('parents_tel')->nullable();
             $table->string('photo')->nullable();

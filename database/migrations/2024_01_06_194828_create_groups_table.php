@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('start_time');
             $table->string('finish_time');
             $table->string('level')->nullable();
-            $table->tinyInteger('teacher_id')->nullable();
             $table->string('monthly_payment');
             $table->timestamps();
         });

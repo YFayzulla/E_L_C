@@ -13,4 +13,8 @@ class Group extends Model
     public function teacherhasGroup(){
         return $this->hasMany(User::class);
     }
+
+    public function level(){
+        return Level::where('id','level');
+    }
 }

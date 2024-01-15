@@ -24,13 +24,14 @@
                 <input id="phone" name="phone" value="{{$student->phone}}" type="text" class="form-control">
 
                 @error('phone')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va yoki kiritilgan raqam takrorlangan</div>
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va yoki kiritilgan
+                    raqam takrorlangan
+                </div>
                 @enderror
 
 
-
                 <label for="passport" class="text-dark">Pasport seria</label>
-                <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control" >
+                <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control">
 
                 {{--                @error('passport')--}}
                 {{--                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>--}}
@@ -43,6 +44,13 @@
 
                 <label for="location" class="text-dark">Yashash manzili</label>
                 <input id="location" name="location" value="{{$student->location}}" type="text" class="form-control">
+
+                @error('location')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas</div>
+                @enderror
+
+                <label for="description" class="text-dark">Qo`shimcha malumotlar</label>
+                <input id="description" name="description" value="{{$student->description}}" type="text" class="form-control">
 
                 @error('location')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas</div>

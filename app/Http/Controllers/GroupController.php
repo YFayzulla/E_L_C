@@ -53,7 +53,6 @@ class GroupController extends Controller
             'monthly_payment' => $request->monthly_payment,
             'level' => $request->level,
         ]);
-
         return redirect()->route('group.index')->with('success', 'malumot qo`lshildi');
     }
 

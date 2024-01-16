@@ -41,6 +41,9 @@ class User extends Authenticatable
 //        return $query->StudentInformation::where('user_id','id')->first();
     }
 
+    public function dept(){
+        return $this->hasMany(DeptStudent::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

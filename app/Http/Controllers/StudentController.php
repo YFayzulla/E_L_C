@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\Level;
 use App\Models\StudentInformation;
@@ -18,7 +19,7 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = User::role('student')->get();
+        $students = User::orderBy("name")->role('student')->get();
         return view('user.student.index', compact('students'));
     }
 
@@ -42,11 +43,11 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-//        $request->validate([
-//            'name' => 'required',
-//            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
-//            'group_id' => 'required'
-//        ]);
+        $request->validate([
+            'name' => 'required',
+            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
+            'group_id' => 'required'
+        ]);
 
         if ($request->hasFile('photo')) {
             $name = $request->file('photo')->getClientOriginalName();
@@ -54,7 +55,7 @@ class StudentController extends Controller
         }
 
 
-        $user=User::create([
+        $user = User::create([
             'name' => $request->name,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
@@ -65,15 +66,21 @@ class StudentController extends Controller
             'photo' => $path ?? null,
         ])->assignRole('student');
 
-        $group=Group::where('id',$request->group_id)->first();
+        $group = Group::where('id', $request->group_id)->first();
 
-        StudentInformation::create([
-            'user_id' => $user ->id,
+        $information = StudentInformation::create([
+            'user_id' => $user->id,
             'group_id' => $request->group_id,
             'description' => $request->description,
-            'level' =>  $group->level,
+            'level' => $group->level,
         ]);
 
+
+        DeptStudent::create([
+            'user_id' => $user->id,
+            'should_pay' => $request->should_pay ?? $group->monthly_payment
+
+        ]);
 
         return redirect()->route('student.index')->with('success', 'malumot qo`lshildi');
     }
@@ -86,8 +93,9 @@ class StudentController extends Controller
      */
     public function show($id)
     {
-        $student=User::find($id);
-        return view('user.student.show',compact('student'));
+        $student = User::find($id);
+
+        return view('user.student.show', compact('student'));
     }
 
     /**
@@ -146,7 +154,6 @@ class StudentController extends Controller
 //            'status' => $request->status,
             'photo' => $path ?? $student->photo ?? null,
         ]);
-
 
         return redirect()->route('student.index')->with('success', 'malumot yangilandi');
 

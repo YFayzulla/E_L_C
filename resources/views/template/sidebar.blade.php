@@ -95,5 +95,11 @@
                 <div data-i18n="Analytics">Guruhlar</div>
             </a>
         </li>
+        <li class="menu-item @if(request()->routeIs('dept.index','group.edit')) active @endif">
+            <a href="{{ route('dept.index') }}" class="menu-link">
+                <i class='bx bxs-group' ></i>
+                <div data-i18n="Analytics">Qarzdorlar</div>
+            </a>
+        </li>
     </ul>
 </aside>

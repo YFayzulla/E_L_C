@@ -26,7 +26,6 @@ return new class extends Migration
             $table->string('parents_tel')->nullable();
             $table->string('photo')->nullable();
             $table->string('status')->nullable();
-            $table->string('status_money')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
@@ -40,6 +41,7 @@ Route::group(['middleware' => ['auth','role:admin']], function () {
     Route::resource('teacher', TeacherController::class);
     Route::resource('group', GroupController::class);
     Route::resource('student', StudentController::class);
+    Route::resource('dept', DeptStudentController::class);
     Route::put('teacher/group/{id}/store',[ExtraTeacherController::class,'add_group'])->name('teacher_group.store');
     Route::delete('teacher/group/delete/{id}',[ExtraTeacherController::class,'group_delete'])->name('teacher_group.delete');
 

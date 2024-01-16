@@ -48,6 +48,10 @@
                 @error('parents_tel')
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
+
+                <label for="should_pay" class="text-dark">Student To`lashi shart bolgan summa</label>
+                <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="text" class="form-control" placeholder="bu yer toldirilmasa guruh narxi avtomatik ravishda yozilib ketadi">
+
                 <label for="description" class="text-dark">Qo`shimcha malumot "muxum emas"</label>
                 <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
 

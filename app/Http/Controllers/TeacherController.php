@@ -17,7 +17,7 @@ class TeacherController extends Controller
      */
     public function index()
     {
-        $teachers = User::role('user')->get();
+        $teachers = User::role('user')->orderBy('name')->get();
         return view('user.teacher.index', compact('teachers'));
     }
 

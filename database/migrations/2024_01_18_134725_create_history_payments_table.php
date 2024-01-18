@@ -13,13 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('dept_students', function (Blueprint $table) {
+        Schema::create('history_payments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('payed')->nullable();
-            $table->string('dept')->nullable();
-            $table->string('status_month')->nullable();
+            $table->string('payment');
+            $table->date('date_paid')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dept_students');
+        Schema::dropIfExists('history_payments');
     }
 };

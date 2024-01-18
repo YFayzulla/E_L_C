@@ -21,6 +21,7 @@
                 <th>Telefon raqami</th>
                 <th>Ota-onasining telefon raqami</th>
                 <th>Ota-onasining ismi</th>
+                <th>guruh</th>
                 <th class="">action</th>
             </tr>
             </thead>
@@ -32,6 +33,7 @@
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
                     <th>{{$student->parents_name}}</th>
+                    <th>{{$student->studentinformation->group->name}}</th>
                     <th class="d-flex">
                         <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-2">
                             <i class='bx bx-edit-alt' ></i>

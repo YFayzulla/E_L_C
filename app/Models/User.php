@@ -28,6 +28,9 @@ class User extends Authenticatable
         'parents_name',
         'parents_tel',
         'photo',
+        'should_pay',
+        'dept',
+        'month',
         'status',
     ];
 
@@ -37,10 +40,13 @@ class User extends Authenticatable
     }
 
     public function studentinformation(){
-        return $this->hasmany(StudentInformation::class);
+        return $this->hasOne(StudentInformation::class);
 //        return $query->StudentInformation::where('user_id','id')->first();
     }
 
+    public function studenthistory(){
+        return $this->hasMany(HistoryPayments::class);
+    }
     public function dept(){
         return $this->hasMany(DeptStudent::class);
     }

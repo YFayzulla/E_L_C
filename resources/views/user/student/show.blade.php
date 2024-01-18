@@ -3,33 +3,37 @@
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         <div class="max-w-xl mx-auto">
-            <h1 style="text-align: center">O`quvchi malumotlari</h1>
-            <h3><b>F.I.O </b>{{$student->name}}</h3>
-            <h3><b>Yashash manzili</b> {{$student->location}}</h3>
-            <h3><b>Telefon raqami </b>{{$student->phone}}</h3>
+            <div class="container" style="display: flex; justify-content: space-between;">
+                <div class="container__left">
+                    <h1 style="text-align: center">O`quvchi malumotlari</h1>
+                    <h3><b>F.I.O </b>{{$student->name}}</h3>
+                    <h3><b>Yashash manzili</b> {{$student->location}}</h3>
+                    <h3><b>Telefon raqami </b>{{$student->phone}}</h3>
 
-            <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
-            <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
-            @foreach($student->studentinformation as $inform)
-                <tr>
-                    <td><h5>{{$loop->index+1}} - bosqich: Guruh: {{$inform->group->name}} darajasi:{{$inform->level}}
-                            sana {{$inform->created_at}} olgan baho </h5></td>
-                </tr>
-            @endforeach
+                    <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
+                    <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
+                    <table class="table">
+                        <th>No</th>
+                        <th>tolagan summa</th>
+                        <th>qachon tolagan</th>
+                        <th></th>
 
-            <hr>
+                        @foreach($student->studenthistory as $item)
+                            <tr>
+                                <th>{{$loop->index++}}</th>
+                                <th>{{$item->payment}}</th>
+                                <th>{{($item->date_paid == null) ?? echo $item->created_at)}}</th>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
 
-            @foreach($student->dept as $dept)
-                <tr>
-                    <th>{{$loop->index+1}}</th>
-                    <th>{{$dept->payed}}/</th>
-                    <th>{{$dept->should_pay}}</th>
-                    <th><button>taxrirlash</button></th>
-                </tr>
-            @endforeach
-            <img src="{{asset( 'storage/'.$student->photo) }}"
-                 style="width: 300px; display: block; margin-left: auto;"
-                 alt="internet bilan muammo bor">
+                <div class="container__right" style="max-width: 300px; margin-top: 20px;">
+                    <img src="{{asset( 'storage/'.$student->photo) }}"
+                         style="width: 200px; display: block; margin-left: auto;"
+                         alt="internet bilan muammo bor">
+                </div>
+            </div>
         </div>
     </div>
 @endsection

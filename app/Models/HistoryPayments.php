@@ -5,13 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DeptStudent extends Model
+class HistoryPayments extends Model
 {
     use HasFactory;
-    protected $fillable=['user_id','payed','dept','status_month','date_payed'];
-
-    public $timestamps = false;
-
-
-
+    protected $fillable=['user_id','payment','date'];
 }

@@ -50,17 +50,22 @@
                 @enderror
 
                 <label for="should_pay" class="text-dark">Student To`lashi shart bolgan summa</label>
-                <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="text" class="form-control" placeholder="bu yer toldirilmasa guruh narxi avtomatik ravishda yozilib ketadi">
+                <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="number" class="form-control" placeholder="bu yer toldirilmasa guruh narxi avtomatik ravishda yozilib ketadi">
 
                 <label for="description" class="text-dark">Qo`shimcha malumot "muxum emas"</label>
                 <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
 
-                <label for="parents_tel" class="text-dark">Guruxni tanlang</label>
+                <label for="group_id" class="text-dark">Guruxni tanlang</label>
                 <select class="form-control" name="group_id">
                     @foreach($groups as $group)
                     <option value="{{$group->id}}">{{$group->name}}</option>
                     @endforeach
                 </select>
+
+                @error('group_id')
+                <div class="alert alert-danger" role="alert">guruh mavjud emas!</div>
+                @enderror
+
 
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">

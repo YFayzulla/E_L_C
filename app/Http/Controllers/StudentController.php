@@ -54,6 +54,7 @@ class StudentController extends Controller
             $path = $request->file('photo')->storeAs('Photo', $name);
         }
 
+        $group = Group::where('id', $request->group_id)->first();
 
         $user = User::create([
             'name' => $request->name,
@@ -64,22 +65,25 @@ class StudentController extends Controller
             'parents_tel' => $request->parents_tel,
             'location' => $request->location,
             'photo' => $path ?? null,
+            'should_pay' => $request->should_pay ?? $group->monthly_payment,
+            'dept' => $request->should_pay ?? $group->monthly_payment,
+            'description' => $request->description,
+            'month' => 0
         ])->assignRole('student');
 
-        $group = Group::where('id', $request->group_id)->first();
 
         $information = StudentInformation::create([
             'user_id' => $user->id,
             'group_id' => $request->group_id,
-            'description' => $request->description,
             'level' => $group->level,
         ]);
 
 
         DeptStudent::create([
             'user_id' => $user->id,
-            'should_pay' => $request->should_pay ?? $group->monthly_payment
-
+            'payed' => 0,
+            'dept' => $request->should_pay,
+            'status_month' =>  0
         ]);
 
         return redirect()->route('student.index')->with('success', 'malumot qo`lshildi');
@@ -109,7 +113,7 @@ class StudentController extends Controller
 
         $student = User::find($id);
 
-//        dd($id,$student);
+        //        dd($id,$student);
         if ($student !== null)
             return view('user.student.edit', compact('student'));
         else
@@ -150,8 +154,8 @@ class StudentController extends Controller
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
             'description' => $request->description,
-//            'money' => $request->money,
-//            'status' => $request->status,
+            //            'money' => $request->money,
+            //            'status' => $request->status,
             'photo' => $path ?? $student->photo ?? null,
         ]);
 

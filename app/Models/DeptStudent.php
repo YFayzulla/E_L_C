@@ -12,6 +12,8 @@ class DeptStudent extends Model
 
     public $timestamps = false;
 
-
+    public function student(){
+        return $this->belongsTo(User::class,'user_id','id');
+    }
 
 }

@@ -66,9 +66,7 @@ class StudentController extends Controller
             'location' => $request->location,
             'photo' => $path ?? null,
             'should_pay' => $request->should_pay ?? $group->monthly_payment,
-            'dept' => $request->should_pay ?? $group->monthly_payment,
             'description' => $request->description,
-            'month' => 0
         ])->assignRole('student');
 
 

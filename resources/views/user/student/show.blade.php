@@ -12,17 +12,17 @@
 
                     <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
                     <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
+                    <h3 style="text-align: center">Kirim</h3>
                     <table class="table">
                         <th>No</th>
                         <th>tolagan summa</th>
-                        <th>qachon tolagan</th>
-                        <th></th>
+                        <th>to`langan sana</th>
 
                         @foreach($student->studenthistory as $item)
                             <tr>
-                                <th>{{$loop->index++}}</th>
+                                <th>{{$loop->index+1}}</th>
                                 <th>{{$item->payment}}</th>
-                                <th>{{($item->date_paid == null) ?? echo $item->created_at)}}</th>
+                                <th>@if($item->date ==null){{$item->created_at.'data'}}@else {{$item->date.'sana'}} @endif</th>
                             </tr>
                         @endforeach
                     </table>

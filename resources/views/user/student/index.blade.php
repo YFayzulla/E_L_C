@@ -18,7 +18,7 @@
             <tr>
                 <th>id</th>
                 <th>Ismi</th>
-                <th>Telefon raqami</th>
+                <th>Telefon</th>
                 <th>Ota-onasining telefon raqami</th>
                 <th>Ota-onasining ismi</th>
                 <th>guruh</th>

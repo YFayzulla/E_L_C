@@ -6,6 +6,7 @@ use App\Models\DeptStudent;
 use App\Models\HistoryPayments;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use function PHPUnit\Framework\lessThanOrEqual;
 
 class DeptStudentController extends Controller
@@ -99,7 +100,7 @@ class DeptStudentController extends Controller
         HistoryPayments::create([
             'user_id' => $student->user_id,
             'payment' => $request->payment,
-            'date_paid' => $request->date_paid ?? now(),
+            'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
         ]);
 
         return redirect()->back();

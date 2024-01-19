@@ -1,4 +1,4 @@
-@extends("admin.master")
+@extends("template.master")
 @section("content")
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <div class="py-12">

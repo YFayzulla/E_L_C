@@ -44,7 +44,7 @@ Route::group(['middleware' => ['auth','role:admin']], function () {
     Route::resource('dept', DeptStudentController::class);
     Route::put('teacher/group/{id}/store',[ExtraTeacherController::class,'add_group'])->name('teacher_group.store');
     Route::delete('teacher/group/delete/{id}',[ExtraTeacherController::class,'group_delete'])->name('teacher_group.delete');
-
+    Route::post('student/dept',[Controller::class,'search'])->name('student.search');
 
     // Room
 });

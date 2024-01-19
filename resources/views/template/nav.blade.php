@@ -23,6 +23,24 @@
             </div>
         </div>
         <!-- /Search -->
+        <!-- Search bt date -->
+        <form action="{{route('student.search')}}" method="post">
+            @csrf
+            <div class="navbar-nav align-items-center">
+                <div class="nav-item d-flex align-items-center">
+                    <i class="bx bx-search fs-4 lh-0"></i>
+                    <input
+                        type="date"
+                        class="form-control border-0 shadow-none"
+                        placeholder="date_paid"
+                        name="date_paid"
+                        aria-label="Search..."
+                    />
+                </div>
+                <button type="submit" class="btn btn-outline-dark"> izlash</button>
+            </div>
+        </form>
+        <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             <!-- User -->

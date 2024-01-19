@@ -9,14 +9,12 @@
                 <tr>
                     <td>No</td>
                     <td>ismi</td>
-                    <td>status</td>
                     <td>pul to`lash</td>
                 </tr>
                 @foreach($students as $student)
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th>{{$student->name}}</th>
-                        <th></th>
                         <th>
 
                             <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"

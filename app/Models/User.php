@@ -47,9 +47,10 @@ class User extends Authenticatable
     public function studenthistory(){
         return $this->hasMany(HistoryPayments::class);
     }
-    public function dept(){
-        return $this->hasMany(DeptStudent::class);
-    }
+
+//    public function dept(){
+//        return $this->belongsTo(DeptStudent::class);
+//    }
     /**
      * The attributes that should be hidden for serialization.
      *

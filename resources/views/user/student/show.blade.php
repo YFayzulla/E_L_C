@@ -12,8 +12,9 @@
 
                     <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
                     <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
-                    <h3 style="text-align: center">Kirim</h3>
+                    <h3 style="text-align: center"></h3>
                     <table class="table">
+
                         <th>No</th>
                         <th>tolagan summa</th>
                         <th>to`langan sana</th>
@@ -22,7 +23,11 @@
                             <tr>
                                 <th>{{$loop->index+1}}</th>
                                 <th>{{$item->payment}}</th>
-                                <th>@if($item->date ==null){{$item->created_at.'data'}}@else {{$item->date.'sana'}} @endif</th>
+                                <th>@if($item->date ==null)
+                                        {{$item->created_at.'data'}}
+                                    @else
+                                        {{$item->date.'sana'}}
+                                    @endif</th>
                             </tr>
                         @endforeach
                     </table>

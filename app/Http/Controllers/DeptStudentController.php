@@ -80,7 +80,6 @@ class DeptStudentController extends Controller
 
         if ($dept == $payment) {
             $student->status_month++;
-            dd('1');
         } elseif ($dept - $payment > 0) {
             $student->payed = $request->payment;
             $student->dept = $student->dept - $request->payment;
@@ -89,7 +88,7 @@ class DeptStudentController extends Controller
             if ((int)$item == $item) {
                 $student->status_month = $item;
             } else {
-                $student->status_month = (int)$item;
+                $student->status_month += (int)$item;
                 $item = $item - (int)$item;
                 $student->payed = $item * $student->dept;
             }

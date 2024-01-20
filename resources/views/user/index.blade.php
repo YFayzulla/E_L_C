@@ -2,7 +2,11 @@
 @section('content')
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         <div class="max-w-xl mx-auto">
-            <button class="btn-outline-danger" style="float: right">PDF generate</button>
+            <div class="row">
+                <div class="float-left col-lg-12">
+                    <a class="btn btn-danger float-right m-2" href="{{ URL::to('/roomList/pdf',$date) }}">Report</a>
+                </div>
+            </div>
             <div class="container" style="display: flex; justify-content: space-between;">
                     <table class="table">
                         <tr>

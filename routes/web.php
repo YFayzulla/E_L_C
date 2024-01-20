@@ -3,6 +3,7 @@
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StudentController;
@@ -45,7 +46,7 @@ Route::group(['middleware' => ['auth','role:admin']], function () {
     Route::put('teacher/group/{id}/store',[ExtraTeacherController::class,'add_group'])->name('teacher_group.store');
     Route::delete('teacher/group/delete/{id}',[ExtraTeacherController::class,'group_delete'])->name('teacher_group.delete');
     Route::post('student/dept',[Controller::class,'search'])->name('student.search');
-
+    Route::get('/roomList/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     // Room
 });
 

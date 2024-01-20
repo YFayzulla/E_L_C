@@ -2,9 +2,9 @@
 @section('content')
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         <div class="max-w-xl mx-auto">
+            <button class="btn-outline-danger" style="float: right">PDF generate</button>
             <div class="container" style="display: flex; justify-content: space-between;">
-                <div class="container__left">
-                    <table class="table table-bordered">
+                    <table class="table">
                         <tr>
                             <th>no</th>
                             <th>ismi</th>
@@ -19,11 +19,9 @@
                             <th>{{$student->student->phone}}</th>
                             <th>{{$student->payment}}</th>
                             <th>{{$student->date}}</th>
-
                         </tr>
                     @endforeach
                     </table>
-                </div>
             </div>
         </div>
     </div>

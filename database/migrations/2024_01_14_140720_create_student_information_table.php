@@ -19,10 +19,10 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('group_id');
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-//            $table->unsignedInteger('group_id');
 //            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->string('level');
             $table->string('overall_result')->nullable();
+            $table->unsignedInteger('status')->nullable();
             $table->timestamps();
         });
     }

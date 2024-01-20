@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClinicDoctor;
 use App\Models\DeptStudent;
 use App\Models\HistoryPayments;
 use App\Models\User;
@@ -18,12 +17,11 @@ class Controller extends BaseController
 
     public function index()
     {
-        $user = auth()->user();
-        if ($user->hasRole('admin')) {
-            $students = DeptStudent::all();
-            return view('user.index', compact('students'));
-        } else
-            return abort('403');
+
+    }
+
+    public function auth(){
+        return view('dashboard');
     }
 
     public function search(Request $request)

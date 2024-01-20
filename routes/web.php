@@ -7,6 +7,7 @@ use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherAdminPanel;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,7 +28,6 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [Controller::class, 'auth'])->name('user');
-    Route::get('payment', [Controller::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
 
 /*                          USER                */
 Route::group(['middleware' => ['auth','role:admin']], function () {
+//    Route::get('payment', [Controller::class, 'index'])->name('dashboard');
     Route::resource('teacher', TeacherController::class);
     Route::resource('group', GroupController::class);
     Route::resource('student', StudentController::class);
@@ -45,5 +46,11 @@ Route::group(['middleware' => ['auth','role:admin']], function () {
     Route::get('/roomList/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     // Room
 });
+
+//Teachers
+Route::group(['middleware' => ['auth','role:user']], function () {
+    Route::get('teacher/group',[TeacherAdminPanel::class,'group'])->name('teacher.attendance');
+});
+
 
 require __DIR__.'/auth.php';

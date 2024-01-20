@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DeptStudent;
+use App\Models\GroupTeacher;
 use App\Models\HistoryPayments;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -15,13 +16,14 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function index()
-    {
-
-    }
+//    public function index()
+//    {
+//    }
 
     public function auth(){
-        return view('dashboard');
+        $id=auth()->id();
+        $groups=GroupTeacher::where('teacher_id',$id)->get();
+        return view('dashboard',compact('groups'));
     }
 
     public function search(Request $request)

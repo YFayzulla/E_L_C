@@ -110,11 +110,11 @@
         @endrole
 
         @role('user')
-            <li class="menu-item @if(request()->routeIs('teacher.attendance')) active @endif">
-                <a href="{{ route('teacher.attendance')}}" class="menu-link">
-                <div data-i18n="Analytics">guruxlar</div>
-                </a>
-            </li>
+        <li class="menu-item @if(request()->routeIs('attendance')) active @endif">
+            <a href="{{route('attendance')}}" class="menu-link">
+                <div data-i18n="Analytics">Pul to`lash</div>
+            </a>
+        </li>
         @endrole
     </ul>
 </aside>

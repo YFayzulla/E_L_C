@@ -34,23 +34,22 @@ Route::middleware('auth')->group(function () {
 });
 
 /*                          USER                */
-Route::group(['middleware' => ['auth','role:admin']], function () {
+Route::group(['middleware' => ['auth', 'role:admin']], function () {
 //    Route::get('payment', [Controller::class, 'index'])->name('dashboard');
     Route::resource('teacher', TeacherController::class);
     Route::resource('group', GroupController::class);
     Route::resource('student', StudentController::class);
     Route::resource('dept', DeptStudentController::class);
-    Route::put('teacher/group/{id}/store',[ExtraTeacherController::class,'add_group'])->name('teacher_group.store');
-    Route::delete('teacher/group/delete/{id}',[ExtraTeacherController::class,'group_delete'])->name('teacher_group.delete');
-    Route::post('student/dept',[Controller::class,'search'])->name('student.search');
+    Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
+    Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
+    Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
     Route::get('/roomList/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     // Room
 });
 
 //Teachers
-Route::group(['middleware' => ['auth','role:user']], function () {
-    Route::get('teacher/group',[TeacherAdminPanel::class,'group'])->name('teacher.attendance');
+Route::group(['middleware' => ['auth', 'role:user']], function () {
+    Route::get('attendance', [TeacherAdminPanel::class, 'group'])->name('attendance');
 });
 
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -9,8 +9,8 @@ class TeacherAdminPanel extends Controller
 {
 
     public function group(){
-        dd('as');
-        return view('teacher.group') ;
+
+        return view('teacher.show') ;
 
     }
 

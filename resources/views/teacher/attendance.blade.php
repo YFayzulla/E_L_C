@@ -8,15 +8,19 @@
                     <td>name</td>
                     <td>status</td>
                 </tr>
+                <form action="" method='post'>
                 @foreach($students as $student)
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th><b>{{$student->student->name}}</b></th>
                         <th>
-                            <input type="checkbox" name="status">
+                            <input type="checkbox" class="float-end" style="padding-left: 20px"
+                                   name="status[{{$student->id}}]" value="on">
                         </th>
                     </tr>
                 @endforeach
+                    <button type="submit">topshirish</button>
+                </form>
             </table>
         </div>
     </div>

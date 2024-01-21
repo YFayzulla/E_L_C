@@ -49,7 +49,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 //Teachers
 Route::group(['middleware' => ['auth', 'role:user']], function () {
-    Route::get('attendance', [TeacherAdminPanel::class, 'group'])->name('attendance');
+    Route::get('groups', [TeacherAdminPanel::class, 'group'])->name('attendance');
+    Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
+    Route::get('attendance/submit', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
 });
 
 require __DIR__ . '/auth.php';

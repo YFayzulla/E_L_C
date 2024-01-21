@@ -40,6 +40,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}"/>
 
     <!-- Vendors CSS -->
+
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}"/>
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}"/>x

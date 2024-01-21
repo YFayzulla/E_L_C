@@ -35,19 +35,19 @@
                     <th>{{$teacher->date_born}}</th>
                     <th><img src="{{asset("storage/".$teacher->photo)}}"  width="40px" alt="??"></th>
                     <th class="d-flex">
-                        <a href="{{route('teacher.show',$teacher->id)}}" class="btn-outline-warning btn m-2">
-                            <i class='bx bx-show' ></i>
-                        </a>
 
-                        <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-2">
+                        <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-1">
                             <i class='bx bx-edit-alt' ></i>
+                        </a>
+                        <a href="{{route('teacher.show',$teacher->id)}}" class="btn-outline-primary btn m-1">
+                            <i class='bx bx-show' ></i>
                         </a>
 
                         <form action="{{route('teacher.destroy',$teacher->id)}}" method="post"
                               onsubmit="return confirm('are you sure for deleting ');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" style="" class="btn-outline-danger btn m-2">
+                            <button type="submit" style="" class="btn-outline-danger btn m-1">
                                 <i class='bx bx-trash-alt' ></i>
                             </button>
                         </form>

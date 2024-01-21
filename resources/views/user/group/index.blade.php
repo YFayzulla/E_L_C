@@ -37,14 +37,14 @@
                     <th>{{$group->level}}</th>
                     <th>{{$group->monthly_payment}}</th>
                     <th class="d-flex">
-                        <a href="{{route('group.edit',$group->id)}}" class="btn-outline-warning btn m-2">
+                        <a href="{{route('group.edit',$group->id)}}" class="btn-outline-warning btn m-1">
                             <i class='bx bx-edit-alt' ></i>
                         </a>
                         <form action="{{route('group.destroy',$group->id)}}" method="post"
                               onsubmit="return confirm('are you sure for deleting ');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" style="" class="btn-outline-danger btn m-2">
+                            <button type="submit" style="" class="btn-outline-danger btn m-1">
                                 <i class='bx bx-trash-alt' ></i>
 
                             </button>

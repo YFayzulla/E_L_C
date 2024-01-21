@@ -3,6 +3,7 @@
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         <div class="d-flex">
             <table class="table">
+{{--                @dd($id)--}}
             @foreach($groups as $group)
                 <tr>
                     <th><b>{{$group->group->name}}</b></th>

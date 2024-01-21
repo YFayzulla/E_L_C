@@ -2,7 +2,6 @@
 @section('content')
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
-
         <h1 class="text-center">O`quvchilar</h1>
 
         <a href="{{route('student.create')}}" type="button" class="btn-outline-success btn m-2">
@@ -35,18 +34,18 @@
                     <th>{{$student->parents_name}}</th>
                     <th>{{$student->studentinformation->group->name}}</th>
                     <th class="d-flex">
-                        <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-2">
+                        <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
                             <i class='bx bx-edit-alt' ></i>
                         </a>
 
-                        <a class="btn btn-outline-primary m-2" href="{{ route('student.show',$student->id) }}"><i
+                        <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
                                 class="bx bx-show-alt"></i></a>
 
                         <form action="{{route('student.destroy',$student->id)}}" method="post"
                               onsubmit="return confirm('are you sure for deleting ');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" style="" class="btn-outline-danger btn m-2">
+                            <button type="submit" style="" class="btn-outline-danger btn m-1">
                                 <i class='bx bx-trash-alt' ></i>
 
                             </button>

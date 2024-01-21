@@ -112,7 +112,7 @@
         @role('user')
         <li class="menu-item @if(request()->routeIs('attendance')) active @endif">
             <a href="{{route('attendance')}}" class="menu-link">
-                <div data-i18n="Analytics">Pul to`lash</div>
+                <div data-i18n="Analytics">guruxlar || davomat</div>
             </a>
         </li>
         @endrole

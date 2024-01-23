@@ -13,15 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('student_information', function (Blueprint $table) {
+        Schema::create('assessments', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('group_id');
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-            $table->string('level');
+            $table->string('get_mark');
+            $table->string('group');
             $table->string('overall_result')->nullable();
-            $table->unsignedInteger('status')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_information');
+        Schema::dropIfExists('assessments');
     }
 };

@@ -28,9 +28,11 @@ class Controller extends BaseController
 
     public function search(Request $request)
     {
+
         $users=HistoryPayments::where('date',$request->date_paid)->get();
         $date=$request->date_paid;
         return view('user.index',compact('users','date'));
+
     }
 
 }

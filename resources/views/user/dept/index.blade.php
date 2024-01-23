@@ -2,8 +2,6 @@
 @section('content')
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-
-
         <div class="max-w-xl">
             <table class="table">
                 <thead>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\GroupController;
@@ -52,6 +53,7 @@ Route::group(['middleware' => ['auth', 'role:user']], function () {
     Route::get('groups', [TeacherAdminPanel::class, 'group'])->name('attendance');
     Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
+    Route::resource('assessment',AssessmentController::class);
 });
 
 require __DIR__ . '/auth.php';

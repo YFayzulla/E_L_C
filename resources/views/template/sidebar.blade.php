@@ -115,6 +115,12 @@
                 <div data-i18n="Analytics">guruxlar || davomat</div>
             </a>
         </li>
+
+        <li class="menu-item @if(request()->routeIs('assessment.index')) active @endif">
+            <a href="{{route('assessment.index')}}" class="menu-link">
+                <div data-i18n="Analytics">guruxlar || davomat</div>
+            </a>
+        </li>
         @endrole
     </ul>
 </aside>

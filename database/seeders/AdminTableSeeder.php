@@ -20,6 +20,5 @@ class AdminTableSeeder extends Seeder
             'phone' => '+998930430959',
             'password' => bcrypt('password'),
         ])->assignRole('admin');
-
     }
 }

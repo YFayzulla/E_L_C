@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
+use App\Models\Attendance;
+use App\Models\GroupTeacher;
+use App\Models\StudentInformation;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AssessmentController extends Controller
@@ -14,8 +18,9 @@ class AssessmentController extends Controller
      */
     public function index()
     {
-
-        return view('teacher.assessment.index') ;
+        $id = auth()->id();
+        $groups = GroupTeacher::where('teacher_id', $id)->get();
+        return view('teacher.assessment.index', compact('groups'));
     }
 
     /**
@@ -25,7 +30,7 @@ class AssessmentController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -36,7 +41,15 @@ class AssessmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        foreach ($request->end_mark as $id => $end_mark) {
+            $user_id = auth()->id();
+            Assessment::create([
+                'user_id' => $id,
+                'get_mark' => $end_mark,
+                'who_checked' => $user_id
+//                'overall_result'=>$
+            ]);
+        }
     }
 
     /**
@@ -45,9 +58,10 @@ class AssessmentController extends Controller
      * @param  \App\Models\Assessment  $assessment
      * @return \Illuminate\Http\Response
      */
-    public function show(Assessment $assessment)
+    public function show($id)
     {
-        //
+        $students= StudentInformation::where('group_id',$id)->get();
+        return view('teacher.assessment.make_markes',compact('students'));
     }
 
     /**

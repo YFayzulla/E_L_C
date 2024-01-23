@@ -45,7 +45,7 @@ class StudentController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/', 'unique:' . User::class],
+            'phone' => ['required'],
             'group_id' => 'required'
         ]);
 
@@ -129,7 +129,7 @@ class StudentController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/'],
+            'phone' => ['required', 'string', 'regex:\d{9}$/'],
         ]);
 
 

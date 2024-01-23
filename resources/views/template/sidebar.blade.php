@@ -109,6 +109,9 @@
         </li>
         @endrole
 
+
+
+
         @role('user')
         <li class="menu-item @if(request()->routeIs('attendance')) active @endif">
             <a href="{{route('attendance')}}" class="menu-link">
@@ -118,9 +121,29 @@
 
         <li class="menu-item @if(request()->routeIs('assessment.index')) active @endif">
             <a href="{{route('assessment.index')}}" class="menu-link">
-                <div data-i18n="Analytics">guruxlar || davomat</div>
+                <div data-i18n="Analytics">guruxlar || yakuniy baholash</div>
             </a>
         </li>
         @endrole
+
+{{--        @php--}}
+{{--            $groups = DB::select('SELECT * FROM group_teachers WHERE teacher_id = ?', [auth()->id()]);--}}
+{{--        @endphp--}}
+
+{{--        <li class="menu-item">--}}
+{{--            <a href="javascript:void(0);" class="menu-link menu-toggle">--}}
+{{--                <i class="menu-icon tf-icons bx bx-layout"></i>--}}
+{{--                <div data-i18n="Layouts">guruxlar || yakuniy baholash</div>--}}
+{{--            </a>--}}
+{{--            <ul class="menu-sub">--}}
+{{--                @foreach($groups as $group)--}}
+{{--                    <li class="menu-item">--}}
+{{--                        <a href="layouts-without-menu.html" class="menu-link">--}}
+{{--                            <div data-i18n="Without menu">{{$group}}</div>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+{{--                @endforeach--}}
+{{--            </ul>--}}
+{{--        </li>--}}
     </ul>
 </aside>

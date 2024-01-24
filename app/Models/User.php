@@ -29,8 +29,7 @@ class User extends Authenticatable
         'parents_tel',
         'photo',
         'should_pay',
-        'dept',
-        'month',
+        'description',
         'status',
     ];
 
@@ -46,6 +45,10 @@ class User extends Authenticatable
 
     public function studenthistory(){
         return $this->hasMany(HistoryPayments::class);
+    }
+
+    public function assessment(){
+        return $this->hasMany(Assessment::class );
     }
 
 //    public function dept(){

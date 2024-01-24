@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/1', function () {
+    $student=\App\Models\User::find(3);
+    return view('user.pdf.student_show',compact('student'));
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [Controller::class, 'auth'])->name('user');
@@ -44,16 +48,19 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
     Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
-    Route::get('/roomList/pdf/{date}', [PdfController::class, 'RoomListPDF']);
+    Route::get('/dept/pdf/{date}', [PdfController::class, 'RoomListPDF']);
+    Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
     // Room
 });
 
 //Teachers
 Route::group(['middleware' => ['auth', 'role:user']], function () {
+
     Route::get('groups', [TeacherAdminPanel::class, 'group'])->name('attendance');
     Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
     Route::resource('assessment',AssessmentController::class);
+
 });
 
 require __DIR__ . '/auth.php';

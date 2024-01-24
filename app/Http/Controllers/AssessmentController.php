@@ -86,6 +86,7 @@ class AssessmentController extends Controller
                 'get_mark' => $end_mark,
                 'who_checked' => $user_id,
                 'group'=>$group->name,
+                'teacher'=>auth()->user()->name
 //              'overall_result'=>$
             ]);
         }

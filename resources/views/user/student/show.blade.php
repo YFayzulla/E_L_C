@@ -3,6 +3,7 @@
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         <div class="max-w-xl mx-auto">
+            <a class="btn btn-danger float-right m-2" href="{{ URL::to('/student/pdf',$student->id) }}">Report</a>
             <div class="container" style="display: flex; justify-content: space-between;">
                 <div class="container__left">
                     <h1 style="text-align: center">O`quvchi malumotlari</h1>
@@ -26,8 +27,23 @@
                                 <th>@if($item->date ==null)
                                         {{$item->created_at.'data'}}
                                     @else
-                                        {{$item->date.'sana'}}
+                                        {{$item->date}}
                                     @endif</th>
+                            </tr>
+                        @endforeach
+                    </table>
+
+                    <table class="table">
+                        <tr>
+                            <th>O`qituvchi</th>
+                            <th>o`qigan guruh</th>
+                            <th>olgan baxosi</th>
+                        </tr>
+                        @foreach($student->assessment as $assessment)
+                            <tr>
+                                <th>{{$assessment->teacher}}</th>
+                                <th>{{$assessment->group}}</th>
+                                <th>{{$assessment->get_mark}}</th>
                             </tr>
                         @endforeach
                     </table>
@@ -39,6 +55,8 @@
                          alt="internet bilan muammo bor">
                 </div>
             </div>
+
+
         </div>
     </div>
 @endsection

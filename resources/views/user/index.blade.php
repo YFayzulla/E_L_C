@@ -3,7 +3,7 @@
 
     <div class="float-left col-lg-12">
         <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-            <a class="btn btn-danger float-right m-2" href="{{ URL::to('/roomList/pdf',$date) }}">Report</a>
+            <a class="btn btn-danger float-right m-2" href="{{ URL::to('/dept/pdf',$date) }}">Report</a>
             <div class="container" style="display: flex; justify-content: space-between;">
                 <table class="table">
                     <tr>

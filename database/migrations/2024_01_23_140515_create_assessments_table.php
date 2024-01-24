@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('get_mark');
             $table->string('group')->nullable();
+            $table->string('teacher')->nullable();
             $table->string('overall_result')->nullable();
             $table->timestamps();
         });

@@ -1,8 +1,9 @@
 @extends('template.master')
 @section('content')
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-        <form action="{{route('assessment.store')}}" method='post'>
+        <form action="{{route('assessment.update',$id)}}" method='post'>
             @csrf
+            @method('PUT')
             <table class="table">
                 <tr>
                     <td>no</td>

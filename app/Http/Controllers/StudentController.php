@@ -128,7 +128,7 @@ class StudentController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:\d{9}$/'],
+            'phone' => ['required'],
         ]);
 
 
@@ -151,6 +151,7 @@ class StudentController extends Controller
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
             'description' => $request->description,
+            'should_pay' => $request->should_pay,
             //            'money' => $request->money,
             //            'status' => $request->status,
             'photo' => $path ?? $student->photo ?? null,

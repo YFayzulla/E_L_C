@@ -69,6 +69,14 @@
                 <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
                 @enderror
 
+                <label for="should_pay" class="text-dark">Tolashi shart bolgan summa</label>
+                <input id="should_pay" name="should_pay" value="{{$student->should_pay}}" type="text"
+                       class="form-control">
+
+                @error('should_pay')
+                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                @enderror
+
                 <label for="photo" class="text-dark"> Rasim</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 

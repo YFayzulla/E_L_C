@@ -6,6 +6,27 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
 </head>
 <body>
 <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
@@ -55,10 +76,12 @@
                 </table>
             </div>
 
-{{--            <div c
---}}
         </div>
-
+{{--        <div class="container__right" style="max-width: 300px; margin-top: 20px;">--}}
+{{--            <img src="{{asset( 'storage/'.$student->photo) }}"--}}
+{{--                 style="width: 200px; display: block; margin-left: auto;"--}}
+{{--                 alt="internet bilan muammo bor">--}}
+{{--        </div>--}}
 
     </div>
 </div>

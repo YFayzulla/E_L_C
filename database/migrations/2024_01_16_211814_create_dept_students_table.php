@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('payed')->nullable();
             $table->string('dept')->nullable();
             $table->string('status_month')->nullable();
+            $table->date('date')->nullable();
         });
     }
 

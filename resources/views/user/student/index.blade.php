@@ -2,6 +2,10 @@
 @section('content')
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
+        @php
+            use Illuminate\Support\Carbon;
+        @endphp
+
         <h1 class="text-center">O`quvchilar</h1>
 
         <a href="{{route('student.create')}}" type="button" class="btn-outline-success btn m-2">
@@ -19,7 +23,7 @@
                 <th>Ismi</th>
                 <th>Telefon</th>
                 <th>Ota-onasining telefon raqami</th>
-                <th>Ota-onasining ismi</th>
+                <th>oylik to`lov</th>
                 <th>guruh</th>
                 <th class="">action</th>
             </tr>
@@ -31,7 +35,7 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
-                    <th>{{$student->parents_name}}</th>
+                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>
                     <th>{{$student->studentinformation->group->name}}</th>
                     <th class="d-flex">
                         <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">

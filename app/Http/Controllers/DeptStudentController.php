@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DeptStudent;
 use App\Models\HistoryPayments;
 use App\Models\User;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use function PHPUnit\Framework\lessThanOrEqual;
@@ -80,19 +81,22 @@ class DeptStudentController extends Controller
 
         if ($dept == $payment) {
             $student->status_month++;
+            $student->date = Carbon::now()->addMonths()->format('Y-m-d');
         } elseif ($dept - $payment > 0) {
             $student->payed = $request->payment;
             $student->dept = $student->dept - $request->payment;
         } else {
             $item = ($payment / $dept);
             if ((int)$item == $item) {
-                $student->status_month = $item;
+                $student->status_month += $item;
+                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
+
             } else {
                 $student->status_month += (int)$item;
                 $item = $item - (int)$item;
                 $student->payed = $item * $student->dept;
+                $student->date = Carbon::now()->addMonths((int)$item)->format('Y-m-d');
             }
-
         }
         $student->save();
 
@@ -102,8 +106,10 @@ class DeptStudentController extends Controller
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success','to`langan pul qabul qilindi');
     }
+
+
 
     /**
      * Remove the specified resource from storage.

@@ -53,7 +53,7 @@
                         <th>{{$student->date}}</th>
                     </tr>
                     @php
-                    $sum+= $student->payment
+                    $sum += $student->payment
                     @endphp
                 @endforeach
             </table>

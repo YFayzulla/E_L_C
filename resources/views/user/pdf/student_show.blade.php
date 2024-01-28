@@ -75,13 +75,7 @@
                     @endforeach
                 </table>
             </div>
-
         </div>
-{{--        <div class="container__right" style="max-width: 300px; margin-top: 20px;">--}}
-{{--            <img src="{{asset( 'storage/'.$student->photo) }}"--}}
-{{--                 style="width: 200px; display: block; margin-left: auto;"--}}
-{{--                 alt="internet bilan muammo bor">--}}
-{{--        </div>--}}
 
     </div>
 </div>

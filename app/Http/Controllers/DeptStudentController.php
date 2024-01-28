@@ -81,15 +81,26 @@ class DeptStudentController extends Controller
 
         if ($dept == $payment) {
             $student->status_month++;
-            $student->date = Carbon::now()->addMonths()->format('Y-m-d');
+//            $student->date = Carbon::now()->addMonths()->format('Y-m-d');
+            $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');
         } elseif ($dept - $payment > 0) {
-            $student->payed = $request->payment;
-            $student->dept = $student->dept - $request->payment;
+            if ($student->payed == 0 ||$student->payed == null  ) {
+                $student->payed = $request->payment;
+                $student->dept = $student->dept - $request->payment;
+                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');
+            }
+            else{
+                $student->payed = $request->payment;
+                $student->dept = $student->dept - $request->payment;
+            }
+
+
         } else {
             $item = ($payment / $dept);
             if ((int)$item == $item) {
                 $student->status_month += $item;
-                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
+//                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
+                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d'); ;
 
             } else {
                 $student->status_month += (int)$item;

@@ -23,7 +23,7 @@
                 <th>Ismi</th>
                 <th>Telefon</th>
                 <th>Ota-onasining telefon raqami</th>
-                <th>oylik to`lov</th>
+{{--                <th>oylik to`lov</th>--}}
                 <th>guruh</th>
                 <th class="">action</th>
             </tr>
@@ -35,13 +35,12 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
-                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>
+{{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
                     <th>{{$student->studentinformation->group->name}}</th>
                     <th class="d-flex">
                         <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
                             <i class='bx bx-edit-alt' ></i>
                         </a>
-
                         <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
                                 class="bx bx-show-alt"></i></a>
 
@@ -59,7 +58,6 @@
                 </tbody>
             @endforeach
         </table>
-
         <script>
             @if(session('success'))
             Swal.fire({
@@ -69,8 +67,5 @@
                 timer: 1500
             })
             @endif
-
-
-        </script>
-
+        </script
 @endsection

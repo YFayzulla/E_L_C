@@ -33,6 +33,7 @@
                         @endforeach
                     </table>
 
+                    <p>Yakuniy nazorat</p>
                     <table class="table">
                         <tr>
                             <th>O`qituvchi</th>
@@ -44,6 +45,23 @@
                                 <th>{{$assessment->teacher}}</th>
                                 <th>{{$assessment->group}}</th>
                                 <th>{{$assessment->get_mark}}</th>
+                            </tr>
+                        @endforeach
+                    </table>
+                    <p>Davomat</p>
+
+                    <table class="table">
+                        <tr>
+                            <th> guruhi </th>
+                            <th> O`qituvchisi </th>
+                            <th> sana </th>
+
+                        </tr>
+                        @foreach($attendances as $attendance)
+                            <tr>
+                                <th>{{$attendance->student->name}}</th>
+                                <th>{{$attendance->group->name}}</th>
+                                <th>{{$attendance->created_at}}</th>
                             </tr>
                         @endforeach
                     </table>

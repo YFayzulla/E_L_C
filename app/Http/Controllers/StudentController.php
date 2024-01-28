@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\Level;
@@ -95,8 +96,9 @@ class StudentController extends Controller
      */
     public function show($id)
     {
+        $attendances=Attendance::where('user_id',$id)->get();
         $student = User::find($id);
-        return view('user.student.show', compact('student'));
+        return view('user.student.show', compact('student','attendances'));
     }
 
     /**

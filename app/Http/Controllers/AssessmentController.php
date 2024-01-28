@@ -53,7 +53,8 @@ class AssessmentController extends Controller
     public function show($id)
     {
         $students= StudentInformation::where('group_id',$id)->get();
-        return view('teacher.assessment.make_markes',compact('students','id'));
+        $groups=Group::all();
+        return view('teacher.assessment.make_markes',compact('students','id','groups'));
     }
 
     /**
@@ -76,23 +77,23 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-
-        $group=Group::where('id',$id)->first();
-
-        foreach ($request->end_mark as $id => $end_mark) {
-            $user_id = auth()->id();
-            Assessment::create([
-                'user_id' => $id,
-                'get_mark' => $end_mark,
-                'who_checked' => $user_id,
-                'group'=>$group->name,
-                'teacher'=>auth()->user()->name
-//              'overall_result'=>$
-            ]);
+        $end_mark = $request->end_mark;
+        $rec_group =$request->rec_group;
+        $reason = $request->reason;
+//        dd($end_mark,$rec_group,$reason);
+        $count=count($reason);
+        $group=Group::find($id);
+        for ($i = 0; $i < $count; $i++) {
+            $data=new Assessment();
+            $data->get_mark = $end_mark[$i];
+            $data->user_id = $request->student;
+            $data->for_what = $reason[$i];
+//            $data->rec_group = $rec_group[$i];
+            $data->group = $group->name;
         }
-        $id = auth()->id();
-        $groups = GroupTeacher::where('teacher_id', $id)->get();
-        return redirect()->route('assessment.index', )->with('success','baholar saqlandi');
+
+        $data->save();
+        return redirect()->route('assessment.index' )->with('success','baholar saqlandi');
     }
 
     /**

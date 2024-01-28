@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('get_mark');
             $table->string('group')->nullable();
-            $table->string('teacher')->nullable();
-            $table->string('overall_result')->nullable();
+            $table->string('for_what')->nullable();
+            $table->string('rec_group')->nullable();
             $table->timestamps();
         });
     }

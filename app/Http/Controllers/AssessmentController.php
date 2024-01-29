@@ -78,21 +78,21 @@ class AssessmentController extends Controller
     public function update(Request $request, $id)
     {
         $end_mark = $request->end_mark;
-        $rec_group =$request->rec_group;
+        $rec_group =$request->recommended;
         $reason = $request->reason;
-//        dd($end_mark,$rec_group,$reason);
+        $student = $request->student;
         $count=count($reason);
         $group=Group::find($id);
         for ($i = 0; $i < $count; $i++) {
             $data=new Assessment();
             $data->get_mark = $end_mark[$i];
-            $data->user_id = $request->student;
+            $data->user_id = $student[$i];
             $data->for_what = $reason[$i];
-//            $data->rec_group = $rec_group[$i];
+            $data->rec_group = $rec_group[$i];
             $data->group = $group->name;
+        $data->save();
         }
 
-        $data->save();
         return redirect()->route('assessment.index' )->with('success','baholar saqlandi');
     }
 

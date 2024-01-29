@@ -18,33 +18,36 @@
                         <th>recommendation</th>
                     </tr>
                     </thead>
+                    @php($i=0)
                     @foreach($students as $student)
-                        @php($i=0)
+                        <input type="hidden" name="student[]" value="{{($student->student->id)}}">
                         <tbody class="table-border-bottom-0">
-                        <input type="hidden" name="student" value="{{$student->id}}" >
                         <tr>
                             <td><i class="fab fa-angular fa-lg text-danger"></i>{{ $loop->index+1 }}</td>
                             <td><i class="fab fa-angular fa-lg text-danger "></i>{{ $student->student->name }}</td>
                             <th>
                                 <input type="text" class="float input-group-merge    justify-content-center"
                                        style="height: 30px;width: 50px"
-                                       name="end_mark[{{$i}}]">
+                                       name="end_mark[]">
                             </th>
                             <th>
                                 <input type="text" class="float input-group-merge form-control "
-                                       name="reason[{{$i}}]">
+                                       name="reason[]">
                             </th>
                             <th>
 
-{{--                                <select class="float input-group-merge form-control" name="recommended[]">--}}
+                                <select class="float input-group-merge form-control" name="recommended[]">
 
-{{--                                    @foreach($groups as $group)--}}
-{{--                                        <option value="{{ $group->name }}">{{ $group->name }}</option>--}}
-{{--                                    @endforeach--}}
+                                    @foreach($groups as $group)
+                                        <option value="{{ $group->name }}">{{ $group->name }}</option>
+                                    @endforeach
+                                    <option value='0'>kutuvchilar</option>
 
-{{--                                </select>--}}
+                                </select>
                             </th>
                         </tbody>
+                        @php($i++)
+
                     @endforeach
                 </table>
                 <button type="submit" class="btn btn-primary m-2 position-absolute">topshirish</button>

@@ -39,12 +39,16 @@
                             <th>O`qituvchi</th>
                             <th>o`qigan guruh</th>
                             <th>olgan baxosi</th>
+                            <th>malumot</th>
+                            <th>tafsiya qilingan gurux</th>
                         </tr>
                         @foreach($student->assessment as $assessment)
                             <tr>
                                 <th>{{$assessment->teacher}}</th>
                                 <th>{{$assessment->group}}</th>
                                 <th>{{$assessment->get_mark}}</th>
+                                <th>{{$assessment->for_what}}</th>
+                                <th>{{$assessment->rec_group}}</th>
                             </tr>
                         @endforeach
                     </table>

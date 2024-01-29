@@ -41,6 +41,7 @@
                 <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
                 <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
                 <h3 style="text-align: center"></h3>
+
                 <table class="table">
 
                     <th>No</th>
@@ -60,23 +61,44 @@
                     @endforeach
                 </table>
 
+                <p>Yakuniy nazorat</p>
                 <table class="table">
                     <tr>
                         <th>O`qituvchi</th>
                         <th>o`qigan guruh</th>
                         <th>olgan baxosi</th>
+                        <th>malumot</th>
+                        <th>tafsiya qilingan gurux</th>
                     </tr>
                     @foreach($student->assessment as $assessment)
                         <tr>
                             <th>{{$assessment->teacher}}</th>
                             <th>{{$assessment->group}}</th>
                             <th>{{$assessment->get_mark}}</th>
+                            <th>{{$assessment->for_what}}</th>
+                            <th>{{$assessment->rec_group}}</th>
+                        </tr>
+                    @endforeach
+                </table>
+                <p>Davomat</p>
+
+                <table class="table">
+                    <tr>
+                        <th> guruhi </th>
+                        <th> O`qituvchisi </th>
+                        <th> sana </th>
+
+                    </tr>
+                    @foreach($attendances as $attendance)
+                        <tr>
+                            <th>{{$attendance->student->name}}</th>
+                            <th>{{$attendance->group->name}}</th>
+                            <th>{{$attendance->created_at}}</th>
                         </tr>
                     @endforeach
                 </table>
             </div>
         </div>
-
     </div>
 </div>
 </body>

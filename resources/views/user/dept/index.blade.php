@@ -45,9 +45,9 @@
                                                 @method('PUT')
                                                 <label for="recipient-name"
                                                        class="col-form-label">{{$student->name}} pul to`lamoqchi</label>
-                                                <P>@if($student->studentdept->payed != 0) to`lagan summa {{$student->studentdept->payed}} {{$student->studentdept->date}} kuni to`lagan  @endif</P>
+                                                <P>@if(!empty($student->studentdept->payed)) to`lagan summa {{$student->studentdept->payed}} {{$student->studentdept->date}} kuni to`lagan @else   @endif</P>
                                                 <div class="mb-3 d-flex">
-                                                    <input type="number" class="form-control" value="400000"
+                                                    <input type="number" class="form-control" value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"
                                                            name="payment"
                                                            id="recipient-name">
                                                     <input type="date" class="form-control" name="date_paid"

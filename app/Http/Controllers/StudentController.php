@@ -159,6 +159,11 @@ class StudentController extends Controller
             'photo' => $path ?? $student->photo ?? null,
         ]);
 
+        $should_pay=DeptStudent::where('user_id',$id)->first();
+        $should_pay->update([
+            'dept'=>$request->should_pay,
+        ]);
+
         return redirect()->route('student.index')->with('success', 'malumot yangilandi');
 
     }

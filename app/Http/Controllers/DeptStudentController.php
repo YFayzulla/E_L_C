@@ -86,24 +86,36 @@ class DeptStudentController extends Controller
             $student->date = $request->date_paid;
         }
 
-        if ($dept - $payment > 0) {
-//            if ($payment +  )
+        elseif ($dept - $payment > 0) {
+            if ($student->payed == 0){
+                $student->payed = $payment;
+                $student->date = Carbon::now()->format('Y-m-d');
+            }
+
+
+            else{
+                $student->payed = 0;
+                $student->status_month ++;
+            }
+
         }
-//        else {
-//            $item = ($payment / $dept);
-//            if ((int)$item == $item) {
-//                $student->status_month += $item;
-////                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
-//                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');;
-//
-//            } else {
-//                $student->status_month += (int)$item;
-//                $item = $item - (int)$item;
-//                $student->payed = $item * $student->dept;
-//                $student->date = Carbon::now()->addMonths((int)$item)->format('Y-m-d');
-//            }
-//        }
-//        $student->save();
+
+        else {
+            $item = ($payment / $dept);
+            if ((int)$item == $item) {
+                $student->status_month += $item;
+//                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
+                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');
+
+            } else {
+                $student->status_month += (int)$item;
+                $item = $item - (int)$item;
+                $student->payed = $item * $student->dept;
+                $student->date = Carbon::now()->addMonths((int)$item)->format('Y-m-d');
+            }
+        }
+
+        $student->save();
 
         HistoryPayments::create([
             'user_id' => $student->user_id,

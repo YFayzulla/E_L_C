@@ -41,8 +41,6 @@
                                     @foreach($groups as $group)
                                         <option value="{{ $group->name }}">{{ $group->name }}</option>
                                     @endforeach
-                                    <option value='0'>kutuvchilar</option>
-
                                 </select>
                             </th>
                         </tbody>

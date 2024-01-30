@@ -64,7 +64,6 @@
                 <p>Yakuniy nazorat</p>
                 <table class="table">
                     <tr>
-                        <th>O`qituvchi</th>
                         <th>o`qigan guruh</th>
                         <th>olgan baxosi</th>
                         <th>malumot</th>
@@ -72,7 +71,6 @@
                     </tr>
                     @foreach($student->assessment as $assessment)
                         <tr>
-                            <th>{{$assessment->teacher}}</th>
                             <th>{{$assessment->group}}</th>
                             <th>{{$assessment->get_mark}}</th>
                             <th>{{$assessment->for_what}}</th>

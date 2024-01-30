@@ -89,13 +89,13 @@
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit')) active @endif">
+        <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit','group.show')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class='bx bxs-group'></i>
                 <div data-i18n="Analytics">Guruhlar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('dept.index','group.edit')) active @endif">
+        <li class="menu-item @if(request()->routeIs('dept.index')) active @endif">
             <a href="{{ route('dept.index') }}" class="menu-link">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                      class="bi bi-coin me-1" viewBox="0 0 16 16">
@@ -113,13 +113,13 @@
 
 
         @role('user')
-        <li class="menu-item @if(request()->routeIs('attendance')) active @endif">
+        <li class="menu-item @if(request()->routeIs('attendance','attendance.check')) active @endif">
             <a href="{{route('attendance')}}" class="menu-link">
                 <div data-i18n="Analytics">guruxlar || davomat</div>
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('assessment.index')) active @endif">
+        <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
             <a href="{{route('assessment.index')}}" class="menu-link">
                 <div data-i18n="Analytics">guruxlar || yakuniy baholash</div>
             </a>

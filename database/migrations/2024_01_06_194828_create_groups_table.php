@@ -16,10 +16,10 @@ return new class extends Migration
         Schema::create('groups', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('start_time');
-            $table->string('finish_time');
+            $table->string('start_time')->nullable();
+            $table->string('finish_time')->nullable();
             $table->string('level')->nullable();
-            $table->string('monthly_payment');
+            $table->string('monthly_payment')->nullable();
             $table->timestamps();
         });
     }

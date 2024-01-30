@@ -42,6 +42,7 @@ class AssessmentController extends Controller
      */
     public function store(Request $request)
     {
+
     }
 
     /**
@@ -83,6 +84,7 @@ class AssessmentController extends Controller
         $student = $request->student;
         $count=count($reason);
         $group=Group::find($id);
+
         for ($i = 0; $i < $count; $i++) {
             $data=new Assessment();
             $data->get_mark = $end_mark[$i];

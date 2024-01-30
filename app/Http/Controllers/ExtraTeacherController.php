@@ -2,26 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\GroupTeacher;
+use App\Models\StudentInformation;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ExtraTeacherController extends Controller
 {
-    public function add_group (Request $request , $id){
+    public function add_group(Request $request, $id)
+    {
         $request->validate([
 //            'group_id'=>['required', 'unique:'.User::class]
         ]);
 
         GroupTeacher::create([
-            'teacher_id'=>$id,
-            'group_id'=> $request->group_id
+            'teacher_id' => $id,
+            'group_id' => $request->group_id
         ]);
 
-        return redirect()->back()->with('success','Yangi guruh qo`shildi');
+        return redirect()->back()->with('success', 'Yangi guruh qo`shildi');
     }
-    public function group_delete($id){
+
+    public function group_delete($id)
+    {
         $group = GroupTeacher::find($id);
         $group->delete();
-        return redirect()->back()->with('success' ,' malumot o`chieildi');
+        return redirect()->back()->with('success', ' malumot o`chieildi');
     }
+
+    public function change_group(Request $request, $id)
+    {
+
+        $group = Group::find($request->group);
+        $user=User::where('id',$id)->first();
+        $user->update([
+            'group_id'=>$request->group,
+        ]);
+
+        StudentInformation::create([
+            'user_id'=>$id,
+            'group_id'=>$request->group,
+            'level'=>$group->level  ?? "????",
+        ]);
+
+        return redirect()->back()->with('success');
+    }
+
+
 }

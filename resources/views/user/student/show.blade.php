@@ -34,21 +34,57 @@
                     </table>
 
                     <p>Yakuniy nazorat</p>
+
                     <table class="table">
                         <tr>
-                            <th>O`qituvchi</th>
+                            <th>sana</th>
                             <th>o`qigan guruh</th>
                             <th>olgan baxosi</th>
                             <th>malumot</th>
                             <th>tafsiya qilingan gurux</th>
+                            <th>tastiqlash</th>
                         </tr>
                         @foreach($student->assessment as $assessment)
                             <tr>
-                                <th>{{$assessment->teacher}}</th>
+                                <th>{{$assessment->created_at}}</th>
                                 <th>{{$assessment->group}}</th>
                                 <th>{{$assessment->get_mark}}</th>
                                 <th>{{$assessment->for_what}}</th>
-                                <th>{{$assessment->rec_group}}</th>
+                                <th> @if($assessment->rec_group == 0) o`ta olmadi @else {{ $assessment->rec_group }} @endif</th>
+                                <th>
+                                    <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
+                                            data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"
+                                    > xulosa
+                                    </button>
+                                    {{--Modal--}}
+                                    <div class="modal fade" id="exampleModal{{$student->id}}" tabindex="-1"
+                                         aria-labelledby="exampleModalLabel"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{route('student.change.group',$student->id)}}" method="post">
+                                                        @csrf
+                                                        <label for="recipient-name"
+                                                               class="col-form-label"> boshqa guruhga o`tirish </label>
+                                                        <select name="group" class="form-control">
+                                                            @foreach($groups as $group)
+                                                            <option value="{{$group->id}}">{{$group->name}}</option>
+                                                            @endforeach
+                                                        </select>
+
+                                                        <button type="submit" class="btn btn-outline-primary m-2">save
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </th>
                             </tr>
                         @endforeach
                     </table>
@@ -56,9 +92,9 @@
 
                     <table class="table">
                         <tr>
-                            <th> guruhi </th>
-                            <th> O`qituvchisi </th>
-                            <th> sana </th>
+                            <th> guruhi</th>
+                            <th> O`qituvchisi</th>
+                            <th> sana</th>
 
                         </tr>
                         @foreach($attendances as $attendance)

@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class HistoryPayments extends Model
 {
+
     use HasFactory;
+
     protected $fillable=['user_id','payment','date'];
 
     public function student(){

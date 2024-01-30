@@ -35,6 +35,6 @@ class TeacherAdminPanel extends Controller
                 'who_checked' => $user_id
             ]);
         }
-        return redirect()->route('attendance');
+        return redirect()->route('attendance')->with('success' , 'Saved');
     }
 }

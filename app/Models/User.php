@@ -27,6 +27,7 @@ class User extends Authenticatable
         'location',
         'parents_name',
         'parents_tel',
+        'group_id',
         'photo',
         'should_pay',
         'description',
@@ -36,6 +37,10 @@ class User extends Authenticatable
 
     public function teacherhasGroup(){
         return $this->hasMany(Group::class);
+    }
+
+    public function group(){
+        return $this->belongsTo(Group::class);
     }
 
     public function studentinformation(){
@@ -55,9 +60,6 @@ class User extends Authenticatable
         return $this->hasOne(DeptStudent::class,'user_id','id' );
     }
 
-//    public function dept(){
-//        return $this->belongsTo(DeptStudent::class);
-//    }
     /**
      * The attributes that should be hidden for serialization.
      *

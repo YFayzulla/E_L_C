@@ -20,7 +20,7 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = User::orderBy("name")->role('student')->get();
+        $students = User::orderBy("name")->role('student')->where('group_id','!=',1)->get();
         return view('user.student.index', compact('students'));
     }
 
@@ -64,6 +64,7 @@ class StudentController extends Controller
             'phone' => $request->phone,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
+            'group  _id' => $group->id,
             'location' => $request->location,
             'photo' => $path ?? null,
             'should_pay' => $request->should_pay ?? $group->monthly_payment,
@@ -98,7 +99,8 @@ class StudentController extends Controller
     {
         $attendances=Attendance::where('user_id',$id)->get();
         $student = User::find($id);
-        return view('user.student.show', compact('student','attendances'));
+        $groups = Group::all();
+        return view('user.student.show', compact('student','attendances','groups'));
     }
 
     /**

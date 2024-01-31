@@ -6,14 +6,14 @@
             <a class="btn btn-danger float-right m-2" href="{{ URL::to('/student/pdf',$student->id) }}">Report</a>
             <div class="container" style="display: flex; justify-content: space-between;">
                 <div class="container__left">
-                    <h1 style="text-align: center">O`quvchi malumotlari</h1>
-                    <h3><b>F.I.O </b>{{$student->name}}</h3>
-                    <h3><b>Yashash manzili</b> {{$student->location}}</h3>
-                    <h3><b>Telefon raqami </b>{{$student->phone}}</h3>
+                    <h1 style="text-align: center">Student`s data</h1>
+                    <h3><b>Full Name: </b>{{$student->name}}</h3>
+                    <h3><b>Location:</b> {{$student->location}}</h3>
+                    <h3><b>Tel </b>{{$student->phone}}</h3>
 
-                    <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
-                    <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
-                    <h3 style="text-align: center"></h3>
+                    <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
+                    <h4><b>Parents Tel </b> {{$student->parents_tel}}</h4>
+                    <h4><b>Description:</b> {{($student->description)}}</h4>
 
 {{--                    <table class="table">--}}
 {{--                        <tr>--}}
@@ -30,8 +30,8 @@
                     <table class="table">
 
                         <th>No</th>
-                        <th>tolagan summa</th>
-                        <th>to`langan sana</th>
+                        <th>Paid</th>
+                        <th>Date</th>
 
                         @foreach($student->studenthistory as $item)
                             <tr>
@@ -46,13 +46,13 @@
                         @endforeach
                     </table>
 
-                    <p>Davomat</p>
+                    <p>Attendance</p>
 
                     <table class="table">
                         <tr>
-                            <th> guruhi</th>
-                            <th> O`qituvchisi</th>
-                            <th> sana</th>
+                            <th> Group</th>
+                            <th> Teacher </th>
+                            <th> Date </th>
 
                         </tr>
                         @foreach($attendances as $attendance)

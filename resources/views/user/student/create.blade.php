@@ -5,57 +5,57 @@
 
 
         <div class="max-w-xl">
-            <h1 class="text-center"> O`quvchi qo`shish </h1>
+            <h1 class="text-center"> Create student </h1>
 
             <form action="{{route('student.store')}}" method="post" enctype="multipart/form-data">
                 @csrf
 
-                <label for="name" class="text-dark">Ismi</label>
+                <label for="name" class="text-dark">Name</label>
                 <input id="name" name="name" value="{{old('name')}}" type="text" class="form-control">
 
                 @error('name')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="passport" class="text-dark">Pasport seria</label>
+                <label for="passport" class="text-dark"> Passport </label>
                 <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
 
 
-                <label for="phone" class="text-dark">Telefon raqam</label>
+                <label for="phone" class="text-dark">Tel</label>
                 <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control" placeholder="+998(__)_______">
 
                 @error('phone')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas yoki kiritilgan raqam takrorlangan  !</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="location" class="text-dark">Yashash manzili</label>
+                <label for="location" class="text-dark">Location</label>
                 <input id="location" name="location" value="{{old('location')}}" type="text" class="form-control">
 
                 @error('location')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="parents_name" class="text-dark">Ota-onasining ismi</label>
+                <label for="parents_name" class="text-dark">Parents name</label>
                 <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text" class="form-control">
 
                 @error('parents_name')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="parents_tel" class="text-dark">Ota-onasining Telefon raqami</label>
+                <label for="parents_tel" class="text-dark">Parents tel</label>
                 <input id="parents_tel" name="parents_tel" value="{{old('parents_tel')}}" type="text" class="form-control">
 
                 @error('parents_tel')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="should_pay" class="text-dark">Student To`lashi shart bolgan summa</label>
+                <label for="should_pay" class="text-dark">Should Pay</label>
                 <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="number" class="form-control">
 
-                <label for="description" class="text-dark">Qo`shimcha malumot "muxum emas"</label>
+                <label for="description" class="text-dark">Description "not necessary"</label>
                 <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
 
-                <label for="group_id" class="text-dark">Guruxni tanlang</label>
+                <label for="group_id" class="text-dark">Group</label>
                 <select class="form-control" name="group_id">
                     @foreach($groups as $group)
                     <option value="{{$group->id}}">{{$group->name}}</option>
@@ -63,18 +63,14 @@
                 </select>
 
                 @error('group_id')
-                <div class="alert alert-danger" role="alert">guruh mavjud emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
 
-                <label for="photo" class="text-dark"> Rasim</label>
+                <label for="photo" class="text-dark"> Photo </label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 
-                @error('photo')
-                <div class="alert alert-danger" role="alert">rasm yuklanish shart!</div>
-                @enderror
-
-                <button type="submit" class="btn btn-warning m-4 "> Yuklash </button>
+                <button type="submit" class="btn btn-warning m-4 "> submit </button>
 
             </form>
         </div>

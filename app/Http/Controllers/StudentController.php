@@ -32,7 +32,7 @@ class StudentController extends Controller
 
     public function create()
     {
-        $groups = Group::all();
+        $groups = Group::where('id','!=',1)->get();
         return view('user.student.create', compact('groups'));
     }
 

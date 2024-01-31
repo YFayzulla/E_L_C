@@ -6,7 +6,7 @@
             use Illuminate\Support\Carbon;
         @endphp
 
-        <h1 class="text-center">O`quvchilar</h1>
+        <h1 class="text-center">Students</h1>
 
         <a href="{{route('student.create')}}" type="button" class="btn-outline-success btn m-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor"
@@ -20,11 +20,11 @@
             <thead>
             <tr>
                 <th>id</th>
-                <th>Ismi</th>
-                <th>Telefon</th>
-                <th>Ota-onasining telefon raqami</th>
-{{--                <th>oylik to`lov</th>--}}
-                <th>guruh</th>
+                <th>name</th>
+                <th>tel</th>
+                <th>Parents tel</th>
+                {{--                <th>oylik to`lov</th>--}}
+                <th>group</th>
                 <th class="">action</th>
             </tr>
             </thead>
@@ -35,11 +35,11 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
-{{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
+                    {{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
                     <th>{{$student->group->name}}</th>
                     <th class="d-flex">
                         <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
-                            <i class='bx bx-edit-alt' ></i>
+                            <i class='bx bx-edit-alt'></i>
                         </a>
                         <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
                                 class="bx bx-show-alt"></i></a>
@@ -49,7 +49,7 @@
                             @csrf
                             @method('DELETE')
                             <button type="submit" style="" class="btn-outline-danger btn m-1">
-                                <i class='bx bx-trash-alt' ></i>
+                                <i class='bx bx-trash-alt'></i>
 
                             </button>
                         </form>
@@ -58,15 +58,6 @@
                 </tbody>
             @endforeach
         </table>
-{{--        {{ $students->links() }}--}}
-        <script>
-            @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: '{{session('success')}}',
-                showConfirmButton: false,
-                timer: 1500
-            })
-            @endif
-        </script
+    {{--        {{ $students->links() }}--}}
+    </div>
 @endsection

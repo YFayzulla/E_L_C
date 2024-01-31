@@ -6,26 +6,18 @@
             use Illuminate\Support\Carbon;
         @endphp
 
-        <h1 class="text-center">O`quvchilar</h1>
-
-        <a href="{{route('student.create')}}" type="button" class="btn-outline-success btn m-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor"
-                 class="bi bi-plus-lg" viewBox="0 0 16 16">
-                <path fill-rule="evenodd"
-                      d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-            </svg>
-        </a>
+        <h1 class="text-center"> Students who failed </h1>
 
         <table class="table">
             <thead>
             <tr>
                 <th>id</th>
-                <th>Ismi</th>
-                <th>Telefon</th>
-                <th>Ota-onasining telefon raqami</th>
+                <th>Name</th>
+                <th>Tel</th>
+                <th>Parents tel</th>
                 {{--                <th>oylik to`lov</th>--}}
-                <th>guruh</th>
-                {{--                <th class="">action</th>--}}
+                <th>group</th>
+                                <th class="">action</th>
             </tr>
             </thead>
             @foreach($students as $student)
@@ -51,7 +43,7 @@
                                         <form action="{{route('student.change.group',$student->id)}}" method="post">
                                             @csrf
                                             <label for="recipient-name"
-                                                   class="col-form-label"> boshqa guruhga o`tirish </label>
+                                                   class="col-form-label"> throw to another group </label>
                                             <select name="group" class="form-control">
                                                 @foreach($groups as $group)
                                                     <option value="{{$group->id}}">{{$group->name}}</option>

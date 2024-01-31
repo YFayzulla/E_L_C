@@ -9,10 +9,10 @@
                 <table class="table">
                     <tr>
                         <th>no</th>
-                        <th>ismi</th>
-                        <th>telefon raqam</th>
-                        <th>tolangan pullar</th>
-                        <th>sana</th>
+                        <th>name</th>
+                        <th>tel</th>
+                        <th>paid</th>
+                        <th>date</th>
                     </tr>
                     @foreach($users as $student)
                         <tr>
@@ -28,7 +28,7 @@
                     @endforeach
                 </table>
             </div>
-                <p>shu kunda to`langan umumiy summa : {{$sum}} </p>
+                <p>Sum in date: {{$sum}} </p>
         </div>
     </div>
 @endsection

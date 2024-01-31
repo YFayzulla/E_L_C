@@ -78,21 +78,21 @@
         <li class="menu-item @if(request()->routeIs('teacher.index' , 'teacher.create' , 'teacher.edit', 'teacher.show')) active @endif">
             <a href="{{ route('teacher.index') }}" class="menu-link">
                 <i class='bx bx-user'></i>
-                <div data-i18n="Analytics">O`qituvchilar</div>
+                <div data-i18n="Analytics">Teachers</div>
             </a>
         </li>
 
         <li class="menu-item @if(request()->routeIs('student.index' , 'student.create' , 'student.edit', 'student.show'  )) active @endif">
             <a href="{{ route('student.index') }}" class="menu-link">
                 <i class='bx bxs-graduation'></i>
-                <div data-i18n="Analytics">O`quvchilar</div>
+                <div data-i18n="Analytics">Students</div>
             </a>
         </li>
 
         <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit','group.show')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class='bx bxs-group'></i>
-                <div data-i18n="Analytics">Guruhlar</div>
+                <div data-i18n="Analytics">Groups</div>
             </a>
         </li>
         <li class="menu-item @if(request()->routeIs('dept.index')) active @endif">
@@ -104,7 +104,7 @@
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                     <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
                 </svg>
-                <div data-i18n="Analytics">Pul to`lash</div>
+                <div data-i18n="Analytics"> pay </div>
             </a>
         </li>
         <li class="menu-item @if(request()->routeIs('waiters.index')) active @endif">
@@ -116,7 +116,7 @@
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                     <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
                 </svg>
-                <div data-i18n="Analytics">??????</div>
+                <div data-i18n="Analytics">Waiters</div>
             </a>
         </li>
         @endrole
@@ -125,13 +125,13 @@
         @role('user')
         <li class="menu-item @if(request()->routeIs('attendance','attendance.check')) active @endif">
             <a href="{{route('attendance')}}" class="menu-link">
-                <div data-i18n="Analytics">guruxlar || davomat</div>
+                <div data-i18n="Analytics"> Attendance </div>
             </a>
         </li>
 
         <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
             <a href="{{route('assessment.index')}}" class="menu-link">
-                <div data-i18n="Analytics">guruxlar || yakuniy baholash</div>
+                <div data-i18n="Analytics"> test results </div>
             </a>
         </li>
         @endrole

@@ -38,7 +38,7 @@
                         aria-label="Search..."
                     />
                 </div>
-                <button type="submit" class="btn btn-outline-dark"> izlash</button>
+                <button type="submit" class="btn btn-outline-dark"> Search </button>
             </div>
         </form>
         <!-- /Search -->

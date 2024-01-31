@@ -7,8 +7,8 @@
                 <thead>
                 <tr>
                     <td>No</td>
-                    <td>ismi</td>
-                    <td>pul to`lash</td>
+                    <td>name</td>
+                    <td>pay</td>
                 </tr>
                 </thead>
 
@@ -44,8 +44,8 @@
                                                 @csrf
                                                 @method('PUT')
                                                 <label for="recipient-name"
-                                                       class="col-form-label">{{$student->name}} pul to`lamoqchi</label>
-                                                <P>@if(!empty($student->studentdept->payed)) to`lagan summa {{$student->studentdept->payed}} {{$student->studentdept->date}} kuni to`lagan @else   @endif</P>
+                                                       class="col-form-label">{{$student->name}} will pay</label>
+                                                <P>@if(!empty($student->studentdept->payed)) paid {{$student->studentdept->payed}} this date {{$student->studentdept->date}}  @else   @endif</P>
                                                 <div class="mb-3 d-flex">
                                                     <input type="number" class="form-control" value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"
                                                            name="payment"

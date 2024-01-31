@@ -3,7 +3,7 @@
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
 
-        <h1 class="text-center">Guruhlar</h1>
+        <h1 class="text-center">Groups</h1>
 
         <a href="{{route('group.create')}}" type="button" class="btn-outline-success btn m-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor"
@@ -17,18 +17,18 @@
             <thead>
             <tr>
                 <th>id</th>
-                <th>Guruh nomi</th>
-                <th>Guruh ochilgan kun</th>
-                <th>Boshlanish vaqti</th>
-                <th>Tugash vaqti</th>
-                <th>daraja</th>
-                <th>Guruh narxi</th>
+                <th>Name</th>
+                <th>opened date</th>
+                <th>start time</th>
+                <th>finish time</th>
+                <th>level</th>
+                <th>cost</th>
                 <th class="">action</th>
             </tr>
             </thead>
             @foreach($groups as $group)
+                <tbody id="myTable" class="table-group-divider">
                 <tr>
-                    <tbody id="myTable" class="table-group-divider">
                     <th>{{$loop->index+1}}</th>
                     <th>{{$group->name}}</th>
                     <th>{{$group->created_at}}</th>

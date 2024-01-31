@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Level;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -64,7 +65,10 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
-        return view('user.group.show',compact('group'));
+        $groups=Group::where('id','!=',1)->get();
+        $students=User::where('group_id',$group->id)->get();
+        return view('user.group.show',compact('students','groups'));
+
     }
 
     /**

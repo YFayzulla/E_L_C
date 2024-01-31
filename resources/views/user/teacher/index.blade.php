@@ -3,7 +3,7 @@
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
 
-        <h1 class="text-center">O`qituvchilar</h1>
+        <h1 class="text-center">Teachers</h1>
 
         <a href="{{route('teacher.create')}}" type="button" class="btn-outline-success btn m-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor"
@@ -17,11 +17,11 @@
             <thead>
             <tr>
                 <th>id</th>
-                <th>Ismi</th>
-                <th>Telefon raqami</th>
-                <th>Turar joyi</th>
-                <th>tugulgan sanas</th>
-                <th>rasimi</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Date born</th>
+                <th>photo</th>
                 <th class="">action</th>
             </tr>
             </thead>

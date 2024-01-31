@@ -44,7 +44,7 @@ class User extends Authenticatable
     }
 
     public function studentinformation(){
-        return $this->hasOne(StudentInformation::class);
+        return $this->hasMany(StudentInformation::class,'id');
 //        return $query->StudentInformation::where('user_id','id')->first();
     }
 

@@ -24,11 +24,8 @@
                                     <option value="{{$group->id}}">{{$group->name}}</option>
                                 @endforeach
                             </select>
-                            <button type="submit" class="btn btn-primary">Save changes</button>
+                            <button type="submit" class="btn btn-primary mt-2">submit</button>
                         </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -38,8 +35,8 @@
         <table class="table">
             <tr>
                 <th>No</th>
-                <th> Guruhlar</th>
-                <th> O`chirish</th>
+                <th> Group </th>
+                <th> Delete</th>
             </tr>
 
             @foreach($teachers as $teacher)

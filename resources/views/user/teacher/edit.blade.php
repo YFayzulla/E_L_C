@@ -5,48 +5,48 @@
 
 
         <div class="max-w-xl">
-            <h1 class="text-center"> O`qituvchi malumotlarini o`zgartirish </h1>
+            <h1 class="text-center"> Edit teacher`s data </h1>
 
             <form action="{{route('teacher.update',$teacher->id)}}" method="post" enctype="multipart/form-data">
 
                 @csrf
                 @method('PUT')
 
-                <label for="name" class="text-dark">Ismi</label>
+                <label for="name" class="text-dark">Name</label>
                 <input id="name" name="name" value="{{$teacher->name}}" type="text" class="form-control">
 
                 @error('name')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="password" class="text-dark">Parol</label>
+                <label for="password" class="text-dark">password</label>
                 <input id="password" name="password" type="password"  class="form-control">
 
                 @error('password')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
-                <label for="phone" class="text-dark">Telefon raqam</label>
+                <label for="phone" class="text-dark">Phone</label>
                 <input id="phone" name="phone" value="{{$teacher->phone}}" type="text" class="form-control">
 
                 @error('phone')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas va yoki kiritilgan raqam takrorlangan</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="date_born" class="text-dark">Tug`ulgan sana</label>
+                <label for="date_born" class="text-dark">Date born</label>
                 <input id="date_born" name="date_born" value="{{$teacher->date_born}}" type="date" class="form-control">
 
                 @error('date_born')
-                <div class="alert alert-danger" role="alert">Maydonni to`ldiring!</div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="location" class="text-dark">Yashash manzil</label>
+                <label for="location" class="text-dark">Location</label>
                 <input id="location" name="location" value="{{$teacher->location}}" type="text" class="form-control">
 
                 @error('location')
-                <div class="alert alert-danger" role="alert">Ushbu maydon bo'sh bo'lishi mumkin emas! </div>
+                <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-                <label for="passport" class="text-dark">Pasport seria</label>
+                <label for="passport" class="text-dark">Passport</label>
                 <input id="passport" name="passport" value="{{$teacher->passport}}" type="text" class="form-control" >
 
                 {{--                @error('passport')--}}
@@ -54,14 +54,12 @@
                 {{--                @enderror--}}
 
 
-                <label for="photo" class="text-dark"> Rasim</label>
+                <label for="photo" class="text-dark"> Photo</label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 
-                @error('photo')
-                <div class="alert alert-danger" role="alert">rasm yuklanish shart!</div>
-                @enderror
 
-                <button class="btn btn-warning m-4 "> Yuklash</button>
+
+                <button class="btn btn-warning m-4 "> submit</button>
 
             </form>
         </div>

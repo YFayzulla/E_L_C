@@ -65,10 +65,9 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
-        $groups=Group::where('id','!=',1)->get();
+//        $groups=Group::where('id','!=',1)->get();
         $students=User::where('group_id',$group->id)->get();
-        return view('user.group.show',compact('students','groups'));
-
+        return view('user.group.show',compact('students'));
     }
 
     /**

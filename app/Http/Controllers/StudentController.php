@@ -64,7 +64,7 @@ class StudentController extends Controller
             'phone' => $request->phone,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
-            'group  _id' => $group->id,
+            'group_id' => $group->id,
             'location' => $request->location,
             'photo' => $path ?? null,
             'should_pay' => $request->should_pay ?? $group->monthly_payment,

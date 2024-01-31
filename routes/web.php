@@ -52,7 +52,6 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
     Route::get('/dept/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
-    Route::get('student/group/edit/{id}',[ExtraTeacherController::class,'overall_result'])->name('change.group');
     Route::post('teacher/group/change/{id}',[ExtraTeacherController::class,'change_group'])->name('student.change.group');
 });
 

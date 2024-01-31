@@ -76,7 +76,7 @@ class TeacherController extends Controller
     public function show($id)
     {
 
-        $groups=Group::all();
+        $groups=Group::where('id','!=',1)->get();
 
         $teachers=GroupTeacher::where('teacher_id','=',$id)->get();
 

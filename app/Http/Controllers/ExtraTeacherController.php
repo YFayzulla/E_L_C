@@ -33,8 +33,6 @@ class ExtraTeacherController extends Controller
 
     public function change_group(Request $request, $id)
     {
-
-        $group = Group::find($request->group);
         $user=User::where('id',$id)->first();
         $user->update([
             'group_id'=>$request->group,
@@ -43,10 +41,9 @@ class ExtraTeacherController extends Controller
         StudentInformation::create([
             'user_id'=>$id,
             'group_id'=>$request->group,
-            'level'=>$group->level  ?? "????",
         ]);
 
-        return redirect()->back()->with('success');
+        return redirect()->route('student.index')->with('success');
     }
 
 

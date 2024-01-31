@@ -25,7 +25,7 @@
                 <th>Ota-onasining telefon raqami</th>
                 {{--                <th>oylik to`lov</th>--}}
                 <th>guruh</th>
-{{--                <th class="">action</th>--}}
+                {{--                <th class="">action</th>--}}
             </tr>
             </thead>
             @foreach($students as $student)
@@ -35,9 +35,38 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
-                    {{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
                     <th>{{$student->group->name}}</th>
+                    <th>
+                        <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo">xulosa</button>
 
+                        <div class="modal fade" id="exampleModal{{$student->id}}" tabindex="-1"
+                             aria-labelledby="exampleModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="{{route('student.change.group',$student->id)}}" method="post">
+                                            @csrf
+                                            <label for="recipient-name"
+                                                   class="col-form-label"> boshqa guruhga o`tirish </label>
+                                            <select name="group" class="form-control">
+                                                @foreach($groups as $group)
+                                                    <option value="{{$group->id}}">{{$group->name}}</option>
+                                                @endforeach
+                                            </select>
+
+                                            <button type="submit" class="btn btn-outline-primary m-2">save
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </th>
                 </tr>
                 </tbody>
             @endforeach

@@ -42,7 +42,6 @@
                             <th>olgan baxosi</th>
                             <th>malumot</th>
                             <th>tafsiya qilingan gurux</th>
-                            <th>tastiqlash</th>
                         </tr>
                         @foreach($student->assessment as $assessment)
                             <tr>
@@ -51,8 +50,12 @@
                                 <th>{{$assessment->get_mark}}</th>
                                 <th>{{$assessment->for_what}}</th>
                                 <th> @if($assessment->rec_group == 0) o`ta olmadi @else {{ $assessment->rec_group }} @endif</th>
-                                <th>
-                                    <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
+
+
+                            </tr>
+                        @endforeach
+                    </table>
+                                    <button type="button" class="btn-outline-success btn m-2 float-end" data-bs-toggle="modal"
                                             data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"
                                     > xulosa
                                     </button>
@@ -82,12 +85,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-
-                                </th>
-                            </tr>
-                        @endforeach
-                    </table>
                     <p>Davomat</p>
 
                     <table class="table">

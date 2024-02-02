@@ -64,6 +64,15 @@
                 <input id="should_pay" name="should_pay" value="{{$student->should_pay}}" type="text"
                        class="form-control">
 
+                <label for="should_pay" class="text-dark">Group</label>
+
+                <select class="form-control" name="group_id">
+                    @foreach($groups as $group)
+                        <option value="{{$group->id}}">{{$group->name}}</option>
+                    @endforeach
+                </select>
+
+
                 @error('should_pay')
                 <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror

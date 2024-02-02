@@ -32,6 +32,7 @@
                 <tbody id="myTable" class="table-group-divider">
                 <tr>
                     <th>{{$loop->index+1}}</th>
+{{--                    @dd($student->name)--}}
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
@@ -58,6 +59,5 @@
                 </tbody>
             @endforeach
         </table>
-    {{--        {{ $students->links() }}--}}
     </div>
 @endsection

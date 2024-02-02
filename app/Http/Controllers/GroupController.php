@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assessment;
 use App\Models\Group;
 use App\Models\Level;
 use App\Models\User;
@@ -65,9 +66,9 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
-//        $groups=Group::where('id','!=',1)->get();
-        $students=User::where('group_id',$group->id)->get();
-        return view('user.group.show',compact('students'));
+        $guruxlar=Group::all();
+        $groups=Assessment::where('Group',$group->name)->get();
+        return view('user.group.show',compact('groups','guruxlar'));
     }
 
     /**

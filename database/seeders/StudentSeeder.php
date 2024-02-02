@@ -32,6 +32,20 @@ class StudentSeeder extends Seeder
                 'parents_tel' => $faker->phoneNumber,
                 'should_pay' => $faker->numerify,
             ])->assignRole('Student');
+
         }
+
+        User::create([
+            'name' => 'fayzulla',
+            'phone' => '+998911234567',
+            'password' => bcrypt('password'),// You might want to use a more secure method for passwords
+            'passport' => $faker->name,
+            'date_born' => $faker->date,
+            'location' => $faker->city,
+            'description' => $faker->text,
+            'parents_name' => $faker->name,
+            'parents_tel' => $faker->phoneNumber,
+            'should_pay' => $faker->numerify,
+        ])->assignRole('Student');
     }
 }

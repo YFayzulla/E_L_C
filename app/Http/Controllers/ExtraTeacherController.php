@@ -31,20 +31,20 @@ class ExtraTeacherController extends Controller
         return redirect()->back()->with('success', ' malumot o`chieildi');
     }
 
-    public function change_group(Request $request, $id)
+    public function change_group(Request $request , $id)
     {
-        $user=User::where('id',$id)->first();
+
+        $user=User::find($id);
+
         $user->update([
-            'group_id'=>$request->group,
+            'group_id'=>$request->group_id,
         ]);
 
         StudentInformation::create([
             'user_id'=>$id,
-            'group_id'=>$request->group,
+            'group_id'=>$request->group_id,
         ]);
 
-        return redirect()->route('student.index')->with('success');
+        return redirect()->back()->with('success');
     }
-
-
 }

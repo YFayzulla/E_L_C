@@ -27,6 +27,7 @@ class TeacherAdminPanel extends Controller
     public function attendance_submit(Request $request, $id)
     {
 //        dd($id);
+
         foreach ($request->status as $name => $status) {
             $user_id = auth()->id();
             Attendance::create([
@@ -35,6 +36,7 @@ class TeacherAdminPanel extends Controller
                 'who_checked' => $user_id
             ]);
         }
+
         return redirect()->route('attendance')->with('success' , 'Saved');
     }
 }

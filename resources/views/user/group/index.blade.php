@@ -40,7 +40,6 @@
                         <a href="{{route('group.edit',$group->id)}}" class="btn-outline-warning btn m-1">
                             <i class='bx bx-edit-alt'></i>
                         </a>
-
                         <a href="{{route('group.show',$group->id)}}" class="btn btn-outline-primary m-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
@@ -56,7 +55,6 @@
                             @method('DELETE')
                             <button type="submit" style="" class="btn-outline-danger btn m-1">
                                 <i class='bx bx-trash-alt'></i>
-
                             </button>
                         </form>
                     </th>

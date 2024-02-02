@@ -20,7 +20,13 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = User::orderBy("name")->role('student')->where('group_id','!=',1)->get();
+        $students = User::orderBy("name")->role('student')->get();
+
+
+//        foreach ($students as $user)
+//        {
+////            var_dump($user->name);
+//        }
         return view('user.student.index', compact('students'));
     }
 
@@ -72,10 +78,9 @@ class StudentController extends Controller
         ])->assignRole('student');
 
 
-        $information = StudentInformation::create([
+        StudentInformation::create([
             'user_id' => $user->id,
             'group_id' => $request->group_id,
-            'level' => $group->level,
         ]);
 
 
@@ -113,10 +118,13 @@ class StudentController extends Controller
     {
 
         $student = User::find($id);
+        $groups = Group::where('id','!=',1)->get();
+
+
 
         //        dd($id,$student);
         if ($student !== null)
-            return view('user.student.edit', compact('student'));
+            return view('user.student.edit', compact('student','groups'));
         else
             return abort('403');
     }
@@ -156,15 +164,16 @@ class StudentController extends Controller
             'parents_tel' => $request->parents_tel,
             'description' => $request->description,
             'should_pay' => $request->should_pay,
+            'group_id' =>$request->group_id,
             //            'money' => $request->money,
             //            'status' => $request->status,
             'photo' => $path ?? $student->photo ?? null,
         ]);
 
         $should_pay=DeptStudent::where('user_id',$id)->first();
-        $should_pay->update([
-            'dept'=>$request->should_pay,
-        ]);
+//        $should_pay->update([
+//            'dept'=>$request->should_pay,
+//        ]);
 
         return redirect()->route('student.index')->with('success', 'malumot yangilandi');
 

@@ -30,8 +30,10 @@
                     <th>{{$student->group->name}}</th>
                     <th>
                         <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
-                                data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo">xulosa</button>
-
+                                data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"
+                        > xulosa
+                        </button>
+                        {{--Modal--}}
                         <div class="modal fade" id="exampleModal{{$student->id}}" tabindex="-1"
                              aria-labelledby="exampleModalLabel"
                              aria-hidden="true">
@@ -43,10 +45,10 @@
                                         <form action="{{route('student.change.group',$student->id)}}" method="post">
                                             @csrf
                                             <label for="recipient-name"
-                                                   class="col-form-label"> throw to another group </label>
-                                            <select name="group" class="form-control">
-                                                @foreach($groups as $group)
-                                                    <option value="{{$group->id}}">{{$group->name}}</option>
+                                                   class="col-form-label"> boshqa guruhga o`tirish </label>
+                                            <select name="group_id" class="form-control">
+                                                @foreach($groups as $g)
+                                                    <option value="{{$g->id}}">{{$g->name}}</option>
                                                 @endforeach
                                             </select>
 
@@ -57,7 +59,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </th>
                 </tr>
                 </tbody>

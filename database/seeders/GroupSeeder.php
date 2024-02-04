@@ -18,7 +18,7 @@ class GroupSeeder extends Seeder
     {
         $faker = Faker::create();
         Group::create([
-            'name' => 'зал ожидания'
+            'name' => 'waiters'
         ]);
     }
 }

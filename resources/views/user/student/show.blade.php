@@ -15,16 +15,15 @@
                     <h4><b>Parents Tel </b> {{$student->parents_tel}}</h4>
                     <h4><b>Description:</b> {{($student->description)}}</h4>
 
-{{--                    <table class="table">--}}
-{{--                        <tr>--}}
-{{--                            <th>id</th>--}}
-{{--                            <th>name</th>--}}
-{{--                        </tr>--}}
-{{--                        <tr>--}}
-{{--                            <th>salom</th>--}}
-{{--                        </tr>--}}
-{{--                    </table>--}}
-
+                    {{--                    <table class="table">--}}
+                    {{--                        <tr>--}}
+                    {{--                            <th>id</th>--}}
+                    {{--                            <th>name</th>--}}
+                    {{--                        </tr>--}}
+                    {{--                        <tr>--}}
+                    {{--                            <th>salom</th>--}}
+                    {{--                        </tr>--}}
+                    {{--                    </table>--}}
 
 
                     <table class="table">
@@ -32,7 +31,6 @@
                         <th>No</th>
                         <th>Paid</th>
                         <th>Date</th>
-
                         @foreach($student->studenthistory as $item)
                             <tr>
                                 <th>{{$loop->index+1}}</th>
@@ -46,13 +44,29 @@
                         @endforeach
                     </table>
 
+                    <p>travel of group</p>
+                    <table class="table">
+                        <tr>
+                            <th>No</th>
+                            <th>group</th>
+                            <th>Date</th>
+                        </tr>
+                        @foreach($student->studentinformation as $item)
+                            <tr>
+                                <th>{{$loop->index+1}}</th>
+                                <th>{{$item->group->name}}</th>
+                                <th>{{$item->created_at}}</th>
+                            </tr>
+                        @endforeach
+                    </table>
+
                     <p>Attendance</p>
 
                     <table class="table">
                         <tr>
                             <th> Group</th>
-                            <th> Teacher </th>
-                            <th> Date </th>
+                            <th> Teacher</th>
+                            <th> Date</th>
 
                         </tr>
                         @foreach($attendances as $attendance)

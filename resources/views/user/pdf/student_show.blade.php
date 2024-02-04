@@ -33,21 +33,31 @@
     <div class="max-w-xl mx-auto">
         <div class="container" style="display: flex; justify-content: space-between;">
             <div class="container__left">
-                <h1 style="text-align: center">O`quvchi malumotlari</h1>
-                <h3><b>F.I.O </b>{{$student->name}}</h3>
-                <h3><b>Yashash manzili</b> {{$student->location}}</h3>
-                <h3><b>Telefon raqami </b>{{$student->phone}}</h3>
+                <h1 style="text-align: center">Student`s data</h1>
+                <h3><b>Full Name: </b>{{$student->name}}</h3>
+                <h3><b>Location:</b> {{$student->location}}</h3>
+                <h3><b>Tel </b>{{$student->phone}}</h3>
 
-                <h4><b>Ota-Onasi: </b>{{$student->parents_name}},Tel raqami {{$student->parents_tel}} </h4>
-                <h4><b>Qoshimcha malumotlar:</b> {{($student->description)}}</h4>
-                <h3 style="text-align: center"></h3>
+                <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
+                <h4><b>Parents Tel </b> {{$student->parents_tel}}</h4>
+                <h4><b>Description:</b> {{($student->description)}}</h4>
+
+                {{--                    <table class="table">--}}
+                {{--                        <tr>--}}
+                {{--                            <th>id</th>--}}
+                {{--                            <th>name</th>--}}
+                {{--                        </tr>--}}
+                {{--                        <tr>--}}
+                {{--                            <th>salom</th>--}}
+                {{--                        </tr>--}}
+                {{--                    </table>--}}
+
 
                 <table class="table">
 
                     <th>No</th>
-                    <th>tolagan summa</th>
-                    <th>to`langan sana</th>
-
+                    <th>Paid</th>
+                    <th>Date</th>
                     @foreach($student->studenthistory as $item)
                         <tr>
                             <th>{{$loop->index+1}}</th>
@@ -61,30 +71,29 @@
                     @endforeach
                 </table>
 
-                <p>Yakuniy nazorat</p>
+                <p>travel of group</p>
                 <table class="table">
                     <tr>
-                        <th>o`qigan guruh</th>
-                        <th>olgan baxosi</th>
-                        <th>malumot</th>
-                        <th>tafsiya qilingan gurux</th>
+                        <th>No</th>
+                        <th>group</th>
+                        <th>Date</th>
                     </tr>
-                    @foreach($student->assessment as $assessment)
+                    @foreach($student->studentinformation as $item)
                         <tr>
-                            <th>{{$assessment->group}}</th>
-                            <th>{{$assessment->get_mark}}</th>
-                            <th>{{$assessment->for_what}}</th>
-                            <th>{{$assessment->rec_group}}</th>
+                            <th>{{$loop->index+1}}</th>
+                            <th>{{$item->group->name}}</th>
+                            <th>{{$item->created_at}}</th>
                         </tr>
                     @endforeach
                 </table>
-                <p>Davomat</p>
+
+                <p>Attendance</p>
 
                 <table class="table">
                     <tr>
-                        <th> guruhi </th>
-                        <th> O`qituvchisi </th>
-                        <th> sana </th>
+                        <th> Group</th>
+                        <th> Teacher</th>
+                        <th> Date</th>
 
                     </tr>
                     @foreach($attendances as $attendance)

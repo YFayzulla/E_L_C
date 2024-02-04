@@ -67,7 +67,7 @@ class GroupController extends Controller
     public function show(Group $group)
     {
         $guruxlar=Group::all();
-        $groups=Assessment::where('Group',$group->name)->get();
+        $groups=Assessment::where('Group',$group->name)->orderby('created_at')->get();
         return view('user.group.show',compact('groups','guruxlar'));
     }
 

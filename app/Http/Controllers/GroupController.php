@@ -70,6 +70,9 @@ class GroupController extends Controller
         $guruxlar=Group::all();
         $groups=Assessment::where('Group',$group->name)->orderby('created_at')->get();
         return view('user.group.show',compact('groups','guruxlar','id'));
+
+//        pdf left and assessment will be group_id
+
     }
 
     /**

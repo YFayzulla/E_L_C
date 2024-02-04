@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\HistoryPayments;
 use App\Models\User;
@@ -32,10 +33,24 @@ class PdfController extends Controller
         set_time_limit(300); // Set to a value greater than 60 seconds
         $today = now()->toDateString();
         $student = User::find($id);
-        $attendances=Attendance::where('user_id',$id)->get();
-        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student,'attendances'=>$attendances]);
+        $attendances = Attendance::where('user_id', $id)->get();
+        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
         return $pdf->download('orders.pdf');
         GeneratePdfJob::dispatch($id);
+        return "PDF generation job dispatched successfully!";
+    }
+
+    public function Assessment($id)
+    {
+
+        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
+
+        $groups = Assessment::where('group_id', $id)->orderby('created_at')->get();
+
+        return $pdf->download('orders.pdf');
+
+        GeneratePdfJob::dispatch($id);
+
         return "PDF generation job dispatched successfully!";
     }
 }

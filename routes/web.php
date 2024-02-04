@@ -4,6 +4,7 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GroupExtraController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
@@ -53,6 +54,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/dept/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
     Route::post('teacher/group/change/{id}',[ExtraTeacherController::class,'change_group'])->name('student.change.group');
+    Route::delete('/delete-multiple', [GroupExtraController::class, 'deleteMultiple'])->name('deleteMultiple');
+
 });
 
 //Teachers

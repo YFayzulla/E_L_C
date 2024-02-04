@@ -7,7 +7,7 @@
         @endphp
 
         <h1 class="text-center"> Students who failed </h1>
-
+        <div class="table-responsive text-nowrap">
         <table class="table">
             <thead>
             <tr>
@@ -64,6 +64,7 @@
                 </tbody>
             @endforeach
         </table>
+        </div>
         {{--        {{ $students->links() }}--}}
         <script>
             @if(session('success'))

@@ -32,30 +32,31 @@
         </div>
 
         <!-- Hidden select area initially -->
-        <table class="table">
-            <tr>
-                <th>No</th>
-                <th> Group </th>
-                <th> Delete</th>
-            </tr>
-
-            @foreach($teachers as $teacher)
+        <div class="table-responsive text-nowrap">
+            <table class="table">
                 <tr>
-                    <th>{{$loop->index+1}}</th>
-                    <th>{{$teacher->group->name}}</th>
-                    <td>
-                        <form action="{{route('teacher_group.delete',$teacher->id)}}" method="post"
-                              onsubmit="return confirm('are you sure for deleting ');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" style="" class="btn-outline-danger btn ">
-                                <i class='bx bx-trash-alt' ></i>
-                            </button>
-                        </form>
-                    </td>
+                    <th>No</th>
+                    <th> Group</th>
+                    <th> Delete</th>
                 </tr>
-            @endforeach
 
-        </table>
+                @foreach($teachers as $teacher)
+                    <tr>
+                        <th>{{$loop->index+1}}</th>
+                        <th>{{$teacher->group->name}}</th>
+                        <td>
+                            <form action="{{route('teacher_group.delete',$teacher->id)}}" method="post"
+                                  onsubmit="return confirm('are you sure for deleting ');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" style="" class="btn-outline-danger btn ">
+                                    <i class='bx bx-trash-alt'></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
 
+            </table>
+        </div>
 @endsection

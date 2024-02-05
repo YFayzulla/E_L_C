@@ -43,9 +43,9 @@ class PdfController extends Controller
     public function Assessment($id)
     {
 
-        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
+        $groups = Assessment::where('group', $id)->get();
 
-        $groups = Assessment::where('group_id', $id)->orderby('created_at')->get();
+        $pdf = PDF::loadView('user.pdf.group_assessment', ['groups' => $groups]);
 
         return $pdf->download('orders.pdf');
 

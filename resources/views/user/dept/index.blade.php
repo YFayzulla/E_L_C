@@ -46,16 +46,20 @@
                                                     @csrf
                                                     @method('PUT')
                                                     <label for="recipient-name"
-                                                           class="col-form-label">{{$student->name}} will pay</label>
+                                                           class="col-form-label">{{$student->name}} is going to pay</label>
                                                     <P>@if(!empty($student->studentdept->payed))
                                                             paid {{$student->studentdept->payed}} this
                                                             date {{$student->studentdept->date}}
                                                         @else   @endif</P>
                                                     <div class="mb-3 d-flex">
-                                                        <input type="number" class="form-control"
+                                                        <input type="number" class="form-control me-1"
                                                                value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"
                                                                name="payment"
                                                                id="recipient-name">
+                                                        <select name="money_type" id="" class="form-select me-1">
+                                                            <option value="cash">cash</option>
+                                                            <option value="electronic">electronic</option>
+                                                        </select>
                                                         <input type="date" class="form-control" name="date_paid"
                                                                id="recipient-name">
                                                         <button type="submit" class="btn btn-outline-primary m-2">save

@@ -84,23 +84,16 @@ class DeptStudentController extends Controller
         if ($dept == $payment) {
             $student->status_month += 1;
             $student->date = $request->date_paid;
-        }
-
-        elseif ($dept - $payment > 0) {
-            if ($student->payed == 0){
+        } elseif ($dept - $payment > 0) {
+            if ($student->payed == 0) {
                 $student->payed = $payment;
                 $student->date = Carbon::now()->format('Y-m-d');
-            }
-
-
-            else{
+            } else {
                 $student->payed = 0;
-                $student->status_month ++;
+                $student->status_month++;
             }
 
-        }
-
-        else {
+        } else {
             $item = ($payment / $dept);
             if ((int)$item == $item) {
                 $student->status_month += $item;
@@ -121,8 +114,8 @@ class DeptStudentController extends Controller
             'user_id' => $student->user_id,
             'payment' => $request->payment,
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
+            'type_of_money' => $request->money_type,
         ]);
-
         return redirect()->back()->with('success', 'to`langan pul qabul qilindi');
     }
 

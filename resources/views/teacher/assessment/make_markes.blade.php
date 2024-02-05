@@ -35,8 +35,7 @@
                                        name="reason[]">
                             </th>
                             <th>
-
-                                <select class="float input-group-merge form-control" name="recommended[]">
+                                <select class="form-select form-control" name="recommended[]">
 
                                     @foreach($groups as $group)
                                         <option value="{{ $group->name }}">{{ $group->name }}</option>

@@ -28,11 +28,13 @@
 
                     <th>No</th>
                     <th>Paid</th>
+                    <th> type </th>
                     <th>Date</th>
                     @foreach($student->studenthistory as $item)
                         <tr>
-                            <th>{{$loop->index+1}}</th>
-                            <th>{{$item->payment}}</th>
+                            <th>{{$loop-> index+1 }}</th>
+                            <th>{{$item-> payment }}</th>
+                            <th>{{$item-> type_of_money }}</th>
                             <th>@if($item->date ==null)
                                     {{$item->created_at.'data'}}
                                 @else
@@ -62,11 +64,12 @@
 
                 <table class="table">
                     <tr>
-                        <th> Group</th>
-                        <th> Teacher</th>
+                        <th> Group </th>
+                        <th> Teacher </th>
                         <th> Date</th>
 
                     </tr>
+
                     @foreach($attendances as $attendance)
                         <tr>
                             <th>{{$attendance->student->name}}</th>

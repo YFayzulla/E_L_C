@@ -30,11 +30,13 @@
 
                         <th>No</th>
                         <th>Paid</th>
+                        <th>type</th>
                         <th>Date</th>
                         @foreach($student->studenthistory as $item)
                             <tr>
                                 <th>{{$loop->index+1}}</th>
                                 <th>{{$item->payment}}</th>
+                                <th>{{$item->type_of_money}}</th>
                                 <th>@if($item->date ==null)
                                         {{$item->created_at.'data'}}
                                     @else

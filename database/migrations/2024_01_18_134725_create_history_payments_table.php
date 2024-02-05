@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('payment');
             $table->date('date');
+            $table->string('type_of_money')->nullable();
             $table->timestamps();
         });
     }

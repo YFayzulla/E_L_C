@@ -2,18 +2,22 @@
 @section('content')
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-{{--select delete--}}
+        {{--select delete--}}
+        <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a>
 
         <form action="{{route('deleteMultiple')}}" method="post">
-        <button type="button" id="selectAllBtn" class="btn btn-primary mb-3 me-1">Select All</button>
-        <button class="btn btn-danger mb-3 text-white">Delete specified data</button>
-        <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a>
             @csrf
             @method('DELETE')
+
+            <button type="button" id="selectAllBtn" class="btn btn-primary mb-3 me-1">Select All</button>
+            <button class="btn btn-danger mb-3 text-white">Delete specified data</button>
+
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
                     <thead class="table-active">
+
                     <TR>
+
                         <td>+</td>
                         <th>id</th>
                         <th>name</th>
@@ -21,7 +25,9 @@
                         <th>information</th>
                         <th>rec group</th>
                         <th>change group</th>
+
                     </TR>
+
                     </thead>
 
                     {{--                    @dd($groups)--}}
@@ -38,7 +44,6 @@
                             <th>{{$group->for_what}}</th>
                             <th>{{$group->rec_group}}</th>
                             <th>
-
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                         data-bs-target="#exampleModal{{$group->user_id}}" data-bs-whatever="@mdo"
                                 > xulosa
@@ -52,8 +57,7 @@
                                             <div class="modal-header">
                                             </div>
                                             <div class="modal-body">
-                                                <form action="{{route('student.change.group',$group->user_id)}}"
-                                                      method="post">
+                                                <form action="{{route('student.change.group',$group->user_id)}}" method="post">
                                                     @csrf
                                                     <label for="recipient-name"
                                                            class="col-form-label"> boshqa guruhga o`tirish </label>

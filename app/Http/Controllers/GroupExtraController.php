@@ -39,4 +39,8 @@ class GroupExtraController extends Controller
         return redirect()->back()->with('success');
     }
 
+    public function assessment($id){
+        return view('user.group.attendance',compact('id'));
+    }
+
 }

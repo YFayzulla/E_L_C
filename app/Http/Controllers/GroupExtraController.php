@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
+use App\Models\Attendance;
 use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -39,8 +40,9 @@ class GroupExtraController extends Controller
         return redirect()->back()->with('success');
     }
 
-    public function assessment($id){
-        return view('user.group.attendance',compact('id'));
+    public function attendance($id){
+        $items = Attendance::where('group_id',$id)->get();
+        return view('user.group.attendance',compact('items'));
     }
 
 }

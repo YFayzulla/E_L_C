@@ -20,11 +20,11 @@
                     </thead>
                     @php($i=0)
                     @foreach($students as $student)
-                        <input type="hidden" name="student[]" value="{{($student->student->id)}}">
+                        <input type="hidden" name="student[]" value="{{($student->id)}}">
                         <tbody class="table-border-bottom-0">
                         <tr>
                             <td><i class="fab fa-angular fa-lg text-danger"></i>{{ $loop->index+1 }}</td>
-                            <td><i class="fab fa-angular fa-lg text-danger "></i>{{ $student->student->name }}</td>
+                            <td><i class="fab fa-angular fa-lg text-danger "></i>{{ $student->name }}</td>
                             <th>
                                 <input type="text" class="float input-group-merge    justify-content-center"
                                        style="height: 30px;width: 50px"

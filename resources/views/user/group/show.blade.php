@@ -32,48 +32,22 @@
 
                     {{--                    @dd($groups)--}}
 
-                    @foreach($groups as $group)
+                    @foreach($assessments as $assessment)
                         <tr>
                             <td>
                                 <input type="checkbox" class="checkbox" name="selectedItems[]"
-                                       value="{{ $group->id }}">
+                                       value="{{ $assessment->id }}">
                             </td>
                             <th>{{$loop->index+1}}</th>
-                            <th>{{$group->student->name}}</th>
-                            <th>{{$group->get_mark}}</th>
-                            <th>{{$group->for_what}}</th>
-                            <th>{{$group->rec_group}}</th>
+                            <th>{{$assessment->student->name}}</th>
+                            <th>{{$assessment->get_mark}}</th>
+                            <th>{{$assessment->for_what}}</th>
+                            <th>{{$assessment->rec_group}}</th>
                             <th>
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
-                                        data-bs-target="#exampleModal{{$group->user_id}}" data-bs-whatever="@mdo"
-                                > xulosa
+                                        data-bs-target="#exampleModal{{$assessment->user_id}}" data-bs-whatever="@mdo"
+                                > submit
                                 </button>
-                                {{--Modal--}}
-                                <div class="modal fade" id="exampleModal{{$group->user_id}}" tabindex="-1"
-                                     aria-labelledby="exampleModalLabel"
-                                     aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="{{route('student.change.group',$group->user_id)}}" method="post">
-                                                    @csrf
-                                                    <label for="recipient-name"
-                                                           class="col-form-label"> boshqa guruhga o`tirish </label>
-                                                    <select name="group_id" class="form-control">
-                                                        @foreach($guruxlar as $g)
-                                                            <option value="{{$g->id}}">{{$g->name}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <button type="submit" class="btn btn-outline-success m-2">save
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </th>
                         </tr>
                     @endforeach
@@ -81,6 +55,35 @@
             </div>
         </form>
     </div>
+
+    <!-- Modal -->
+    @foreach($assessments as $assessment)
+        <div class="modal fade" id="exampleModal{{$assessment->user_id}}" tabindex="-1"
+             aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    </div>
+                    {{$assessment->student->name}}
+                    <div class="modal-body">
+                        <form action="{{route('student.change.group',$assessment->user_id)}}" method="post">
+                            @csrf
+                            <label for="recipient-name"
+                                   class="col-form-label"> change group </label>
+                            <select name="group_id" class="form-control">
+                                @foreach($groups as $group)
+                                    <option value="{{$group->id}}">{{$group->name}}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="btn btn-outline-success m-2">save
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     <script>
         $(document).ready(function () {

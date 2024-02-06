@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\StudentInformation;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class TeacherAdminPanel extends Controller
@@ -20,7 +21,7 @@ class TeacherAdminPanel extends Controller
 
     public function attendance($id)
     {
-        $students = StudentInformation::where('group_id', $id)->get();
+        $students = User :: where('group_id', $id)->get();
         return view('teacher.attendance', compact('students', 'id'));
     }
 
@@ -36,7 +37,6 @@ class TeacherAdminPanel extends Controller
                 'who_checked' => $user_id
             ]);
         }
-
         return redirect()->route('attendance')->with('success' , 'Saved');
     }
 }

@@ -54,6 +54,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::resource('group', GroupController::class);
     Route::delete('/delete-multiple', [GroupExtraController::class, 'deleteMultiple'])->name('deleteMultiple');
     Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');
+    Route::post('teacher/group/change/{id}',[GroupExtraController::class,'change_group'])->name('student.change.group');
 
 //    student
     Route::resource('student', StudentController::class);
@@ -62,7 +63,6 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 //    teacher
     Route::resource('teacher', TeacherController::class);
-    Route::post('teacher/group/change/{id}',[ExtraTeacherController::class,'change_group'])->name('student.change.group');
     Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
     Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
 

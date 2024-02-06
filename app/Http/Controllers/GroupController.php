@@ -66,10 +66,12 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
+
         $id=$group->name;
-        $guruxlar=Group::all();
-        $groups=Assessment::where('Group',$group->name)->orderby('created_at')->get();
-        return view('user.group.show',compact('groups','guruxlar','id'));
+        $groups=Group::all();
+        $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
+        return view('user.group.show',compact('assessments','groups','id'));
+
     }
 
     /**

@@ -13,10 +13,10 @@
                 @foreach($students as $student)
                     <tr>
                         <th>{{$loop->index+1}}</th>
-                        <th><b>{{$student->student->name}}</b></th>
+                        <th><b>{{$student->name}}</b></th>
                         <th>
                             <input type="checkbox" class="float-end" style="padding-left: 20px"
-                                   name="status[{{$student->user_id}}]" value="on">
+                                   name="status[{{$student->id}}]" value="on">
                         </th>
                     </tr>
                 @endforeach

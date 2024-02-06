@@ -56,6 +56,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');
     Route::post('group/change/{id}',[GroupExtraController::class,'change_group'])->name('student.change.group');
     Route::get('group/assessment/{id}',[GroupExtraController::class,'attendance'])->name('group.attendance');
+    Route::get('/attendance/filter', [GroupExtraController::class, 'filter'])->name('attendance.filter');
+
 
 //    student
     Route::resource('student', StudentController::class);

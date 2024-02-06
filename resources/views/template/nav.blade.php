@@ -24,12 +24,11 @@
             </div>
         </div>
         <!-- /Search -->
-        <!-- Search bt date -->
+        <!-- Search by date -->
         <form action="{{route('student.search')}}" method="post">
             @csrf
             <div class="navbar-nav align-items-center">
                 <div class="nav-item d-flex align-items-center">
-                    <i class="bx bx-search fs-4 lh-0"></i>
                     <input
                         type="date"
                         class="form-control border-0 shadow-none"

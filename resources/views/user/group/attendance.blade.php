@@ -7,10 +7,12 @@
         <!-- Add a form with a date input for filtering -->
 
         <form action="{{ route('attendance.filter') }}" method="GET">
+{{--            @csrf--}}
             <div style="margin:10px">
-            <label for="filter_date">Filter by Date:</label>
-            <input type="date" id="filter_date" name="filter_date">
-            <button type="submit" class="btn-primary">Filter</button>
+                <label for="filter_date">Filter by Date:</label>
+                <input type="date" id="filter_date" name="filter_date">
+                <button type="submit" class="btn-primary" name="task" value="show">Filter</button>
+                <button type="submit" class="btn-danger" name="task" value="report">Report</button>
             </div>
         </form>
 
@@ -33,7 +35,7 @@
                 <tbody>
                 @foreach($items as $item)
                     <tr>
-                        <td>{{ $item->id }}</td>
+                        <td>{{ $loop->index+1 }}</td>
                         <td>{{ $item->student->name }}</td>
                         <td>{{ $item->teacher->name }}</td>
                         <td>{{ $item->created_at }}</td>

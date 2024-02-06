@@ -43,14 +43,7 @@ class PdfController extends Controller
     public function Assessment($id)
     {
 
-        $groups = Assessment::where('group', $id)->get();
 
-        $pdf = PDF::loadView('user.pdf.group_assessment', ['groups' => $groups]);
 
-        return $pdf->download('orders.pdf');
-
-        GeneratePdfJob::dispatch($id);
-
-        return "PDF generation job dispatched successfully!";
     }
 }

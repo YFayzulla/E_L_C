@@ -45,7 +45,7 @@ class PdfController extends Controller
     {
         set_time_limit(300); // Set to a value greater than 60 seconds
         $today = now()->toDateString();
-        $teacher = User::all()->where('name', '!=', 'admin');
+        $teacher = User::role('user')->get();
         $pdf = PDF::loadView('user.pdf.teacher', ['teacher' => $teacher]);
         return $pdf->download('orders.pdf');
 

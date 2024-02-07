@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeptStudent extends Model
 {
     use HasFactory;
-    protected $fillable=['user_id','payed','dept','status_month','date'];
+    protected $fillable=['user_id','payed','should_pay','dept','status_month','date'];
 
     public $timestamps = false;
 

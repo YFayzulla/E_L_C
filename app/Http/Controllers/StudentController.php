@@ -138,48 +138,49 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'phone' => ['required'],
-        ]);
+        $student = DeptStudent::where('user_id', $id)->first();
+        $payment = $request->payment;
+        $dept = $student->dept;
 
+//        dd($student->student->should_pay, $request);
 
-        $student = User::find($id);
-
-        if ($request->hasFile('photo')) {
-            if (isset($student->photo)) {
-                Storage::delete($student->photo);
+        if ($dept == $payment) {
+            $student->status_month += 1;
+            $student->date = $request->date_paid;
+        } elseif ($dept - $payment > 0) {
+            if ($student->payed == 0) {
+                $student->payed = $payment;
+                $student->date = Carbon::now()->format('Y-m-d');
+            } else {
+                $student->payed = 0;
+                $student->status_month++;
             }
-            $name = $request->file('photo')->getClientOriginalName();
-            $path = $request->file('photo')->storeAs('Photo', $name);
+
+        } else {
+            $item = ($payment / $dept);
+            if ((int)$item == $item) {
+                $student->status_month += $item;
+//                $student->date = Carbon::now()->addMonths($item)->format('Y-m-d');
+                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');
+
+            } else {
+                $student->status_month += (int)$item;
+                $item = $item - (int)$item;
+                $student->payed = $item * $student->dept;
+                $student->date = Carbon::now()->addMonths((int)$item)->format('Y-m-d');
+            }
         }
 
-        $student->update([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'password' => bcrypt($request->password),
-            'passport' => $request->passport,
-            'location' => $request->location,
-            'parents_name' => $request->parents_name,
-            'parents_tel' => $request->parents_tel,
-            'description' => $request->description,
-            'should_pay' => $request->should_pay,
-            'group_id' =>$request->group_id,
-            //            'money' => $request->money,
-            //            'status' => $request->status,
-            'photo' => $path ?? $student->photo ?? null,
+        $student->save();
+
+        HistoryPayments::create([
+            'user_id' => $student->user_id,
+            'payment' => $request->payment,
+            'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
+            'type_of_money' => $request->money_type,
         ]);
-
-        $should_pay=DeptStudent::where('user_id',$id)->first();
-
-        $should_pay->update([
-            'dept'=>$request->should_pay,
-        ]);
-
-        return redirect()->route('student.index')->with('success', 'malumot yangilandi');
-
+        return redirect()->back()->with('success', 'to`langan pul qabul qilindi');
     }
-
     /**
      * Remove the specified resource from storage.
      *

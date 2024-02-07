@@ -49,6 +49,8 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
     Route::get('/dept/pdf/{date}', [PdfController::class, 'RoomListPDF']);
     Route::get('/assessment/pdf/{date}', [PdfController::class, 'Assessment']);
+    Route::get('/teacher/pdf', [PdfController::class, 'teacher']);
+    Route::get('/group/pdf', [PdfController::class, 'group']);
 
 //    group
     Route::resource('group', GroupController::class);

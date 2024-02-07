@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Attendance;
+use App\Models\Group;
 use App\Models\HistoryPayments;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -37,6 +38,28 @@ class PdfController extends Controller
         $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
         return $pdf->download('orders.pdf');
         GeneratePdfJob::dispatch($id);
+        return "PDF generation job dispatched successfully!";
+    }
+
+    public function teacher()
+    {
+        set_time_limit(300); // Set to a value greater than 60 seconds
+        $today = now()->toDateString();
+        $teacher = User::all()->where('name', '!=', 'admin');
+        $pdf = PDF::loadView('user.pdf.teacher', ['teacher' => $teacher]);
+        return $pdf->download('orders.pdf');
+
+        return "PDF generation job dispatched successfully!";
+    }
+
+    public function group()
+    {
+        set_time_limit(300); // Set to a value greater than 60 seconds
+        $today = now()->toDateString();
+        $group = Group::all();
+        $pdf = PDF::loadView('user.pdf.group', ['group' => $group]);
+        return $pdf->download('orders.pdf');
+
         return "PDF generation job dispatched successfully!";
     }
 

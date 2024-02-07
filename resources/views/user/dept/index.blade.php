@@ -46,11 +46,14 @@
                                                     @csrf
                                                     @method('PUT')
                                                     <label for="recipient-name"
-                                                           class="col-form-label">{{$student->name}} is going to pay</label>
+                                                           class="col-form-label">{{$student->name}} is going to pay,
+                                                        monthly payment {{$student->should_pay}}</label>
                                                     <P>@if(!empty($student->studentdept->payed))
                                                             paid {{$student->studentdept->payed}} this
                                                             date {{$student->studentdept->date}}
-                                                        @else   @endif</P>
+                                                        @else
+
+                                                        @endif</P>
                                                     <div class="mb-3 d-flex">
                                                         <input type="number" class="form-control me-1"
                                                                value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"

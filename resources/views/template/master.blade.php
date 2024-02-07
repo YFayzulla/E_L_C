@@ -88,7 +88,16 @@
             <div class="content-wrapper">
                 <!-- Content -->
                 <div class="container-xxl flex-grow-1 container-p-y">
+
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible" role="alert">
+                            <strong>Success!</strong> {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
                     @yield("content")
+
                 </div>
                 <!-- / Content -->
 
@@ -109,19 +118,6 @@
 <!-- / Layout wrapper -->
 
 <!-- Core JS -->
-
-<script>
-    @if(session('success'))
-    Swal.fire({
-        icon: 'success',
-        title: '{{session('success')}}',
-        showConfirmButton: false,
-        timer: 1500
-    })
-    @endif
-
-
-</script>
 
 <!-- build:js assets/vendor/js/core.js -->
 <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>

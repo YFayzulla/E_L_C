@@ -40,7 +40,7 @@ class GroupExtraController extends Controller
             'group_id' => $request->group_id,
         ]);
 
-        return redirect()->back()->with('success');
+        return redirect()->back()->with('success', 'Updated successfully!');
     }
 
     public function attendance($id)

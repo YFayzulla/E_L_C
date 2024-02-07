@@ -71,7 +71,7 @@
                             @csrf
                             <label for="recipient-name"
                                    class="col-form-label"> change group </label>
-                            <select name="group_id" class="form-control">
+                            <select name="group_id" class="form-select">
                                 @foreach($groups as $group)
                                     <option value="{{$group->id}}">{{$group->name}}</option>
                                 @endforeach

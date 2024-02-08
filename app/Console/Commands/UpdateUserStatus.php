@@ -24,7 +24,7 @@ class UpdateUserStatus extends Command
     /**
      * Execute the console command.
      *
-     * @return int
+     * @return
      */
     public function handle()
     {

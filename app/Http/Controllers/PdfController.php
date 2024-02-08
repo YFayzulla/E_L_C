@@ -56,7 +56,7 @@ class PdfController extends Controller
     {
         set_time_limit(300); // Set to a value greater than 60 seconds
         $today = now()->toDateString();
-        $group = Group::all();
+        $group = Group::where('id','!=',1)->get();
         $pdf = PDF::loadView('user.pdf.group', ['group' => $group]);
         return $pdf->download('orders.pdf');
 
@@ -66,7 +66,12 @@ class PdfController extends Controller
     public function Assessment($id)
     {
 
+        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
+        $groups = Assessment::where('group', $id)->get();
 
+        $groups = Assessment::where('group_id', $id)->orderby('created_at')->get();
+        $pdf = PDF::loadView('user.pdf.group_assessment', ['groups' => $groups]);
 
+        return $pdf->download('orders.pdf');
     }
 }

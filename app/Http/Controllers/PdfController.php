@@ -63,6 +63,17 @@ class PdfController extends Controller
         return "PDF generation job dispatched successfully!";
     }
 
+    public function student()
+    {
+        set_time_limit(300); // Set to a value greater than 60 seconds
+        $today = now()->toDateString();
+        $student = User::role('student')->get();
+        $pdf = PDF::loadView('user.pdf.student', ['student' => $student]);
+        return $pdf->download('orders.pdf');
+
+        return "PDF generation job dispatched successfully!";
+    }
+
     public function Assessment($id)
     {
 

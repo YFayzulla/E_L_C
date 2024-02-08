@@ -97,7 +97,7 @@ class AssessmentController extends Controller
             }
         }
 
-        return redirect()->route('assessment.index')->with('success', 'baholar saqlandi');
+        return redirect()->route('assessment.index')->with('success', 'Grades saved');
     }
 
     /**

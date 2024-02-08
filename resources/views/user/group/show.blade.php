@@ -64,20 +64,22 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
+                        {{$assessment->student->name}}
                     </div>
-                    {{$assessment->student->name}}
                     <div class="modal-body">
                         <form action="{{route('student.change.group',$assessment->user_id)}}" method="post">
                             @csrf
                             <label for="recipient-name"
-                                   class="col-form-label"> change group </label>
+                                   class="form-label"> change group </label>
                             <select name="group_id" class="form-select">
                                 @foreach($groups as $group)
                                     <option value="{{$group->id}}">{{$group->name}}</option>
                                 @endforeach
                             </select>
+                            <div class="mt-3">
                             <button type="submit" class="btn btn-outline-success m-2">save
                             </button>
+                            </div>
                         </form>
                     </div>
                 </div>

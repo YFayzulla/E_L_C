@@ -91,7 +91,7 @@ class StudentController extends Controller
             'status_month' =>  0
         ]);
 
-        return redirect()->route('student.index')->with('success', 'malumot qo`lshildi');
+        return redirect()->route('student.index')->with('success', 'Information has been added');
     }
 
     /**
@@ -179,7 +179,7 @@ class StudentController extends Controller
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
             'type_of_money' => $request->money_type,
         ]);
-        return redirect()->back()->with('success', 'to`langan pul qabul qilindi');
+        return redirect()->back()->with('success', 'The paid money was received');
     }
     /**
      * Remove the specified resource from storage.
@@ -195,6 +195,6 @@ class StudentController extends Controller
             Storage::delete($student->photo);
         }
         $student->delete();
-        return redirect()->back()->with('success', 'malumot o`chirildi');
+        return redirect()->back()->with('success', 'Information deleted');
     }
 }

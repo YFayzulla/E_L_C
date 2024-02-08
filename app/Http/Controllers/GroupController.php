@@ -55,7 +55,7 @@ class GroupController extends Controller
             'monthly_payment' => $request->monthly_payment,
             'level' => $request->level,
         ]);
-        return redirect()->route('group.index')->with('success', 'malumot qo`lshildi');
+        return redirect()->route('group.index')->with('success', 'Information has been added');
     }
 
     /**
@@ -110,7 +110,7 @@ class GroupController extends Controller
             'level' => $request->level,
         ]);
 
-        return redirect()->route('group.index')->with('success', 'malumot yangilandi');
+        return redirect()->route('group.index')->with('success', 'Information has been updated');
 
 
     }
@@ -124,6 +124,6 @@ class GroupController extends Controller
     public function destroy(Group $group)
     {
         $group->delete();
-        return redirect()->back()->with('success','malumot o`chirildi');
+        return redirect()->back()->with('success','Information deleted');
     }
 }

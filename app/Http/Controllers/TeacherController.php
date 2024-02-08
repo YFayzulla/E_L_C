@@ -64,7 +64,7 @@ class TeacherController extends Controller
             'photo' => $path ?? null,
         ])->assignRole('user');
 
-        return redirect()->route('teacher.index')->with('success', 'malumot qo`lshildi');
+        return redirect()->route('teacher.index')->with('success', 'Information has been added');
     }
 
     /**
@@ -139,7 +139,7 @@ class TeacherController extends Controller
         ]);
 
 
-        return redirect()->route('teacher.index')->with('success','malumot yangilandi');
+        return redirect()->route('teacher.index')->with('success','Information has been updated');
 
     }
 
@@ -153,6 +153,6 @@ class TeacherController extends Controller
     {
         $teacher=User::find($id);
         $teacher->delete();
-        return redirect()->back()->with('success','malumot o`chirildi');
+        return redirect()->back()->with('success','Information deleted');
     }
 }

@@ -21,14 +21,14 @@ class ExtraTeacherController extends Controller
             'group_id' => $request->group_id
         ]);
 
-        return redirect()->back()->with('success', 'Yangi guruh qo`shildi');
+        return redirect()->back()->with('success', 'A new group has been added');
     }
 
     public function group_delete($id)
     {
         $group = GroupTeacher::find($id);
         $group->delete();
-        return redirect()->back()->with('success', ' malumot o`chieildi');
+        return redirect()->back()->with('success', 'Information deleted');
     }
 
 }

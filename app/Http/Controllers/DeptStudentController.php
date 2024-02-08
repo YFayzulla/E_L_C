@@ -123,7 +123,7 @@ class DeptStudentController extends Controller
             'type_of_money' => $request->money_type,
         ]);
 
-        return redirect()->back()->with('success', 'successful');
+        return redirect()->back()->with('success', 'Successful');
     }
 
     /**

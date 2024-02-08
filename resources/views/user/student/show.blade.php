@@ -79,7 +79,7 @@
 
         <div class="col-md-6 mt-4">
             <div class="card">
-                <h5 class="card-header">travel of group</h5>
+                <h5 class="card-header">Travel of group</h5>
                 <div class="table-responsive text-nowrap">
                     <table class="table table-dark">
                         <thead>

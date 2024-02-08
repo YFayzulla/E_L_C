@@ -12,7 +12,7 @@
                 @csrf
                 @method('PUT')
 
-                <label for="name" class="text-dark">name</label>
+                <label for="name" class="text-dark">Name</label>
                 <input id="name" name="name" value="{{$student->name}}" type="text" class="form-control">
 
                 @error('name')

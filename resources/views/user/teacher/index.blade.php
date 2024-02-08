@@ -38,7 +38,19 @@
                         <th>{{$teacher->phone}}</th>
                         <th>{{$teacher->location}}</th>
                         <th>{{$teacher->date_born}}</th>
-                        <th><img src="{{asset("storage/".$teacher->photo)}}" width="40px" alt="??"></th>
+                        <td>
+                            <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
+                                <li
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#imageModal{{$teacher->id}}"
+                                    data-bs-placement="top"
+                                    class="avatar avatar-md pull-up"
+                                >
+                                    <img src="{{ asset('storage/'.$teacher->photo) }}" class="rounded-circle" alt="??"/>
+                                </li>
+                            </ul>
+
+                        </td>
                         <th class="d-flex">
 
                             <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-1">
@@ -59,6 +71,21 @@
                         </th>
                     </tr>
                     </tbody>
+                    <div class="modal fade" id="imageModal{{$teacher->id}}" tabindex="-1" role="dialog"
+                         aria-labelledby="imageModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Закрыть"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="{{ asset('storage/'.$teacher->photo) }}" class="img-fluid"
+                                         alt="Modal Image">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </table>
         </div>

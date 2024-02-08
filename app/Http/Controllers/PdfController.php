@@ -63,6 +63,7 @@ class PdfController extends Controller
         return "PDF generation job dispatched successfully!";
     }
 
+
     public function student()
     {
         set_time_limit(300); // Set to a value greater than 60 seconds

@@ -159,7 +159,7 @@ class StudentController extends Controller
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
             'passport' => $request->passport,
-//            'group_id' => $request->group_id,
+            'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
 //            'money' => $request->money,
@@ -167,6 +167,12 @@ class StudentController extends Controller
             'photo' => $path ?? $student->photo ?? null,
         ]);
 
+        if ($student->group_id == 1 ){
+            StudentInformation::create([
+                'user_id'=>$student->id,
+                'group_id'=>$request->group_id
+            ]);
+        }
 
         return redirect()->route('student.index')->with('success','malumot yangilandi');}
     /**

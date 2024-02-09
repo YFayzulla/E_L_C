@@ -14,7 +14,10 @@ class Group extends Model
         return $this->hasMany(User::class);
     }
 
-
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 
     public function level(){
         return Level::where('id','level');

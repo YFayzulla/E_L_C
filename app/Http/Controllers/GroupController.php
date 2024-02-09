@@ -124,6 +124,7 @@ class GroupController extends Controller
     public function destroy(Group $group)
     {
         $group->delete();
+        User::where('group_id', $group->id)->update(['group_id' => 1]);// Assuming 1 is the default group ID
         return redirect()->back()->with('success','Information deleted');
     }
 }

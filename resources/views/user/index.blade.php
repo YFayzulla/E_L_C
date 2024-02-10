@@ -11,16 +11,16 @@
                         <tr>
                             <th>no</th>
                             <th>name</th>
-                            <th>tel</th>
                             <th>paid</th>
+                            <th>group</th>
                             <th>date</th>
                         </tr>
                         @foreach($users as $student)
                             <tr>
                                 <th>{{$loop->index+1}}</th>
-                                <th>{{$student->student->name}}</th>
-                                <th>{{$student->student->phone}}</th>
+                                <th>{{$student->name}}</th>
                                 <th>{{$student->payment}}</th>
+                                <th>{{$student->group}}</th>
                                 <th>{{$student->date}}</th>
                                 @php
                                     $sum += $student->payment

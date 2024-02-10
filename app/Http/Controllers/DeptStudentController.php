@@ -118,8 +118,9 @@ class DeptStudentController extends Controller
 
         HistoryPayments::create([
             'user_id' => $student->user_id,
-            'name' => $student->student->name,
+            'name' => $user->name,
             'payment' => $request->payment,
+            'group'=>  $user->group->name,
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
             'type_of_money' => $request->money_type,
         ]);

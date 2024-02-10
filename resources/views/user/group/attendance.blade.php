@@ -3,7 +3,7 @@
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
 
-        <h3 class="text-center">Attendance</h3>
+        <h3 class="text-center">{{$group->name}}</h3>
         <!-- Add a form with a date input for filtering -->
 
         <form action="{{ route('attendance.filter') }}" method="GET">
@@ -25,6 +25,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Tel</th>
                     <th>Teacher</th>
                     <th>Date</th>
                 </tr>
@@ -37,6 +38,7 @@
                     <tr>
                         <td>{{ $loop->index+1 }}</td>
                         <td>{{ $item->student->name }}</td>
+                        <td>{{ $item->student->phone }}</td>
                         <td>{{ $item->teacher->name }}</td>
                         <td>{{ $item->created_at }}</td>
                     </tr>

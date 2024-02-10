@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('payment');
+            $table->string('group');
             $table->date('date');
             $table->string('type_of_money')->nullable();
             $table->timestamps();

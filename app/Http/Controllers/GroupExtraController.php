@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Attendance;
+use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
 use Carbon\Carbon;
@@ -47,7 +48,8 @@ class GroupExtraController extends Controller
     {
         $today = Carbon::today();
         $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->paginate();
-        return view('user.group.attendance', compact('items'));
+        $group= Group::find($id);
+        return view('user.group.attendance', compact('items','group'));
     }
 
     public function filter(Request $request)

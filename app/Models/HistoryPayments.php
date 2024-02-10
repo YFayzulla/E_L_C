@@ -10,10 +10,10 @@ class HistoryPayments extends Model
 
     use HasFactory;
 
-    protected $fillable=['user_id','name','payment','date','type_of_money'];
+    protected $fillable=['user_id','name','payment','group','date','type_of_money'];
 
     public function student(){
-        return $this->belongsTo(User::class,'user_id','id');
+        return $this->belongsTo(User::class,'id');
     }
 
 }

@@ -9,6 +9,8 @@
                     <tr>
                         <td>No</td>
                         <td>name</td>
+                        <td>T\N</td>
+                        <td>status</td>
                         <td>pay</td>
                     </tr>
                     </thead>
@@ -18,6 +20,8 @@
                         <tr>
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
+                            <th>{{$student->phone}}</th>
+                            <th>@if( $student->status == 0 ) <p class="text-danger"> debtor </p> @else <p class="text-success"> paid </p> @endif</th>
                             <th>
 
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"

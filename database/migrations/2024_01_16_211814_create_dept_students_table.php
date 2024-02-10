@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
+
         Schema::create('dept_students', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
@@ -22,6 +23,7 @@ return new class extends Migration
             $table->string('status_month')->nullable();
             $table->date('date')->nullable();
         });
+
     }
 
     /**

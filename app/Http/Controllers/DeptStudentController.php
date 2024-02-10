@@ -19,7 +19,7 @@ class DeptStudentController extends Controller
      */
     public function index()
     {
-        $students = User::role('student')->get();
+        $students = User::role('student')->orderby('status') ->get();
         return view('user.dept.index', compact('students'));
     }
 
@@ -118,6 +118,7 @@ class DeptStudentController extends Controller
 
         HistoryPayments::create([
             'user_id' => $student->user_id,
+            'user' => $student->name,
             'payment' => $request->payment,
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
             'type_of_money' => $request->money_type,

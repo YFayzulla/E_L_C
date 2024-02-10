@@ -15,9 +15,11 @@ class LevelSeeder extends Seeder
      */
     public function run()
     {
-        Level::create(['name'=> 'beginner']);
-        Level::create(['name'=> 'elementary']);
-        Level::create(['name'=> 'pre-intermediate']);
-        Level::create(['name'=> 'upper-intermediate']);
+        Level::create(['name'=> 'Starter']);
+        Level::create(['name'=> 'Elementary']);
+        Level::create(['name'=> 'Pre-intermediate']);
+        Level::create(['name'=> 'Upper-intermediate']);
+        Level::create(['name'=> 'IELTS']);
+        Level::create(['name'=> 'Speaking']);
     }
 }

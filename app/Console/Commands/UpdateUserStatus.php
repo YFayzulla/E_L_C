@@ -29,7 +29,7 @@ class UpdateUserStatus extends Command
     public function handle()
     {
         // Decrement the status column for all users
-        User::where('status', '>', 0)->decrement('status');
+        User::role('student')->decrement('status');
         $this->info('User status updated successfully.');
 //        return Command::SUCCESS;
     }

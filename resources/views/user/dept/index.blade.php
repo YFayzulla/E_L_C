@@ -21,7 +21,11 @@
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
                             <th>{{$student->phone}}</th>
-                            <th>@if( $student->status == 0 ) <p class="text-danger"> debtor </p> @else <p class="text-success"> paid </p> @endif</th>
+                            <th>@if( $student->status <= 0 )
+                                    <p class="text-danger"> debtor </p>
+                                @else
+                                    <p class="text-success"> paid </p>
+                                @endif</th>
                             <th>
 
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
@@ -55,21 +59,30 @@
                                                     <P>@if(!empty($student->studentdept->payed))
                                                             paid {{$student->studentdept->payed}} this
                                                             date {{$student->studentdept->date}}
-                                                        @else
+                                                    @else
 
-                                                        @endif</P>
+
+                                                    @endif
+                                                        @if($student->status < 0)
+                                                            <p>
+                                                                the student has a debt of {{abs($student->status)}} month
+                                                            </p>
+                                                        @endif
                                                     <div class="mb-3 d-flex">
                                                         <input type="number" class="form-control me-1"
                                                                value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"
                                                                name="payment"
                                                                id="recipient-name">
-                                                        <select name="money_type" id="" class="form-select me-1">
+                                                        <select name="money_type" id=""
+                                                                class="form-select me-1">
                                                             <option value="cash">cash</option>
                                                             <option value="electronic">electronic</option>
                                                         </select>
                                                         <input type="date" class="form-control" name="date_paid"
                                                                id="recipient-name">
-                                                        <button type="submit" class="btn btn-outline-primary m-2">save
+                                                        <button type="submit"
+                                                                class="btn btn-outline-primary m-2">
+                                                            save
                                                         </button>
                                                     </div>
                                                 </form>

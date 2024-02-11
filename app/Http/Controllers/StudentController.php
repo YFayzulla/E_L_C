@@ -38,7 +38,7 @@ class StudentController extends Controller
 
     public function create()
     {
-        $groups = Group::where('id','!=',1)->get();
+        $groups = Group::where('id', '!=', 1)->get();
         return view('user.student.create', compact('groups'));
     }
 
@@ -72,6 +72,7 @@ class StudentController extends Controller
             'parents_tel' => $request->parents_tel,
             'group_id' => $group->id,
             'location' => $request->location,
+            'status' => 0,
             'photo' => $path ?? null,
             'should_pay' => $request->should_pay ?? $group->monthly_payment,
             'description' => $request->description,
@@ -88,7 +89,7 @@ class StudentController extends Controller
             'user_id' => $user->id,
             'payed' => 0,
             'dept' => $request->should_pay,
-            'status_month' =>  0
+            'status_month' => 0
         ]);
 
         return redirect()->route('student.index')->with('success', 'Information has been added');
@@ -102,10 +103,10 @@ class StudentController extends Controller
      */
     public function show($id)
     {
-        $attendances=Attendance::where('user_id',$id)->get();
+        $attendances = Attendance::where('user_id', $id)->get();
         $student = User::find($id);
         $groups = Group::all();
-        return view('user.student.show', compact('student','attendances','groups'));
+        return view('user.student.show', compact('student', 'attendances', 'groups'));
     }
 
     /**
@@ -118,13 +119,12 @@ class StudentController extends Controller
     {
 
         $student = User::find($id);
-        $groups = Group::where('id','!=',1)->get();
-
+        $groups = Group::where('id', '!=', 1)->get();
 
 
         //        dd($id,$student);
         if ($student !== null)
-            return view('user.student.edit', compact('student','groups'));
+            return view('user.student.edit', compact('student', 'groups'));
         else
             return abort('403');
     }
@@ -163,18 +163,20 @@ class StudentController extends Controller
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
 //            'money' => $request->money,
-//            'status' => $request->status,
+            'status' => 0,
             'photo' => $path ?? $student->photo ?? null,
         ]);
 
-        if ($student->group_id == 1 ){
+        if ($student->group_id == 1) {
             StudentInformation::create([
-                'user_id'=>$student->id,
-                'group_id'=>$request->group_id
+                'user_id' => $student->id,
+                'group_id' => $request->group_id
             ]);
         }
 
-        return redirect()->route('student.index')->with('success','malumot yangilandi');}
+        return redirect()->route('student.index')->with('success', 'malumot yangilandi');
+    }
+
     /**
      * Remove the specified resource from storage.
      *

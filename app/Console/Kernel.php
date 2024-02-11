@@ -10,14 +10,15 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @param \Illuminate\Console\Scheduling\Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-//        $schedule->command('sms:send')->everyMinute();
+        //        $schedule->command('sms:send')->everyMinute();
         $schedule->command('user:status:update')->monthly();
+        //        $schedule->command('user:status:update')->everyMinute();
         //        $schedule->command('sms:send')->everyMinute();
     }
 
@@ -28,7 +29,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

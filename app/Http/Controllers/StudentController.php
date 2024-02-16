@@ -162,7 +162,7 @@ class StudentController extends Controller
             'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
-//            'money' => $request->money,
+            'should_pay' => $request->should_pay,
             'status' => 0,
             'photo' => $path ?? $student->photo ?? null,
         ]);
@@ -173,6 +173,13 @@ class StudentController extends Controller
                 'group_id' => $request->group_id
             ]);
         }
+
+
+        $dept=DeptStudent::where('user_id',$id)->first();
+
+        $dept->update([
+            'dept' => $request->should_pay
+        ]);
 
         return redirect()->route('student.index')->with('success', 'malumot yangilandi');
     }

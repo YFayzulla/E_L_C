@@ -88,4 +88,15 @@ class GroupExtraController extends Controller
         }
     }
 
+    public function show($id){
+
+
+        $students = User::where('group_id' , $id)->role('student')->get();
+
+        return view('user.group.student',compact('students'));
+
+
+    }
+
+
 }

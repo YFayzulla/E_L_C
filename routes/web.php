@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::post('group/change/{id}',[GroupExtraController::class,'change_group'])->name('student.change.group');
     Route::get('group/assessment/{id}',[GroupExtraController::class,'attendance'])->name('group.attendance');
     Route::get('group/attendance/filter', [GroupExtraController::class, 'filter'])->name('attendance.filter');
+    Route::get('group/student/{id}', [GroupExtraController::class, 'show'])->name('group.students');
 
 
 //    student

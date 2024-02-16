@@ -9,7 +9,7 @@
                     <tr>
                         <td>No</td>
                         <td>name</td>
-                        <td>T\N</td>
+                        <td>group</td>
                         <td>status</td>
                         <td>pay</td>
                     </tr>
@@ -20,7 +20,7 @@
                         <tr>
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
-                            <th>{{$student->phone}}</th>
+                            <th>{{$student->group->name}}</th>
                             <th>@if( $student->status <= 0 )
                                     <p class="text-danger"> debtor </p>
                                 @else
@@ -53,6 +53,7 @@
                                                 <form action="{{route('dept.update',$student->id)}}" method="post">
                                                     @csrf
                                                     @method('PUT')
+{{--                                                    <div class="table-responsive">--}}
                                                     <label for="recipient-name"
                                                            class="col-form-label">{{$student->name}} is going to pay,
                                                         monthly payment {{$student->should_pay}}</label>
@@ -68,6 +69,7 @@
                                                                 the student has a debt of {{abs($student->status)}} month
                                                             </p>
                                                         @endif
+{{--                                                    </div>--}}
                                                     <div class="mb-3 d-flex">
                                                         <input type="number" class="form-control me-1"
                                                                value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"

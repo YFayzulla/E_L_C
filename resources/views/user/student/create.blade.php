@@ -56,7 +56,7 @@
                 <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
 
                 <label for="group_id" class="text-dark">Group</label>
-                <select class="form-control" name="group_id">
+                <select class="form-control" name="group_id" >
                     @foreach($groups as $group)
                     <option value="{{$group->id}}">{{$group->name}}</option>
                     @endforeach

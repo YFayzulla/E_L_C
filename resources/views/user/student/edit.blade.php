@@ -67,8 +67,9 @@
                 <label for="should_pay" class="text-dark">Group</label>
 
                 <select class="form-control" name="group_id">
+                    <option value="{{$student->group_id}}">{{$student->group->name}}</option>
                     @foreach($groups as $group)
-                        <option value="{{$group->id}}">{{$group->name}}</option>
+                        <option value="{{$group->id}}" >{{$group->name}}</option>
                     @endforeach
                 </select>
 

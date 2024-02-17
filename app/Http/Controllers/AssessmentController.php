@@ -54,7 +54,7 @@ class AssessmentController extends Controller
     public function show($id)
     {
         $students = User::where('group_id', $id)->get();
-        $groups = Group::all();
+        $groups = Group::OrderBy('name')->get();
         return view('teacher.assessment.make_markes', compact('students', 'id', 'groups'));
     }
 

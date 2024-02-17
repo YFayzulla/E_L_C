@@ -12,13 +12,17 @@
                     <th>id</th>
                     <th>Name</th>
                     <th>T/N</th>
+                    <th>group</th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($students as $student)
-                    <th>{{$loop->index+1}}</th>
-                    <th>{{$student->name}}</th>
-                    <th>{{$student->phone}}</th>
+                    <tr>
+                        <th>{{$loop->index+1}}</th>
+                        <th>{{$student->name}}</th>
+                        <th>{{$student->phone}}</th>
+                        <th>{{$student->group->name}}</th>
+                    </tr>
                 @endforeach
                 </tbody>
             </table>

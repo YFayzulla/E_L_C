@@ -13,7 +13,7 @@ class WaitersController extends Controller
     public function index()
     {
         $groups = Group::where('id', '!=', 1)->get();
-        $students = User::role('student')->where('group_id', 1)->get();
+        $students = User::role('student')->orderby('name') ->where('group_id', 1)->get();
         return view('user.waiters.index', compact('students', 'groups'));
     }
 }

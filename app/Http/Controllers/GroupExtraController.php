@@ -47,7 +47,7 @@ class GroupExtraController extends Controller
     public function attendance($id)
     {
         $today = Carbon::today();
-        $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->paginate();
+        $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->get();
         $group= Group::find($id);
         return view('user.group.attendance', compact('items','group'));
     }
@@ -90,11 +90,9 @@ class GroupExtraController extends Controller
 
     public function show($id){
 
-
-        $students = User::where('group_id' , $id)->role('student')->get();
+        $students = User::where('group_id' , $id)->orderby('name') ->role('student')->get();
 
         return view('user.group.student',compact('students'));
-
 
     }
 

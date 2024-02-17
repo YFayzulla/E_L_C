@@ -17,7 +17,7 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups=Group::where('id','!=',1)->get();
+        $groups=Group::where('id','!=',1)->orderby('name') ->get();
         return view('user.group.index',compact('groups'));
     }
 
@@ -68,7 +68,7 @@ class GroupController extends Controller
     {
 
         $id=$group->name;
-        $groups=Group::all();
+        $groups=Group::orderby('name')->get();
         $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
         return view('user.group.show',compact('assessments','groups','id'));
 

@@ -19,7 +19,7 @@ class DeptStudentController extends Controller
      */
     public function index()
     {
-        $students = User::role('student')->orderby('status') ->get();
+        $students = User::role('student')->orderby('name') ->get();
         return view('user.dept.index', compact('students'));
     }
 

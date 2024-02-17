@@ -74,7 +74,7 @@
 {{--                                                    </div>--}}
                                                     <div class="mb-3 d-flex">
                                                         <input type="number" class="form-control me-1"
-                                                               value="@if($student->studentdept->payed != null){{$student->studentdept->payed}}@endif"
+                                                               value="@if($student->studentdept->payed != null){{$student->studentdept->dept  -  $student->studentdept->payed}}@endif"
                                                                name="payment"
                                                                id="recipient-name">
                                                         <select name="money_type" id=""

@@ -82,6 +82,7 @@ class StudentController extends Controller
         StudentInformation::create([
             'user_id' => $user->id,
             'group_id' => $request->group_id,
+            'group' => $group->name,
         ]);
 
 

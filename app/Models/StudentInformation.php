@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class StudentInformation extends Model
 {
     use HasFactory;
-    protected $fillable=['user_id','group_id'];
+    protected $fillable=['user_id','group_id','group'];
 
     public function group(){
         return $this->belongsTo(Group::class);

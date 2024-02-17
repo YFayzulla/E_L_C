@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assessment;
 use App\Models\Group;
 use App\Models\Level;
+use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
 

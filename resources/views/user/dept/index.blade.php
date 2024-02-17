@@ -27,6 +27,8 @@
                                     <p class="text-success"> paid </p>
                                 @endif</th>
                             <th>
+                                <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
+                                        class="bx bx-show-alt"></i></a>
 
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                         data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"

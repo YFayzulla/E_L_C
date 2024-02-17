@@ -109,7 +109,7 @@
         </li>
         <li class="menu-item @if(request()->routeIs('waiters.index')) active @endif">
             <a href="{{ route('waiters.index') }}" class="menu-link">
-                <div data-i18n="Analytics">Waiters</div>
+                <div data-i18n="Analytics">Waiting Room</div>
             </a>
         </li>
         @endrole

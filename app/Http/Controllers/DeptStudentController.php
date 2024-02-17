@@ -19,7 +19,7 @@ class DeptStudentController extends Controller
      */
     public function index()
     {
-        $students = User::role('student')->orderby('name') ->get();
+        $students = User::role('student')->orderby('name')->get();
         return view('user.dept.index', compact('students'));
     }
 
@@ -83,19 +83,29 @@ class DeptStudentController extends Controller
         $dept = $student->dept;
 //        dd($student->student->should_pay, $request);
 
+
         if ($dept == $payment) {
+
             $student->status_month += 1;
-            $user->status +=1 ;
+            $user->status += 1;
             $student->date = $request->date_paid;
+
         } elseif ($dept - $payment > 0) {
+
+
             if ($student->payed == 0) {
+
                 $student->payed = $payment;
                 $student->date = Carbon::now()->format('Y-m-d');
-            } else {
+
+            } elseif($payment + $student->payed == $student->dept ) {
                 $student->payed = 0;
                 $student->status_month++;
-                $user->status +=1 ;
+                $user->status += 1;
+            }else{
+                $student->payed += $payment;
             }
+
 
         } else {
             $item = ($payment / $dept);
@@ -120,7 +130,7 @@ class DeptStudentController extends Controller
             'user_id' => $student->user_id,
             'name' => $user->name,
             'payment' => $request->payment,
-            'group'=>  $user->group->name,
+            'group' => $user->group->name,
             'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
             'type_of_money' => $request->money_type,
         ]);

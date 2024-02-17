@@ -22,7 +22,6 @@ class StudentController extends Controller
     {
         $students = User::orderBy("name")->role('student')->get();
 
-
 //        foreach ($students as $user)
 //        {
 ////            var_dump($user->name);

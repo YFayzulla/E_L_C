@@ -154,6 +154,14 @@ class StudentController extends Controller
             $path = $request->file('photo')->storeAs('Photo', $name);
         }
 
+        if ( $student->group_id != $request->group_id ) {
+            StudentInformation::create([
+                'user_id' => $student->id,
+                'group_id' => $request->group_id,
+                'group'=>$group->name
+            ]);
+        }
+
         $student->update([
             'name' => $request->name,
             'phone' => $request->phone,
@@ -167,13 +175,7 @@ class StudentController extends Controller
             'photo' => $path ?? $student->photo ?? null,
         ]);
         $group= Group::find($request->group_id);
-        if ($student->group_id == 1) {
-            StudentInformation::create([
-                'user_id' => $student->id,
-                'group_id' => $request->group_id,
-                'group'=>$group->name
-            ]);
-        }
+
 
 
         $dept=DeptStudent::where('user_id',$id)->first();

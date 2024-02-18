@@ -166,11 +166,12 @@ class StudentController extends Controller
             'status' => 0,
             'photo' => $path ?? $student->photo ?? null,
         ]);
-
+        $group= Group::find($request->group_id);
         if ($student->group_id == 1) {
             StudentInformation::create([
                 'user_id' => $student->id,
-                'group_id' => $request->group_id
+                'group_id' => $request->group_id,
+                'group'=>$group->name
             ]);
         }
 

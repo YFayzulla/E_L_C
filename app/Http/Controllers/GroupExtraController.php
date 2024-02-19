@@ -46,10 +46,12 @@ class GroupExtraController extends Controller
 
     public function attendance($id)
     {
+
         $today = Carbon::today();
         $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->get();
         $group= Group::find($id);
         return view('user.group.attendance', compact('items','group'));
+
     }
 
     public function filter(Request $request)

@@ -21,7 +21,7 @@ class TeacherAdminPanel extends Controller
 
     public function attendance($id)
     {
-        $students = User :: where('group_id', $id)->get();
+        $students = User :: where('group_id', $id)->orderBy('name')->get();
         return view('teacher.attendance', compact('students', 'id'));
     }
 

@@ -60,7 +60,6 @@ class StudentController extends Controller
             $path = $request->file('photo')->storeAs('Photo', $fileName);
         }
 
-            dd($path);
 
         $group = Group::where('id', $request->group_id)->first();
 
@@ -157,8 +156,6 @@ class StudentController extends Controller
             $path = $request->file('photo')->storeAs('Photo', $fileName);
         }
 
-        dd($path);
-
         $group= Group::find($request->group_id);
         if ( $student->group_id != $request->group_id ) {
             StudentInformation::create([
@@ -178,7 +175,7 @@ class StudentController extends Controller
             'parents_tel' => $request->parents_tel,
             'should_pay' => $request->should_pay,
             'status' => 0,
-            'photo' => $path,
+            'photo' => $path ?? $student->photo ?? null,
         ]);
 
 

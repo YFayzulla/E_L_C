@@ -50,8 +50,10 @@ class TeacherController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $name = $request->file('photo')->getClientOriginalName();
-            $path = $request->file('photo')->storeAs('Photo', $name);
+
+            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+            $path = $request->file('photo')->storeAs('Photo', $fileName);
+
         }
 
         User::create([
@@ -124,11 +126,11 @@ class TeacherController extends Controller
             if (isset($teacher->photo)) {
                 Storage::delete($teacher->photo);
             }
-            $name = $request->file('photo')->getClientOriginalName();
-            $path = $request->file('photo')->storeAs('Photo', $name);
+            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+            $path = $request->file('photo')->storeAs('Photo', $fileName);
         }
 
-        $teacher->update([
+;        $teacher->update([
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => bcrypt($request->password),

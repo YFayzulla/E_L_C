@@ -56,9 +56,11 @@ class StudentController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            $name = $request->file('photo')->getClientOriginalName();
-            $path = $request->file('photo')->storeAs('Photo', $name);
+            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+            $path = $request->file('photo')->storeAs('Photo', $fileName);
         }
+
+            dd($path);
 
         $group = Group::where('id', $request->group_id)->first();
 
@@ -150,9 +152,12 @@ class StudentController extends Controller
             if (isset($student->photo)) {
                 Storage::delete($student->photo);
             }
-            $name = $request->file('photo')->getClientOriginalName();
-            $path = $request->file('photo')->storeAs('Photo', $name);
+            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+
+            $path = $request->file('photo')->storeAs('Photo', $fileName);
         }
+
+        dd($path);
 
         $group= Group::find($request->group_id);
         if ( $student->group_id != $request->group_id ) {
@@ -173,7 +178,7 @@ class StudentController extends Controller
             'parents_tel' => $request->parents_tel,
             'should_pay' => $request->should_pay,
             'status' => 0,
-            'photo' => $path ?? $student->photo ?? null,
+            'photo' => $path,
         ]);
 
 

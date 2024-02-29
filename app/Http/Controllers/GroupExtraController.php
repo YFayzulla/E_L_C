@@ -36,9 +36,12 @@ class GroupExtraController extends Controller
             'group_id' => $request->group_id,
         ]);
 
+        $group=Group::find($request->group_id);
+
         StudentInformation::create([
             'user_id' => $id,
             'group_id' => $request->group_id,
+            'group'=> $group->name,
         ]);
 
         return redirect()->back()->with('success', 'Updated successfully!');

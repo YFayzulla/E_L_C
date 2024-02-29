@@ -1,4 +1,4 @@
-@extends('template.master')
+`@extends('template.master')
 @section('content')
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
@@ -33,6 +33,7 @@
                     {{--                    @dd($groups)--}}
 
                     @foreach($assessments as $assessment)
+                        <tbody id="myTable" class="table-group-divider">
                         <tr>
                             <td>
                                 <input type="checkbox" class="checkbox" name="selectedItems[]"
@@ -50,6 +51,7 @@
                                 </button>
                             </th>
                         </tr>
+                        </tbody>
                     @endforeach
                 </table>
             </div>
@@ -77,8 +79,8 @@
                                 @endforeach
                             </select>
                             <div class="mt-3">
-                            <button type="submit" class="btn btn-outline-success m-2">save
-                            </button>
+                                <button type="submit" class="btn btn-outline-success m-2">save
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -97,3 +99,4 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 @endsection
+`

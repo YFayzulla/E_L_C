@@ -33,8 +33,9 @@
 
                 <!-- Table body -->
 
-                <tbody>
+
                 @foreach($items as $item)
+                <tbody id="myTable" class="table-group-divider">
                     <tr>
                         <td>{{ $loop->index+1 }}</td>
                         <td>{{ $item->student->name }}</td>
@@ -42,8 +43,8 @@
                         <td>{{ $item->teacher->name }}</td>
                         <td>{{ $item->created_at }}</td>
                     </tr>
-                @endforeach
                 </tbody>
+                @endforeach
             </table>
         </div>
     </div>

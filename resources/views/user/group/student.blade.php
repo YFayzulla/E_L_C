@@ -15,8 +15,9 @@
                     <th>group</th>
                 </tr>
                 </thead>
-                <tbody>
                 @foreach($students as $student)
+                    <tbody id="myTable" class="table-group-divider">
+
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th>{{$student->name}}</th>

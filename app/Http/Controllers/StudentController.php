@@ -144,7 +144,6 @@ class StudentController extends Controller
             'phone' => ['required', 'string'],
         ]);
 
-
         $student = User::find($id);
 
         if ($request->hasFile('photo')) {
@@ -166,6 +165,7 @@ class StudentController extends Controller
         }
 
         $student->update([
+
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
@@ -173,12 +173,12 @@ class StudentController extends Controller
             'group_id' => $request->group_id,
             'parents_name' => $request->parents_name,
             'parents_tel' => $request->parents_tel,
+            'location' => $request->location,
             'should_pay' => $request->should_pay,
-            'status' => 0,
             'photo' => $path ?? $student->photo ?? null,
+            'description' => $request->description,
+
         ]);
-
-
 
         $dept=DeptStudent::where('user_id',$id)->first();
 

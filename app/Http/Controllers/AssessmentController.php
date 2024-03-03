@@ -76,27 +76,38 @@ class AssessmentController extends Controller
      * @param \App\Models\Assessment $assessment
      * @return \Illuminate\Http\Response
      */
+
     public function update(Request $request, $id)
     {
         $end_mark = $request->end_mark;
         $rec_group = $request->recommended;
         $reason = $request->reason;
-        $student = $request->student;
+        $user = $request->student;
         $count = count($reason);
         $group = Group::find($id);
+
 
         for ($i = 0; $i < $count; $i++) {
             $data = new Assessment();
             if ($end_mark[$i] != null || $end_mark[$i] != 0) {
                 $data->get_mark = $end_mark[$i];
-                $data->user_id = $student[$i];
+                $data->user_id = $user[$i];
                 $data->for_what = $reason[$i];
                 $data->rec_group = $rec_group[$i];
                 $data->group = $group->name;
                 $data->save();
             }
-        }
 
+            $student=User::find($user[$i]);
+
+//            $student = StudentInformation::where('user_id',$user[$i])->where('group_id',$group)->get();
+//            dd($student);
+
+            $student->update([
+                'mark' => $end_mark[$i]
+            ]);
+
+        }
         return redirect()->route('assessment.index')->with('success', 'Grades saved');
     }
 

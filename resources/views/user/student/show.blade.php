@@ -21,17 +21,7 @@
                     <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
                     <h4><b>Parents Tel </b> {{$student->parents_tel}}</h4>
                     <h4><b>Description:</b> {{($student->description)}}</h4>
-
-                    {{--                    <table class="table">--}}
-                    {{--                        <tr>--}}
-                    {{--                            <th>id</th>--}}
-                    {{--                            <th>name</th>--}}
-                    {{--                        </tr>--}}
-                    {{--                        <tr>--}}
-                    {{--                            <th>salom</th>--}}
-                    {{--                        </tr>--}}
-                    {{--                    </table>--}}
-
+                    <h5><b>Last Test Result:</b>{{$student->mark}}</h5>
                 </div>
 
                 <div class="container__right" style="max-width: 300px; margin-top: 20px;">
@@ -91,6 +81,7 @@
                         </thead>
                         <tbody class="table-border-bottom-0">
                         @foreach($student->studentinformation as $item)
+
                             <tr>
                                 <th>{{$loop->index+1}}</th>
                                 <th>{{$item->group}}</th>

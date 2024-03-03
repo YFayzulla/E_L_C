@@ -32,6 +32,7 @@ class User extends Authenticatable
         'should_pay',
         'description',
         'status',
+        'mark'
     ];
 
     public function teacherhasGroup(){return $this->hasMany(Group::class);}

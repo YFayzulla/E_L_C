@@ -17,8 +17,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         //        $schedule->command('sms:send')->everyMinute();
-        $schedule->command('user:status:update')->monthlyOn(1,'7:00');
-        //        $schedule->command('user:status:update')->everyMinute();
+//        $schedule->command('user:status:update')->monthlyOn(1,'7:00');
+                $schedule->command('user:status:update')->everyMinute();
         //        $schedule->command('sms:send')->everyMinute();
     }
 

@@ -53,12 +53,16 @@ class GroupExtraController extends Controller
         $today = Carbon::today();
         $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->get();
         $group= Group::find($id);
+
+        //        dd($group,$items);
+
         return view('user.group.attendance', compact('items','group'));
 
     }
 
-    public function filter(Request $request)
+    public function filter(Request $request , $id)
     {
+
 
         if ($request->filter_date == null) {
             $selectedDate=$request->filter_date = Carbon::today();
@@ -70,13 +74,19 @@ class GroupExtraController extends Controller
             // Retrieve the selected date from the form input
 
             // Query the database for attendance records matching the selected date
-            $items = Attendance::whereDate('created_at', $selectedDate)->get();
+
+            $group=Group::find($id);
+
+
+            $items = Attendance::whereDate('created_at', $selectedDate)->where('group_id',$id)->get();
+
+
 
             // Pass the filtered attendance records to the view
-            return view('user.group.attendance', compact('items'));
+
+            return view('user.group.attendance', compact('items','group'));
 
         } elseif ($request->input('task') === 'report') {
-
 
             $items = Attendance::whereDate('created_at', $selectedDate)->get();
 

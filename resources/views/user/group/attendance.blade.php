@@ -6,8 +6,10 @@
         <h3 class="text-center">{{$group->name}}</h3>
         <!-- Add a form with a date input for filtering -->
 
-        <form action="{{ route('attendance.filter') }}" method="GET">
+{{--        @dd($group)--}}
+        <form action="{{ route('attendance.filter',$group->id) }}" method="GET">
 {{--            @csrf--}}
+
             <div style="margin:10px">
                 <label for="filter_date">Filter by Date:</label>
                 <input type="date" id="filter_date" name="filter_date">
@@ -35,6 +37,7 @@
 
 
                 @foreach($items as $item)
+
                 <tbody id="myTable" class="table-group-divider">
                     <tr>
                         <td>{{ $loop->index+1 }}</td>

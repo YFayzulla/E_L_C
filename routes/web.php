@@ -32,7 +32,7 @@ Route::get('/1', function () {
     return view('user.pdf.student_show',compact('student'));
 });
 
- //profil
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [Controller::class, 'auth'])->name('user');

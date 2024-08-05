@@ -40,8 +40,8 @@
                 <tbody id="myTable" class="table-group-divider">
                     <tr>
                         <td>{{ $loop->index+1 }}</td>
-                        <td>{{ $item->student->name }}</td>
-                        <td>{{ $item->student->phone }}</td>
+                        <td>{{ $item->user->name }}</td>
+                        <td>{{ $item->user->phone }}</td>
                         <td>{{ $item->teacher->name }}</td>
                         <td>{{ $item->created_at }}</td>
                     </tr>

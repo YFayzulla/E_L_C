@@ -30,12 +30,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/1', function () {
     $student=\App\Models\User::find(3);
     return view('user.pdf.student_show',compact('student'));
-
-
 });
 
 //attendance list
-Route::get('attendance/list' ,[GroupExtraController::class, 'attendanceList'])->name('attendance.list');
+
+Route::get('attendance/lists' ,[GroupExtraController::class, 'attendanceList'])->name('attendance.list');
 
 
 Route::middleware('auth')->group(function () {

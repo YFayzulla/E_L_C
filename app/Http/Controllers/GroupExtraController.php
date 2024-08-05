@@ -115,16 +115,22 @@ class GroupExtraController extends Controller
 
     public function attendanceList()
     {
+
         $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
         list($year, $month) = explode('-', $date);
 
-        // Fetch students (assuming a 'role' column in the users table to differentiate students)
+        // Fetch students
         $students = User::role('student')->get();
 
-        // Fetch attendances for the selected month and year based on created_at timestamp
+        // Fetch attendances
         $attendances = Attendance::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->get();
+
+
+//        dd($attendances);
+
+//        dd($attendances);
 
         $data = [];
         foreach ($students as $student) {
@@ -139,11 +145,15 @@ class GroupExtraController extends Controller
             $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
         }
 
+//        dd($attendances);
+
         return view('user.group.attendance_list', [
             'data' => $data,
-            'year'=> $year,
-            'month'=> $month,
+            'year' => $year,
+            'month' => $month,
+//            'groups' => Group::all()
         ]);
     }
+
 
 }

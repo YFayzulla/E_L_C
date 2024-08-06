@@ -17,7 +17,6 @@
                     <h3><b>Full Name: </b>{{$student->name}}</h3>
                     <h3><b>Location:</b> {{$student->location}}</h3>
                     <h3><b>Tel </b>{{$student->phone}}</h3>
-
                     <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
                     <h4><b>Parents Tel </b> {{$student->parents_tel}}</h4>
                     <h4><b>Description:</b> {{($student->description)}}</h4>
@@ -93,34 +92,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="justify-content-center mt-4">
-            <div class="card">
-                <h5 class="card-header">Attendance</h5>
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-dark">
-                        <thead>
-                        <tr>
-                            <th> Teacher</th>
-                            <th> Group</th>
-                            <th> Date</th>
-
-                        </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                        @foreach($attendances as $attendance)
-                            <tr>
-                                <th>{{$attendance->student->name}}</th>
-                                <th>{{$attendance->group->name}}</th>
-                                <th>{{$attendance->created_at}}</th>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
     </div>
 
 @endsection

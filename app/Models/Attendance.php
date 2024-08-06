@@ -11,14 +11,15 @@ class Attendance extends Model
 
     protected $fillable=['user_id','group_id','who_checked','status'];
 
-
-    public function student(){
-        return $this->belongsTo(User::class,'user_id');
-    }
     public function group(){
         return $this->belongsTo(Group::class,'group_id');
     }
     public function Teacher(){
         return $this->belongsTo(User::class,'who_checked');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

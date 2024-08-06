@@ -36,36 +36,24 @@ class GroupExtraController extends Controller
             'group_id' => $request->group_id,
         ]);
 
-        $group=Group::find($request->group_id);
+        $group = Group::find($request->group_id);
 
         StudentInformation::create([
             'user_id' => $id,
             'group_id' => $request->group_id,
-            'group'=> $group->name,
+            'group' => $group->name,
         ]);
 
         return redirect()->back()->with('success', 'Updated successfully!');
     }
 
-    public function attendance($id)
-    {
 
-        $today = Carbon::today();
-        $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->get();
-        $group= Group::find($id);
-
-        //        dd($group,$items);
-
-        return view('user.group.attendance', compact('items','group'));
-
-    }
-
-    public function filter(Request $request , $id)
+    public function filter(Request $request, $id)
     {
 
 
         if ($request->filter_date == null) {
-            $selectedDate=$request->filter_date = Carbon::today();
+            $selectedDate = $request->filter_date = Carbon::today();
         } else
             $selectedDate = $request->input('filter_date');
 
@@ -75,16 +63,15 @@ class GroupExtraController extends Controller
 
             // Query the database for attendance records matching the selected date
 
-            $group=Group::find($id);
+            $group = Group::find($id);
 
 
-            $items = Attendance::whereDate('created_at', $selectedDate)->where('group_id',$id)->get();
-
+            $items = Attendance::whereDate('created_at', $selectedDate)->where('group_id', $id)->get();
 
 
             // Pass the filtered attendance records to the view
 
-            return view('user.group.attendance', compact('items','group'));
+            return view('user.group.attendance', compact('items', 'group'));
 
         } elseif ($request->input('task') === 'report') {
 
@@ -103,13 +90,60 @@ class GroupExtraController extends Controller
         }
     }
 
-    public function show($id){
+    public function show($id)
+    {
 
-        $students = User::where('group_id' , $id)->orderby('name') ->role('student')->get();
+        $students = User::where('group_id', $id)->orderby('name')->role('student')->get();
 
-        return view('user.group.student',compact('students'));
+        return view('user.group.student', compact('students'));
 
     }
 
+    public function attendance($id)
+    {
+
+        $today = Carbon::today();
+        $items = Attendance::whereDate('created_at', $today)->where('group_id', $id)->get();
+        $group = Group::find($id);
+
+        //        dd($group,$items);
+
+        return view('user.group.attendance', compact('items', 'group'));
+
+    }
+
+
+    public function attendanceList()
+    {
+        $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
+        list($year, $month) = explode('-', $date);
+
+        // Fetch students (assuming a 'role' column in the users table to differentiate students)
+        $students = User::role('student')->get();
+
+        // Fetch attendances for the selected month and year based on created_at timestamp
+        $attendances = Attendance::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get();
+
+        $data = [];
+        foreach ($students as $student) {
+            $data[$student->name] = [];
+            for ($i = 1; $i <= 31; $i++) {
+                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
+            }
+        }
+
+        foreach ($attendances as $attendance) {
+            $day = $attendance->created_at->format('d');
+            $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
+        }
+
+        return view('user.group.attendance_list', [
+            'data' => $data,
+            'year'=> $year,
+            'month'=> $month,
+        ]);
+    }
 
 }

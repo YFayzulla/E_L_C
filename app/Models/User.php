@@ -35,12 +35,40 @@ class User extends Authenticatable
         'mark'
     ];
 
-    public function teacherhasGroup(){return $this->hasMany(Group::class);}
-    public function group(){return $this->belongsTo(Group::class);}
-    public function studentinformation(){return $this->hasMany(StudentInformation::class);}
-    public function studenthistory(){return $this->hasMany(HistoryPayments::class);}
-    public function assessment(){return $this->hasMany(Assessment::class );}
-    public function studentdept(){return $this->hasOne(DeptStudent::class,'user_id','id' );}
+    public function teacherhasGroup()
+    {
+        return $this->hasMany(Group::class);
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+    public function studentinformation()
+    {
+        return $this->hasMany(StudentInformation::class);
+    }
+
+    public function studenthistory()
+    {
+        return $this->hasMany(HistoryPayments::class);
+    }
+
+    public function assessment()
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
+    public function studentdept()
+    {
+        return $this->hasOne(DeptStudent::class, 'user_id', 'id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

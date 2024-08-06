@@ -30,8 +30,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/1', function () {
     $student=\App\Models\User::find(3);
     return view('user.pdf.student_show',compact('student'));
+
+
 });
 
+//attendance list
+Route::get('attendance/list' ,[GroupExtraController::class, 'attendanceList'])->name('attendance.list');
 
 
 Route::middleware('auth')->group(function () {
@@ -75,6 +79,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
 
 });
+
 
 //Teachers
 Route::group(['middleware' => ['auth', 'role:user']], function () {

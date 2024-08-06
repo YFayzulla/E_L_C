@@ -21,7 +21,7 @@
 
         <!-- Display the attendance records -->
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table-bordered table">
                 <!-- Table headers -->
                 <thead class="table-active">
                 <tr>
@@ -37,7 +37,6 @@
 
 
                 @foreach($items as $item)
-
                 <tbody id="myTable" class="table-group-divider">
                     <tr>
                         <td>{{ $loop->index+1 }}</td>

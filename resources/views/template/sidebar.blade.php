@@ -77,76 +77,68 @@
         @role('admin')
         <li class="menu-item @if(request()->routeIs('teacher.index' , 'teacher.create' , 'teacher.edit', 'teacher.show')) active @endif">
             <a href="{{ route('teacher.index') }}" class="menu-link">
-                <i class='bx bx-user'></i>
+                <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Analytics">Teachers</div>
             </a>
         </li>
 
         <li class="menu-item @if(request()->routeIs('student.index' , 'student.create' , 'student.edit', 'student.show'  )) active @endif">
             <a href="{{ route('student.index') }}" class="menu-link">
-                <i class='bx bxs-graduation'></i>
+                <i class="menu-icon tf-icons bx bxs-user"></i>
                 <div data-i18n="Analytics">Students</div>
             </a>
         </li>
 
         <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit','group.show')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
-                <i class='bx bxs-group'></i>
+                <i class="menu-icon tf-icons bx bx-group"></i>
                 <div data-i18n="Analytics">Groups</div>
             </a>
         </li>
         <li class="menu-item @if(request()->routeIs('dept.index')) active @endif">
             <a href="{{ route('dept.index') }}" class="menu-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                     class="bi bi-coin me-1" viewBox="0 0 16 16">
-                    <path
-                        d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                    <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
-                </svg>
+                <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Analytics"> Payment </div>
             </a>
         </li>
         <li class="menu-item @if(request()->routeIs('waiters.index')) active @endif">
             <a href="{{ route('waiters.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-door-open"></i>
                 <div data-i18n="Analytics">Waiting Room</div>
             </a>
         </li>
+
         @endrole
+
 
 
         @role('user')
-        <li class="menu-item @if(request()->routeIs('attendance','attendance.check')) active @endif">
-            <a href="{{route('attendance')}}" class="menu-link">
-                <div data-i18n="Analytics"> Attendance </div>
+        <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
+            <a href="{{route('assessment.index')}}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-list-check"></i>
+                <div data-i18n="Analytics"> Test  </div>
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
-            <a href="{{route('assessment.index')}}" class="menu-link">
-                <div data-i18n="Analytics"> test results </div>
+        <li class="menu-item @if(request()->routeIs('attendance','attendance.check')) active @endif">
+            <a href="{{route('attendance')}}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div data-i18n="Analytics"> Checking Attendance </div>
             </a>
         </li>
         @endrole
 
-        {{--        @php--}}
-        {{--            $groups = DB::select('SELECT * FROM group_teachers WHERE teacher_id = ?', [auth()->id()]);--}}
-        {{--        @endphp--}}
 
-        {{--        <li class="menu-item">--}}
-        {{--            <a href="javascript:void(0);" class="menu-link menu-toggle">--}}
-        {{--                <i class="menu-icon tf-icons bx bx-layout"></i>--}}
-        {{--                <div data-i18n="Layouts">guruxlar || yakuniy baholash</div>--}}
-        {{--            </a>--}}
-        {{--            <ul class="menu-sub">--}}
-        {{--                @foreach($groups as $group)--}}
-        {{--                    <li class="menu-item">--}}
-        {{--                        <a href="layouts-without-menu.html" class="menu-link">--}}
-        {{--                            <div data-i18n="Without menu">{{$group}}</div>--}}
-        {{--                        </a>--}}
-        {{--                    </li>--}}
-        {{--                @endforeach--}}
-        {{--            </ul>--}}
-        {{--        </li>--}}
+        <li class="menu-item @if(request()->routeIs('attendance.list')) active @endif">
+            <a href="{{ route('attendance.list') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-table"></i>
+                <div data-i18n="Analytics">List Attendance</div>
+            </a>
+        </li>
     </ul>
 </aside>
+
+
+
+
+

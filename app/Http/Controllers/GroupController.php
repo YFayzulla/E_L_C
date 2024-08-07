@@ -73,6 +73,7 @@ class GroupController extends Controller
         $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
         return view('user.group.show',compact('assessments','groups','id'));
 
+
     }
 
     /**

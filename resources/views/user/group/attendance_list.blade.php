@@ -67,4 +67,46 @@
             </div>
         </div>
     </div>
+
+
+
+
+    <div class="container mt-4">
+        <div class="p-4 bg-white shadow-sm rounded-lg">
+
+            <table class="table">
+                <tr>
+                    <td>id</td>
+                    <td>name</td>
+                    <td>teacher</td>
+                    <td>lesson</td>
+                    <td>date</td>
+                    <td>delete</td>
+                </tr>
+                @foreach($attendances as $attendance)
+                    <tr>
+                        <td>{{$loop->index+1}}</td>
+                        <td>{{$attendance->user->name}}</td>
+                        <td>{{$attendance->teacher->name}}</td>
+                        <td>{{$attendance->lesson->name}}</td>
+                        <td>{{$attendance->created_at}}</td>
+                        <td>
+                            <form action="{{route('attendance.delete' , $attendance->id)}}" method="POST">
+                                @csrf
+                                @method("DELETE")
+
+                                <button type="submit" class="btn-danger btn">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+
+
+                            </form>
+                        </td>
+                    </tr>
+
+                @endforeach
+            </table>
+
+        </div>
+    </div>
 @endsection

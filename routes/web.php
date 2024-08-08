@@ -26,6 +26,8 @@ Route::get('/1', function () {
 
 Route::get('attendance/lists', [TeacherAdminPanel::class, 'attendanceList'])->name('attendance.list');
 
+Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
+
 Route::middleware('auth')->group(function () {
     Route::get('/', [Controller::class, 'auth'])->name('user');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

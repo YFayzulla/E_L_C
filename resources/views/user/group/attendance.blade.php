@@ -83,16 +83,6 @@
     </div>
 
 
-
-
-
-    {{--                          old code  for pdf  generate          --}}
-    {{--    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">--}}
-
-
-    {{--        <h3 class="text-center">{{$group->name}} daily  </h3>--}}
-    {{--        <!-- Add a form with a date input for filtering -->--}}
-
     {{--                @dd($items)--}}
     {{--                <form action="{{ route('attendance.filter',$group->id) }}" method="GET">--}}
     {{--                    @csrf--}}
@@ -104,5 +94,35 @@
     {{--                        <button type="submit" class="btn-danger" name="task" value="report">Report</button>--}}
     {{--                    </div>--}}
     {{--                </form>--}}
+
+
+
+
+
+    <div class="container mt-4">
+        <div class="p-4 bg-white shadow-sm rounded-lg">
+
+            <table class="table">
+                <tr>
+                    <td>id</td>
+                    <td>name</td>
+                    <td>teacher</td>
+                    <td>lesson</td>
+                    <td>date</td>
+                </tr>
+                @foreach($attendances as $attendance)
+                    <tr>
+                        <td>{{$loop->index+1}}</td>
+                        <td>{{$attendance->user->name}}</td>
+                        <td>{{$attendance->teacher->name}}</td>
+                        <td>{{$attendance->lesson->name}}</td>
+                        <td>{{$attendance->created_at}}</td>
+                    </tr>
+
+                @endforeach
+            </table>
+
+        </div>
+    </div>
 
 @endsection

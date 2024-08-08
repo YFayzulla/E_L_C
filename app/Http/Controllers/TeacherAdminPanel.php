@@ -30,26 +30,25 @@ class TeacherAdminPanel extends Controller
     {
 //        dd($id);
 
-        foreach ($request->status as $name => $status) {
-            $user_id = auth()->id();
-            Attendance::create([
-                'user_id' => $name,
-                'group_id' => $id,
-                'who_checked' => $user_id
-            ]);
-        }
-
-
-
-        LessonAndHistory::create([
+        $lesson = LessonAndHistory::create([
             'name' => $request->lesson,
 //                'date' => $request->data,
             'group_id' => $id,
         ]);
 
+
+        foreach ($request->status as $name => $status) {
+            $user_id = auth()->id();
+            Attendance::create([
+                'user_id' => $name,
+                'group_id' => $id,
+                'who_checked' => $user_id,
+                'lesson_id' => $lesson->id,
+            ]);
+        }
+
         return redirect()->route('attendance')->with('success', 'Saved');
     }
-
 
 
     public function attendanceList()
@@ -70,7 +69,7 @@ class TeacherAdminPanel extends Controller
 
         // Fetch attendances
 
-        $attendances = Attendance :: whereYear('created_at', $year)
+        $attendances = Attendance:: whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->where('who_checked', auth()->id())
             ->get();
@@ -98,8 +97,11 @@ class TeacherAdminPanel extends Controller
             'data' => $data,
             'year' => $year,
             'month' => $month,
-//            'groups' => Group::all()
+            'attendances' => $attendances,
         ]);
     }
+
+
+
 
 }

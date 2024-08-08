@@ -9,7 +9,7 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $fillable=['user_id','group_id','who_checked','status'];
+    protected $fillable=['user_id','group_id','who_checked','status','lesson_id'];
 
     public function group(){
         return $this->belongsTo(Group::class,'group_id');
@@ -20,6 +20,12 @@ class Attendance extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function lesson()
+    {
+        return $this->belongsTo(LessonAndHistory::class);
+
     }
 
 }

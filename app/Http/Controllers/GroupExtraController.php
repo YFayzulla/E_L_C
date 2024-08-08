@@ -150,6 +150,7 @@ class GroupExtraController extends Controller
             'data' => $data,
             'year' => $year,
             'month' => $month,
+            'attendances' => $attendances,
         ]);
 
     }

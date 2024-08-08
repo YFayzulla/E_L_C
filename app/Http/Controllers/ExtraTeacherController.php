@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\StudentInformation;
@@ -31,4 +32,11 @@ class ExtraTeacherController extends Controller
         return redirect()->back()->with('success', 'Information deleted');
     }
 
+
+    public function attendanceDelete($id)
+    {
+        $attendance = Attendance::find($id);
+        $attendance->delete();
+        return redirect()->back()->with('success', 'Information deleted');
+    }
 }

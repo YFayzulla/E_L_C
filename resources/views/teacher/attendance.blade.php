@@ -1,27 +1,35 @@
 @extends('template.master')
 @section('content')
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-        <form action="{{route('attendance.submit',$id)}}" method='post'>
+    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg">
+        <form action="{{route('attendance.submit', $id)}}" method="post">
             @csrf
-            <table class="table">
+            <div class="d-flex justify-content-end mb-4">
+                <label for="lesson" class="mr-2 align-self-center">Lesson:</label>
+                <input type="text" name="lesson" id="lesson" class="form-control w-25">
+            </div>
+            <table class="table table-bordered">
+                <thead>
                 <tr>
-                    <td>no</td>
-                    <td>name</td>
-                    <td>status</td>
+                    <th>no</th>
+                    <th>name</th>
+                    <th class="text-center">status</th>
                 </tr>
-                @csrf
+                </thead>
+                <tbody>
                 @foreach($students as $student)
                     <tr>
-                        <th>{{$loop->index+1}}</th>
-                        <th><b>{{$student->name}}</b></th>
-                        <th>
-                            <input type="checkbox" class="float-end" style="padding-left: 20px"
-                                   name="status[{{$student->id}}]" value="on">
-                        </th>
+                        <td>{{$loop->index + 1}}</td>
+                        <td><b>{{$student->name}}</b></td>
+                        <td class="text-center">
+                            <input type="checkbox" name="status[{{$student->id}}]" value="on">
+                        </td>
                     </tr>
                 @endforeach
+                </tbody>
             </table>
-            <button type="submit" class="btn btn-primary" style="">topshirish</button>
+{{--            <div class="d-flex justify-content-end mt-2">--}}
+                <button type="submit" class="btn btn-primary">topshirish</button>
+{{--            </div>--}}
         </form>
     </div>
 @endsection

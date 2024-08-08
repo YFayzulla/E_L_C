@@ -102,21 +102,21 @@ class GroupExtraController extends Controller
     public function attendance($id)
     {
 
-        $today = now()->day;;
-        $items = Attendance::where('group_id', $id)->whereDate('created_at', $today)->get();
+        $today = now()->day;
         $group = Group::find($id);
 
         //       new code !!!
-
 
         $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
 
         list($year, $month) = explode('-', $date);
 
         // Fetch students
-        $students = User::role('student')->where('group_id' , $group->id)->get();
+
+        $students = User::role('student')->where('group_id', $group->id)->get();
 
         // Fetch attendances
+
         $attendances = Attendance::where('group_id', $id)->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)->get();
 
@@ -127,23 +127,26 @@ class GroupExtraController extends Controller
         foreach ($students as $student) {
 
             $data[$student->name] = [];
+
             for ($i = 1; $i <= 31; $i++) {
                 $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
             }
+
         }
 
         foreach ($attendances as $attendance) {
+
             $day = $attendance->created_at->format('d');
             $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
+
         }
 
-
 //new code ended
+
         return view('user.group.attendance', [
-            'items' => $items,
             'group' => $group,
             //new items
-            'today'=>$today,
+            'today' => $today,
             'data' => $data,
             'year' => $year,
             'month' => $month,
@@ -151,48 +154,6 @@ class GroupExtraController extends Controller
 
     }
 
-//
-//    public function attendanceList()
-//    {
-//
-//        $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
-//        list($year, $month) = explode('-', $date);
-//
-//        // Fetch students
-//        $students = User::role('student')->get();
-//
-//        // Fetch attendances
-//        $attendances = Attendance::whereYear('created_at', $year)
-//            ->whereMonth('created_at', $month)
-//            ->get();
-//
-//
-////        dd($attendances);
-//
-////        dd($attendances);
-//
-//        $data = [];
-//        foreach ($students as $student) {
-//            $data[$student->name] = [];
-//            for ($i = 1; $i <= 31; $i++) {
-//                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
-//            }
-//        }
-//
-//        foreach ($attendances as $attendance) {
-//            $day = $attendance->created_at->format('d');
-//            $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
-//        }
-//
-////        dd($attendances);
-//
-//        return view('user.group.attendance_list', [
-//            'data' => $data,
-//            'year' => $year,
-//            'month' => $month,
-////            'groups' => Group::all()
-//        ]);
-//    }
 
 
 }

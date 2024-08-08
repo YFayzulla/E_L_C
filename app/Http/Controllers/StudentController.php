@@ -186,6 +186,11 @@ class StudentController extends Controller
             'dept' => $request->should_pay
         ]);
 
+        $dd = Attendance::where('user_id', $student->id)
+            ->update(['group_id' => $request->group_id]);
+
+//        dd($dd);
+
         return redirect()->route('student.index')->with('success', 'malumot yangilandi');
     }
 

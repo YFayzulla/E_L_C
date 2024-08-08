@@ -89,18 +89,20 @@
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit','group.show')) active @endif">
+        <li class="menu-item @if(request()->routeIs('group.index','group.create','group.edit','group.show','group.attendance')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-group"></i>
                 <div data-i18n="Analytics">Groups</div>
             </a>
         </li>
+
         <li class="menu-item @if(request()->routeIs('dept.index')) active @endif">
             <a href="{{ route('dept.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-money"></i>
                 <div data-i18n="Analytics"> Payment </div>
             </a>
         </li>
+
         <li class="menu-item @if(request()->routeIs('waiters.index')) active @endif">
             <a href="{{ route('waiters.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-door-open"></i>
@@ -109,12 +111,12 @@
         </li>
 
         @endrole
-
         @role('user')
+
         <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
             <a href="{{route('assessment.index')}}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-list-check"></i>
-                <div data-i18n="Analytics"> Test  </div>
+                <div data-i18n="Analytics"> Test </div>
             </a>
         </li>
 
@@ -124,7 +126,7 @@
                 <div data-i18n="Analytics"> Checking Attendance </div>
             </a>
         </li>
-        @endrole
+
 
         <li class="menu-item @if(request()->routeIs('attendance.list')) active @endif">
             <a href="{{ route('attendance.list') }}" class="menu-link"> <!-- Default group ID if needed -->
@@ -132,5 +134,7 @@
                 <div data-i18n="Analytics">List Attendance</div>
             </a>
         </li>
+        @endrole
+
     </ul>
 </aside>

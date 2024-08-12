@@ -32,33 +32,34 @@ class TeacherAdminPanel extends Controller
 
         $lesson = LessonAndHistory::create([
             'name' => $request->lesson,
-//                'date' => $request->data,
-            'group_id' => $id,
+            'data' => 1,
+            'group' => $id,
         ]);
 
+//        dd($request->status);
+        if ($request->status) {
+            foreach ($request->status as $name => $status) {
+                $user_id = auth()->id();
+                Attendance::create([
+                    'user_id' => $name,
+                    'group_id' => $id,
+                    'who_checked' => $user_id,
+                    'lesson_id' => $lesson->id,
+                ]);
+            }
+            return redirect()->route('attendance')->with('success', 'Saved');
 
-        foreach ($request->status as $name => $status) {
-            $user_id = auth()->id();
-            Attendance::create([
-                'user_id' => $name,
-                'group_id' => $id,
-                'who_checked' => $user_id,
-                'lesson_id' => $lesson->id,
-            ]);
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong');
         }
 
-        return redirect()->route('attendance')->with('success', 'Saved');
     }
 
 
     public function attendanceList()
     {
-
-
         // test
-
 //        dd('test');
-
 
         $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
 
@@ -98,10 +99,11 @@ class TeacherAdminPanel extends Controller
             'year' => $year,
             'month' => $month,
             'attendances' => $attendances,
+
+            'students' => Attendance::where('who_checked', auth()->id())->orderByDesc('created_at')->paginate(10),
+
         ]);
     }
-
-
 
 
 }

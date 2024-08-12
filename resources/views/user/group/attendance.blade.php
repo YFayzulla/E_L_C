@@ -110,7 +110,7 @@
                     <td>lesson</td>
                     <td>date</td>
                 </tr>
-                @foreach($attendances as $attendance)
+                @foreach($students as $attendance)
                     <tr>
                         <td>{{$loop->index+1}}</td>
                         <td>{{$attendance->user->name}}</td>
@@ -121,6 +121,10 @@
 
                 @endforeach
             </table>
+
+            <div class="card-body">
+                {{ $students->links('pagination::bootstrap-5') }}
+            </div>
 
         </div>
     </div>

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('group')->nullable();
             $table->string('for_what')->nullable();
             $table->string('rec_group')->nullable();
+            $table->integer('history_id')->nullable();
             $table->timestamps();
         });
     }

@@ -87,16 +87,25 @@ class AssessmentController extends Controller
         $count = count($reason);
         $group = Group::find($id);
 
+        if ($request->lesson) {
+            $history = LessonAndHistory::query()->create([
+                'group' => $group->id,
+                'name' => $request->lesson,
+                'data' => 2
+            ]);
+        }
+
 //        dd($request->lesson);
 //        if ()
         for ($i = 0; $i < $count; $i++) {
             $data = new Assessment();
-            if ($end_mark[$i] != null || $end_mark[$i] != 0) {
+            if ($end_mark[$i] != null || $end_mark [$i] != 0) {
                 $data->get_mark = $end_mark[$i];
                 $data->user_id = $user[$i];
                 $data->for_what = $reason[$i];
                 $data->rec_group = $rec_group[$i];
                 $data->group = $group->name;
+                $data->history_id = $history->id;
                 $data->save();
             }
 
@@ -112,13 +121,7 @@ class AssessmentController extends Controller
 
 
         }
-        if ($request->lesson) {
-            LessonAndHistory::query()->create([
-                'group' => $group->id,
-                'name' => $request->lesson,
-                'data' => 2
-            ]);
-        }
+
         return redirect()->route('assessment.index')->with('success', 'Grades saved');
     }
 

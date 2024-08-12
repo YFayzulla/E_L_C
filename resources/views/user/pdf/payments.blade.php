@@ -9,6 +9,7 @@
                 <th>name</th>
                 <th>paid</th>
                 <th>group</th>
+                <th>type</th>
                 <th>date</th>
             </tr>
             @foreach($users as $student)
@@ -17,6 +18,7 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->payment}}</th>
                     <th>{{$student->group}}</th>
+                    <th>{{$student->type_of_money}}</th>
                     <th>{{$student->date}}</th>
                     @php
                         $sum += $student->payment

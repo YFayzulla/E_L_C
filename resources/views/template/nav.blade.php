@@ -32,14 +32,26 @@
                     <input
                         type="date"
                         class="form-control border-0 shadow-none"
-                        placeholder="date_paid"
-                        name="date_paid"
-                        aria-label="Search..."
+                        placeholder="Start Date"
+                        name="start_date"
+                        aria-label="Start Date"
                     />
                 </div>
-                <button type="submit" class="btn btn-outline-dark"> Search </button>
+
+                <div class="nav-item d-flex align-items-center">
+                    <input
+                        type="date"
+                        class="form-control border-0 shadow-none"
+                        placeholder="End Date"
+                        name="end_date"
+                        aria-label="End Date"
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-outline-dark">Search</button>
             </div>
         </form>
+
         <!-- /Search -->
         @endrole
 
@@ -57,7 +69,8 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online">
-                                        <img src="{{ asset('icon/avatar.png') }}" alt class="w-px-40 h-auto rounded-circle"/>
+                                        <img src="{{ asset('icon/avatar.png') }}" alt
+                                             class="w-px-40 h-auto rounded-circle"/>
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
@@ -90,12 +103,11 @@
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <x-dropdown-link :href="route('logout')"
-                                             onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                            <input type="hidden" name="logout" value="1">
+                            <button type="submit" class="dropdown-item">
                                 <i class="bx bx-power-off me-2"></i>
-                                {{__('Log Out')}}
-                            </x-dropdown-link>
+                                <span class="align-middle">Log out</span>
+                            </button>
                         </form>
                     </li>
 

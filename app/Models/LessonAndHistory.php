@@ -11,7 +11,7 @@ class LessonAndHistory extends Model
 
     protected $fillable = [
         'name',
-        'date',
+        'data',
         'group'
     ];
 }

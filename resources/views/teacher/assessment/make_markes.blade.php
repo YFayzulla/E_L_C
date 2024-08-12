@@ -3,9 +3,16 @@
 
     <div class="card">
         <div class="table-responsive text-nowrap">
+
             <form action="{{route('assessment.update',$id)}}" method='post'>
                 @csrf
                 @method('PUT')
+
+                <div class="d-flex justify-content-end mb-4">
+                    <label for="lesson" class="mr-2 align-self-center">name</label>
+                    <input type="text" name="lesson" id="lesson" class="form-control w-25 m-1 mt-2">
+                </div>
+
                 <table class="table table-striped">
                     <thead>
                     <tr>

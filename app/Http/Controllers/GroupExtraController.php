@@ -146,11 +146,13 @@ class GroupExtraController extends Controller
         return view('user.group.attendance', [
             'group' => $group,
             //new items
+            'students' => Attendance::where('group_id', $id)->orderByDesc('created_at')->paginate(10),
             'today' => $today,
             'data' => $data,
             'year' => $year,
             'month' => $month,
             'attendances' => $attendances,
+
         ]);
 
     }

@@ -17,7 +17,7 @@ class ExtraTeacherController extends Controller
 //            'group_id'=>['required', 'unique:'.User::class]
         ]);
 
-        GroupTeacher::create([
+        GroupTeacher::query()->create([
             'teacher_id' => $id,
             'group_id' => $request->group_id
         ]);
@@ -27,7 +27,7 @@ class ExtraTeacherController extends Controller
 
     public function group_delete($id)
     {
-        $group = GroupTeacher::find($id);
+        $group = GroupTeacher::query()->find($id);
         $group->delete();
         return redirect()->back()->with('success', 'Information deleted');
     }
@@ -35,7 +35,7 @@ class ExtraTeacherController extends Controller
 
     public function attendanceDelete($id)
     {
-        $attendance = Attendance::find($id);
+        $attendance = Attendance::query()->find($id);
         $attendance->delete();
         return redirect()->back()->with('success', 'Information deleted');
     }

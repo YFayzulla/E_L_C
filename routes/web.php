@@ -11,10 +11,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherAdminPanel;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\TestResultController;
 use App\Http\Controllers\WaitersController;
 use Illuminate\Support\Facades\Route;
-
-
 
 
 Route::get('/1', function () {
@@ -24,7 +23,6 @@ Route::get('/1', function () {
 
 //attendance list
 
-Route::get('attendance/lists', [TeacherAdminPanel::class, 'attendanceList'])->name('attendance.list');
 
 Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
 
@@ -39,12 +37,17 @@ Route::middleware('auth')->group(function () {
 
 Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
+
+
+    Route::get('Test', [TestResultController::class, 'index'])->name('test');
+
+
 //    Route::get('payment', [Controller::class, 'index'])->name('dashboard');
 
 //    PDF
 
     Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
-    Route::get('/dept/pdf/{date}', [PdfController::class, 'RoomListPDF']);
+    Route::get('/dept/pdf', [PdfController::class, 'RoomListPDF']);
     Route::get('/assessment/pdf/{date}', [PdfController::class, 'Assessment']);
     Route::get('/teacher/pdf', [PdfController::class, 'teacher']);
     Route::get('/group/pdf', [PdfController::class, 'group']);
@@ -80,10 +83,12 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 Route::group(['middleware' => ['auth', 'role:user']], function () {
 //teacher panel
+    Route::get('attendance/lists', [TeacherAdminPanel::class, 'attendanceList'])->name('attendance.list');
     Route::get('groups', [TeacherAdminPanel::class, 'group'])->name('attendance');
     Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
     Route::resource('assessment', AssessmentController::class);
+
 
 });
 

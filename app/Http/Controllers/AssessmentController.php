@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\GroupTeacher;
+use App\Models\LessonAndHistory;
 use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -46,7 +47,7 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource.Reason
      *
      * @param \App\Models\Assessment $assessment
      * @return \Illuminate\Http\Response
@@ -86,7 +87,8 @@ class AssessmentController extends Controller
         $count = count($reason);
         $group = Group::find($id);
 
-
+//        dd($request->lesson);
+//        if ()
         for ($i = 0; $i < $count; $i++) {
             $data = new Assessment();
             if ($end_mark[$i] != null || $end_mark[$i] != 0) {
@@ -98,7 +100,8 @@ class AssessmentController extends Controller
                 $data->save();
             }
 
-            $student=User::find($user[$i]);
+
+            $student = User::find($user[$i]);
 
 //            $student = StudentInformation::where('user_id',$user[$i])->where('group_id',$group)->get();
 //            dd($student);
@@ -107,6 +110,14 @@ class AssessmentController extends Controller
                 'mark' => $end_mark[$i]
             ]);
 
+
+        }
+        if ($request->lesson) {
+            LessonAndHistory::query()->create([
+                'group' => $group->id,
+                'name' => $request->lesson,
+                'data' => 2
+            ]);
         }
         return redirect()->route('assessment.index')->with('success', 'Grades saved');
     }

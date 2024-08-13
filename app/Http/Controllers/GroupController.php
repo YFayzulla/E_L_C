@@ -68,10 +68,10 @@ class GroupController extends Controller
     public function show(Group $group)
     {
 
-        $id=$group->name;
-        $groups=Group::orderby('name')->get();
-        $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
-        return view('user.group.show',compact('assessments','groups','id'));
+//        $id=$group->name;
+//        $groups=Group::orderby('name')->get();
+//        $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
+//        return view('user.group.show',compact('assessments','groups','id'));
 
 
     }

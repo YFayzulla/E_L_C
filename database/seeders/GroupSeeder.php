@@ -20,8 +20,5 @@ class GroupSeeder extends Seeder
         Group::create([
             'name' => 'waiters'
         ]);
-        Group::create([
-            'name' => 'waiters'
-        ]);
     }
 }

@@ -44,6 +44,10 @@ class GroupExtraController extends Controller
             'group' => $group->name,
         ]);
 
+        $dd = Attendance::where('user_id', $user->id)
+            ->update(['group_id' => $request->group_id]);
+
+
         return redirect()->back()->with('success', 'Updated successfully!');
     }
 

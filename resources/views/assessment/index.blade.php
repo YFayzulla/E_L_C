@@ -3,6 +3,9 @@
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
         {{--select delete--}}
+
+        <h1>{{$id}}</h1>
+
         <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a>
 
         <form action="{{route('deleteMultiple')}}" method="post">

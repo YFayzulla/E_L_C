@@ -20,9 +20,9 @@ class AssessmentController extends Controller
      */
     public function index()
     {
+
         $id = auth()->id();
         $groups = GroupTeacher::where('teacher_id', $id)->get();
-
 
         return view('teacher.assessment.index', compact('groups'));
     }
@@ -89,13 +89,13 @@ class AssessmentController extends Controller
         $count = count($reason);
         $group = Group::find($id);
 
-        if ($request->lesson) {
+//        if ($request->lesson) {
             $history = LessonAndHistory::query()->create([
                 'group' => $group->id,
-                'name' => $request->lesson,
+                'name' => $request->lesson ?? auth()->user()->name,
                 'data' => 2
             ]);
-        }
+//        }
 
 //        dd($request->lesson);
 //        if ()
@@ -106,8 +106,8 @@ class AssessmentController extends Controller
                 $data->user_id = $user[$i];
                 $data->for_what = $reason[$i];
                 $data->rec_group = $rec_group[$i];
-                $data->group = $group->name;
-                $data->history_id = $history->id;
+                $data->group = $group->name ;
+                $data->history_id = $history->id ;
                 $data->save();
             }
 

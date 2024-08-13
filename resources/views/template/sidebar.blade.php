@@ -103,8 +103,8 @@
             </a>
         </li>
 
-        <li class="menu-item @if(request()->routeIs('test')) active @endif">
-            <a href="{{ route('test') }}" class="menu-link">
+        <li class="menu-item @if(request()->routeIs('test','test.show')) active @endif">
+            <a href="{{ route('test','test.show') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx-test-tube"></i>
                 <div data-i18n="Analytics">Assessment</div>
             </a>

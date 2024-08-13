@@ -13,6 +13,8 @@
                             <div class="col-sm-12 m-2">
                                 <h5 class="card-title m-0 me-2 text-center"><b>Top 5 </b> students</h5>
 
+{{--                                @dd($topStudents)--}}
+
                                 <table class="table">
                                     <tr>
                                         <td>Name</td>
@@ -29,9 +31,6 @@
                                             <td>
                                                 {{ $topStudent->group }}
                                             </td>
-                                            {{--                                            <td>--}}
-                                            {{--                                                {{ $topStudent->who_checked }}--}}
-                                            {{--                                            </td>--}}
                                             <td>
                                                 {{ $topStudent->get_mark }}
                                             </td>
@@ -57,6 +56,7 @@
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h5 class="card-title m-0 me-2">Latest Test</h5>
                         </div>
+
 {{--                        @dd($data)--}}
 
                         @foreach($data as $item)
@@ -65,8 +65,8 @@
                                     <div
                                         class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                         <div class="me-2">
-                                            <b><a href="#"
-                                                  class="mb-0 text-secondary text-">{{$item->name}}</a></b>
+                                            <b><a href="{{route('test.show',$item->id)}}"
+                                                  class="mb-0 m-2 text-secondary text-">{{$item->name}}</a></b>
                                             <strong> - </strong>
                                         </div>
                                         <div class="user-progress d-flex align-items-center gap-1">
@@ -74,7 +74,7 @@
                                         </div>
                                     </div>
                                 </li>
-                                {{--                                {{ $data->links('pagination::bootstrap-5') }}--}}
+                                                                {{ $data->links('pagination::bootstrap-5') }}
                             </ul>
                         @endforeach
                     </div>

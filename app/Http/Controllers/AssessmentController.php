@@ -22,6 +22,8 @@ class AssessmentController extends Controller
     {
         $id = auth()->id();
         $groups = GroupTeacher::where('teacher_id', $id)->get();
+
+
         return view('teacher.assessment.index', compact('groups'));
     }
 

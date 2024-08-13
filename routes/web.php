@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
 
     Route::get('Test', [TestResultController::class, 'index'])->name('test');
+    Route::get('Test/{id}/show', [TestResultController::class, 'showResults'])->name('test.show');
 
 
 //    Route::get('payment', [Controller::class, 'index'])->name('dashboard');

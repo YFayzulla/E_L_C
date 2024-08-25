@@ -71,12 +71,12 @@
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
 
-{{--        <li class="menu-item @if(request()->routeIs('dashboard')) active @endif">--}}
-{{--            <a href="{{ route('dashboard') }}" class="menu-link">--}}
-{{--                <i class="menu-icon tf-icons bx bxs-dashboard"></i>--}}
-{{--                <div data-i18n="Analytics">Dashboard</div>--}}
-{{--            </a>--}}
-{{--        </li>--}}
+        <li class="menu-item @if(request()->routeIs('dashboard')) active @endif">
+            <a href="{{ route('dashboard') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                <div data-i18n="Analytics">Dashboard</div>
+            </a>
+        </li>
 
         @role('admin')
         <li class="menu-item @if(request()->routeIs('teacher.index' , 'teacher.create' , 'teacher.edit', 'teacher.show')) active @endif">

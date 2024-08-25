@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupExtraController;
 use App\Http\Controllers\PdfController;
@@ -77,6 +78,13 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::resource('teacher', TeacherController::class);
     Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
     Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
+
+//   Finance
+    Route::get('finance', [FinanceController::class, 'index'])->name('finance.other');
+    Route::post('finance/store', [FinanceController::class, 'store'])->name('finance.store');
+    Route::put('finance/update/{id}', [FinanceController::class, 'update'])->name('finance.update');
+    Route::delete('finance/delete/{id}', [FinanceController::class, 'destroy'])->name('finance.destroy');
+
 
 });
 

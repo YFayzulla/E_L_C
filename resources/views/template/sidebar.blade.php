@@ -1,7 +1,7 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
 
-        <img src="{{asset('storage/Photo/logo.jpg')}}" alt="" width="70px">
+        {{--        <img src="{{asset('storage/Photo/logo.jpg')}}" alt="" width="70px">--}}
         {{--              <span class="app-brand-logo demo">--}}
         {{--                <svg--}}
         {{--                    width="25"--}}
@@ -57,23 +57,27 @@
         {{--                  </g>--}}
         {{--                </svg>--}}
         {{--              </span>--}}
-        <span class="app-brand-text demo menu-text fw-bolder ms-2">@role('admin') Admin @endrole @role('user') Teacher @endrole </span>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-            <i class="bx bx-chevron-left bx-sm align-middle"></i>
-        </a>
+
+
+        {{--        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">--}}
+        {{--            <i class="bx bx-chevron-left bx-sm align-middle"></i>--}}
+        {{--        </a>--}}
+
     </div>
 
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
-        {{--        <li class="menu-item @if(request()->routeIs('user')) active @endif">--}}
-        {{--            <a href="{{ route('user') }}" class="menu-link">--}}
-        {{--                <i class='bx bx-home-circle'></i>--}}
-        {{--                <div data-i18n="Analytics">Asosiy sahifa</div>--}}
-        {{--            </a>--}}
-        {{--        </li>--}}
+
+{{--        <li class="menu-item @if(request()->routeIs('dashboard')) active @endif">--}}
+{{--            <a href="{{ route('dashboard') }}" class="menu-link">--}}
+{{--                <i class="menu-icon tf-icons bx bxs-dashboard"></i>--}}
+{{--                <div data-i18n="Analytics">Dashboard</div>--}}
+{{--            </a>--}}
+{{--        </li>--}}
+
         @role('admin')
         <li class="menu-item @if(request()->routeIs('teacher.index' , 'teacher.create' , 'teacher.edit', 'teacher.show')) active @endif">
             <a href="{{ route('teacher.index') }}" class="menu-link">
@@ -116,7 +120,24 @@
             </a>
         </li>
 
+        {{--        <li class="menu-item">--}}
+        {{--            <a href="javascript:void(0);" class="menu-link menu-toggle">--}}
+        {{--                <i class="menu-icon tf-icons bx bx-coin-stack"></i>--}}
+        {{--                <div data-i18n="Account Settings">Finance</div>--}}
+        {{--            </a>--}}
+        {{--            <ul class="menu-sub">--}}
+
+        <li class="menu-item @if(request()->routeIs('finance.other')) active @endif">
+            <a href="{{ route('finance.other') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-coin-stack"></i>
+                <div data-i18n="Notifications"> Finance </div>
+            </a>
+        </li>
+        {{--            </ul>--}}
+        {{--        </li>--}}
+
         @endrole
+
         @role('user')
 
         <li class="menu-item @if(request()->routeIs('assessment.index','assessment.show')) active @endif">
@@ -133,9 +154,8 @@
             </a>
         </li>
 
-
-        <li class="menu-item @if(request()->routeIs('attendance.list')) active @endif">
-            <a href="{{ route('attendance.list') }}" class="menu-link"> <!-- Default group ID if needed -->
+        <li class="menu-item @if(request()->routeIs('attendance.index')) active @endif">
+            <a href="{{ route('attendance.index') }}" class="menu-link"> <!-- Default group ID if needed -->
                 <i class="menu-icon tf-icons bx bx-table"></i>
                 <div data-i18n="Analytics">List Attendance</div>
             </a>

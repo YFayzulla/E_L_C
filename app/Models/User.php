@@ -33,13 +33,47 @@ class User extends Authenticatable
         'should_pay',
         'description',
         'status',
+        'percent',
         'mark'
     ];
 
-    public function teacherhasGroup()
+//    public function teacherhasGroup()
+//    {
+//        return $this->hasMany(Group::class);
+//    }
+
+    public function teacherHasStudents()
     {
-        return $this->hasMany(Group::class);
+
+        $groupIds = GroupTeacher::query()
+            ->where('teacher_id', $this->id)
+            ->pluck('group_id');
+
+
+        return User::role('student')
+            ->whereIn('group_id', $groupIds)
+            ->count();
+
     }
+
+    public function teacherPayment()
+    {
+
+        $summa =  0;
+        $groups = GroupTeacher::query()->where('teacher_id', $this->id)->get();
+
+        foreach ($groups as $group) {
+            $payment = Group::query()->findOrFail( $group->group_id);
+            $number =  User::query()->where('group_id', $group->group_id)->count();
+//            dd($number,$payment->monthly_payment);
+            $summa += $payment->monthly_payment * $number;
+        }
+
+        $summa = $summa*$this->percent/100;
+        return  $summa;
+
+    }
+
 
     public function group()
     {
@@ -71,6 +105,11 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class);
     }
 
+    public function teacherHasGroup()
+    {
+        return GroupTeacher::query()->where('teacher_id' , $this->id)->count()  ;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -89,4 +128,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    private function teacherGroups()
+    {
+        return $this->belongsTo(GroupTeacher::class);
+    }
 }

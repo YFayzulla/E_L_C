@@ -1,10 +1,6 @@
 @extends('template.master')
 @section('content')
     {{--    new code about whole table --}}
-
-
-
-
     <div class="container mt-4">
         <div class="p-4 bg-white shadow-sm rounded-lg">
             <h2 class="text-center mb-4">Attendance
@@ -96,9 +92,6 @@
     {{--                </form>--}}
 
 
-
-
-
     <div class="container mt-4">
         <div class="p-4 bg-white shadow-sm rounded-lg">
 
@@ -109,6 +102,8 @@
                     <td>teacher</td>
                     <td>lesson</td>
                     <td>date</td>
+                    <td>delete</td>
+
                 </tr>
                 @foreach($students as $attendance)
                     <tr>
@@ -117,6 +112,14 @@
                         <td>{{$attendance->teacher->name}}</td>
                         <td>{{$attendance->lesson->name}}</td>
                         <td>{{$attendance->created_at}}</td>
+
+                        <td>
+                            <form action="{{route('attendance.delete',$attendance->id)}}" method="POST">
+                                @csrf
+                                @method("DELETE")
+                                <button class="btn btn-danger"><i class="bx bx-trash-alt"></i></button>
+                            </form>
+                        </td>
                     </tr>
 
                 @endforeach

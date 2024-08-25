@@ -106,6 +106,8 @@ class GroupExtraController extends Controller
     public function attendance($id)
     {
 
+
+//        dd($id);
         $today = now()->day;
         $group = Group::find($id);
 
@@ -133,7 +135,9 @@ class GroupExtraController extends Controller
             $data[$student->name] = [];
 
             for ($i = 1; $i <= 31; $i++) {
+
                 $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
+
             }
 
         }
@@ -144,6 +148,8 @@ class GroupExtraController extends Controller
             $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
 
         }
+
+
 
 //new code ended
 
@@ -160,7 +166,6 @@ class GroupExtraController extends Controller
         ]);
 
     }
-
 
 
 }

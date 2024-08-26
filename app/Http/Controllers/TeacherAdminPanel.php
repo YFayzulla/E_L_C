@@ -44,6 +44,7 @@ class TeacherAdminPanel extends Controller
                     'user_id' => $name,
                     'group_id' => $id,
                     'who_checked' => $user_id,
+                    'status' => 1,
                     'lesson_id' => $lesson->id,
                 ]);
             }

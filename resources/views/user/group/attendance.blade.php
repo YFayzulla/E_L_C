@@ -2,37 +2,38 @@
 @section('content')
     <div class="container mt-4">
         <div class="p-4 bg-white shadow-sm rounded-lg">
-            <h2 class="text-center mb-4">Attendance for {{ \Carbon\Carbon::createFromDate($year, $month)->format('F Y') }}</h2>
-
-            <form method="GET" action="{{ route('group.attendance', $group->id) }}" class="mb-4">
-                <div class="row">
-                    <div class="col-md-4">
-                        <select id="month" name="date" class="form-control mr-2">
-                            <option value="">Select Month</option>
-                            @php
-                                $currentYear = date('Y');
-                                for ($month = 1; $month <= 12; $month++) {
-                                    $monthNum = str_pad($month, 2, '0', STR_PAD_LEFT);
-                                    $monthYear = $currentYear . '-' . $monthNum;
-                                    $monthName = date('F', mktime(0, 0, 0, $month, 1));
-                                    $selected = (date('Y-m') == $monthYear) ? 'selected' : '';
-                                    echo "<option value=\"$monthYear\" $selected>$monthName $currentYear</option>";
-                                }
-                            @endphp
-                        </select>
-                    </div>
-                    <div class="col">
-                        <button type="submit" class="btn btn-primary">Show</button>
-                    </div>
-                </div>
-            </form>
-
-            <form method="GET" action="{{ route('attendance.export', [$group->id, $year, $month]) }}">
-                <button type="submit" class="btn btn-danger mb-4">Export to Excel</button>
-            </form>
-
+            <h2 class="text-center mb-4">Attendance
+                for {{ \Carbon\Carbon::createFromDate($year, $month)->format('F Y') }}</h2>
 
             <div class="table-responsive">
+                <div class="d-flex mb-4">
+                    <div class="d-flex justify-content-center me-3">
+                        <form method="GET" action="{{ route('group.attendance', $group->id) }}" class="d-flex">
+                            <select id="month" name="date" class="form-select me-1">
+                                <option value="">Select Month</option>
+                                @php
+                                    $currentYear = date('Y');
+                                    for ($month = 1; $month <= 12; $month++) {
+                                        $monthNum = str_pad($month, 2, '0', STR_PAD_LEFT);
+                                        $monthYear = $currentYear . '-' . $monthNum;
+                                        $monthName = date('F', mktime(0, 0, 0, $month, 1));
+                                        $selected = (date('Y-m') == $monthYear) ? 'selected' : '';
+                                        echo "<option value=\"$monthYear\" $selected>$monthName $currentYear</option>";
+                                    }
+                                @endphp
+                            </select>
+                            <button type="submit" class="btn btn-primary">Show</button>
+                        </form>
+                    </div>
+
+                    @role('admin')
+                    <div class="d-flex align-items-center">
+                        <form method="GET" action="{{ route('attendance.export', [$group->id, $year, $month]) }}">
+                            <button type="submit" class="btn btn-danger">Export to Excel</button>
+                        </form>
+                    </div>
+                    @endrole
+                </div>
                 <table class="table table-bordered text-center">
                     <thead>
                     <tr>

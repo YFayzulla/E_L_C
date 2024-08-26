@@ -2,37 +2,55 @@
 @section('content')
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-
-        <button class="btn btn-warning" data-toggle="modal" data-target="#exampleModal">add group</button>
         {{-- modal --}}
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="{{route('teacher_group.store',$id)}}" method="post">
-                            @csrf
-                            @method('PUT')
-                            <select class="form-control" name="group_id">
-                                @foreach($groups as $group)
-                                    <option value="{{$group->id}}">{{$group->name}}</option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-primary mt-2">submit</button>
-                        </form>
+        <div class="col-lg-4 col-md-6">
+            <div class="mt-3">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#basicModal">
+                    Add group
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="basicModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Close"
+                                ></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{route('teacher_group.store',$id)}}" method="post">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="row">
+                                    <label for="exampleFormControlSelect1" class="form-label">Groups</label>
+                                    <select class="form-select" name="group_id" id="exampleFormControlSelect1">
+                                        @foreach($groups as $group)
+                                            <option value="{{$group->id}}">{{$group->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    </div>
+                                    <div class="modal-footer mt-3">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                            Close
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Hidden select area initially -->
-        <div class="table-responsive text-nowrap">
+        <div class="table-responsive text-nowrap mt-2">
             <table class="table">
                 <tr>
                     <th>No</th>

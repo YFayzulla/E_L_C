@@ -6,7 +6,9 @@ use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class TeacherController extends Controller
 {
@@ -41,11 +43,9 @@ class TeacherController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+
             'name' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/','unique:'.User::class],
-            'password' => 'required',
-            'location' => 'required',
-            'date_born' => 'required',
+            'phone' => ['required'],
 
         ]);
 
@@ -56,15 +56,18 @@ class TeacherController extends Controller
 
         }
 
+
         User::create([
             'name' => $request->name,
-            'password' => bcrypt($request->password),
+            'password' => bcrypt($request->name),
             'passport' => $request->passport,
             'date_born' => $request->date_born,
             'location' => $request->location,
-            'phone' => $request->phone,
+            'phone' => 998 . $request->phone,
             'photo' => $path ?? null,
+            'percent' => $request->percent
         ])->assignRole('user');
+
 
         return redirect()->route('teacher.index')->with('success', 'Information has been added');
     }
@@ -78,11 +81,17 @@ class TeacherController extends Controller
     public function show($id)
     {
 
-        $groups=Group::where('id','!=',1)->get();
+        $groups = DB::table('groups')
+            ->where('groups.id', '!=', 1)
+            ->leftJoin('group_teachers', 'groups.id', '=', 'group_teachers.group_id')
+            ->whereNull('group_teachers.group_id')
+            ->select('groups.*')
+            ->get();
 
-        $teachers=GroupTeacher::where('teacher_id','=',$id)->get();
 
-        return view('user.teacher.show',compact('teachers','groups','id'));
+        $teachers = GroupTeacher::where('teacher_id', '=', $id)->get();
+
+        return view('user.teacher.show', compact('teachers', 'groups', 'id'));
 
     }
 
@@ -114,9 +123,12 @@ class TeacherController extends Controller
         $request->validate([
             'name' => 'required',
             'date_born' => 'required',
-            'phone' => ['required', 'string', 'regex:/^\+998\d{9}$/'],
-            'password' => 'required',
-            'location'=>'required',
+            'phone' => [
+                'required',
+                'string',
+                Rule::unique('users', 'phone')->ignore($id),
+            ],
+//            'password' => 'required',
         ]);
 
 
@@ -128,20 +140,20 @@ class TeacherController extends Controller
             }
             $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
             $path = $request->file('photo')->storeAs('Photo', $fileName);
-        }
-
-;        $teacher->update([
+        };
+        $teacher->update([
             'name' => $request->name,
             'phone' => $request->phone,
             'password' => bcrypt($request->password),
             'date_born' => $request->date_born,
             'location' => $request->location,
             'passport' => $request->passport,
+            'percent' => $request->percent,
             'photo' => $path ?? $teacher->photo ?? null,
         ]);
 
 
-        return redirect()->route('teacher.index')->with('success','Information has been updated');
+        return redirect()->route('teacher.index')->with('success', 'Information has been updated');
 
     }
 
@@ -153,8 +165,8 @@ class TeacherController extends Controller
      */
     public function destroy($id)
     {
-        $teacher=User::find($id);
+        $teacher = User::find($id);
         $teacher->delete();
-        return redirect()->back()->with('success','Information deleted');
+        return redirect()->back()->with('success', 'Information deleted');
     }
 }

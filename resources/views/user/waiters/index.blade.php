@@ -31,7 +31,7 @@
                     <th>
                         <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"
-                        > xulosa
+                        > conclusion
                         </button>
                         {{--Modal--}}
                         <div class="modal fade" id="exampleModal{{$student->id}}" tabindex="-1"
@@ -45,7 +45,7 @@
                                         <form action="{{route('student.change.group',$student->id)}}" method="post">
                                             @csrf
                                             <label for="recipient-name"
-                                                   class="col-form-label"> boshqa guruhga o`tirish </label>
+                                                   class="col-form-label"> sitting in another group </label>
                                             <select name="group_id" class="form-control">
                                                 @foreach($groups as $g)
                                                     <option value="{{$g->id}}">{{$g->name}}</option>
@@ -65,15 +65,5 @@
             @endforeach
         </table>
         </div>
-        {{--        {{ $students->links() }}--}}
-        <script>
-            @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: '{{session('success')}}',
-                showConfirmButton: false,
-                timer: 1500
-            })
-            @endif
-        </script
+
 @endsection

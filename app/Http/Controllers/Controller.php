@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\DeptStudent;
+use App\Models\Finance;
 use App\Models\GroupTeacher;
 use App\Models\HistoryPayments;
 use App\Models\User;
@@ -17,16 +19,41 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-//    public function index()
-//    {
-//    }
 
-    public function auth()
+
+    public function index()
     {
-        $id = auth()->id();
-        $groups = GroupTeacher::where('teacher_id', $id)->get();
-        return view('dashboard', compact('groups'));
+
+        if (auth()->user()->hasRole('admin')) {
+
+            $teachers = User::query()->role('user')->get();
+
+            $summa = HistoryPayments::query()->sum('payment');
+
+            $consumption = Finance::query()->sum('payment');
+
+            $profit = $summa - $consumption;
+
+            $pie_chart = [ $summa, $consumption ];
+
+            return view('dashboard', [
+                    'teachers' => $teachers,
+                    'number_of_students' => User::query()->role('student')->count(),
+                    'daily_income' => HistoryPayments::query()->whereDate('created_at', today())->sum('payment'),
+                    'trent' => HistoryPayments::query()->whereDate('created_at', today())->get(['payment', 'name']),
+                    'students' => User::role('student')->where('status' ,'<',0 )->get(),
+                    'attendances'=>Attendance::query()->whereDate('created_at', today())->get(),
+                    'profit' => $profit,
+                    'pie_chart'=> $pie_chart
+                ]
+            );
+        }
+        else
+            return view('dashboard');
+
     }
+
+
 
     public function search(Request $request)
     {

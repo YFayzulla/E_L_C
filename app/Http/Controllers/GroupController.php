@@ -44,8 +44,6 @@ class GroupController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'start_time' => 'required',
-            'finish_time' => 'required',
             'monthly_payment' => 'required',
         ]);
 
@@ -99,8 +97,8 @@ class GroupController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'start_time' => 'required',
-            'finish_time' => 'required',
+//            'start_time' => 'required',
+//            'finish_time' => 'required',
             'monthly_payment' => 'required',
         ]);
 

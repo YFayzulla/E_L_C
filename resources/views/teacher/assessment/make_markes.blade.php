@@ -2,27 +2,27 @@
 @section('content')
 
     <div class="card">
-        <div class="table-responsive text-nowrap">
-
+        <div class="text-nowrap">
             <form action="{{route('assessment.update',$id)}}" method='post'>
                 @csrf
                 @method('PUT')
 
-                <div class="d-flex justify-content-end mb-4">
-                    <label for="lesson" class="mr-2 align-self-center">name</label>
-                    <input type="text" name="lesson" id="lesson" class="form-control w-25 m-1 mt-2">
+                <div class="row mb-4">
+                    <!-- Left-aligned label and input -->
+                    <div class="col-md-6 d-flex align-items-center">
+                        <label for="lesson" class="mr-2"></label>
+                        <input type="text" name="lesson" id="lesson" class="form-control w-50 m-3" placeholder="Test Name">
+                    </div>
                 </div>
 
-                <table class="table table-striped">
+                <table class="table table-responsive">
                     <thead>
                     <tr>
                         <th>T/R</th>
-                        <th>name</th>
-                        <th>
-                            mark
-                        </th>
-                        <th>reason</th>
-                        <th>recommendation</th>
+                        <th>Name</th>
+                        <th>Mark</th>
+                        <th>Reason</th>
+                        <th>Recommendation</th>
                     </tr>
                     </thead>
                     @php($i=0)
@@ -30,31 +30,35 @@
                         <input type="hidden" name="student[]" value="{{($student->id)}}">
                         <tbody class="table-border-bottom-0">
                         <tr>
-                            <td><i class="fab fa-angular fa-lg text-danger"></i>{{ $loop->index+1 }}</td>
-                            <td><i class="fab fa-angular fa-lg text-danger "></i>{{ $student->name }}</td>
-                            <th>
-                                <input type="text" class="float input-group-merge    justify-content-center"
+                            <td>{{ $loop->index+1 }}</td>
+                            <td>{{ $student->name }}</td>
+                            <td>
+                                <input type="number" class="float input-group-merge justify-content-center"
                                        style="height: 30px;width: 50px"
                                        name="end_mark[]">
-                            </th>
-                            <th>
-                                <input type="text" class="float input-group-merge form-control "
+                            </td>
+                            <td>
+                                <input type="text" class="float input-group-merge form-control"
                                        name="reason[]">
-                            </th>
-                            <th>
+                            </td>
+                            <td>
                                 <select class="form-select form-control" name="recommended[]">
-
                                     @foreach($groups as $group)
                                         <option value="{{ $group->name }}">{{ $group->name }}</option>
                                     @endforeach
                                 </select>
-                            </th>
+                            </td>
+                        </tr>
                         </tbody>
                         @php($i++)
-
                     @endforeach
                 </table>
-                <button type="submit" class="btn btn-primary m-2 position-absolute">topshirish</button>
+
+                <!-- Right-aligned submit button at the bottom -->
+                <div class="d-flex justify-content-end mb-4">
+                    <button type="submit" class="btn btn-primary m-3">Submit</button>
+                </div>
+
             </form>
         </div>
     </div>

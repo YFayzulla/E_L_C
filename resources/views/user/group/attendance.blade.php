@@ -83,6 +83,8 @@
                     <td>teacher</td>
                     <td>lesson</td>
                     <td>date</td>
+                    <td>delete</td>
+
                 </tr>
                 @foreach($students as $attendance)
                     <tr>
@@ -91,6 +93,19 @@
                         <td>{{ $attendance->teacher->name }}</td>
                         <td>{{ $attendance->lesson->name }}</td>
                         <td>{{ $attendance->created_at }}</td>
+                        <td>{{$loop->index+1}}</td>
+                        <td>{{$attendance->user->name}}</td>
+                        <td>{{$attendance->teacher->name}}</td>
+                        <td>{{$attendance->lesson->name}}</td>
+                        <td>{{$attendance->created_at}}</td>
+
+                        <td>
+                            <form action="{{route('attendance.delete',$attendance->id)}}" method="POST">
+                                @csrf
+                                @method("DELETE")
+                                <button class="btn btn-danger"><i class="bx bx-trash-alt"></i></button>
+                            </form>
+                        </td>
                     </tr>
                 @endforeach
             </table>

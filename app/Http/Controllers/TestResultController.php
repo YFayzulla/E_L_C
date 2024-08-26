@@ -11,7 +11,6 @@ class TestResultController extends Controller
 {
     public function index()
     {
-
         return view('assessment.main', [
             'data' => LessonAndHistory::query()->where('data', '=', 2)->paginate(10),
             'topStudents' => Assessment::query()->orderBy('get_mark', 'desc')

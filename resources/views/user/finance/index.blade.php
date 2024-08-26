@@ -34,14 +34,11 @@
                             <div class="d-flex justify-content-between flex-sm-row flex-column gap-3">
                                 <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
                                     <div class="card-title">
-                                        <h5 class="text-nowrap mb-2">Profile Report</h5>
-                                        <span class="badge bg-label-warning rounded-pill">Year 2021</span>
+                                        <h5 class="text-nowrap mb-2">Daily Consumption</h5>
+                                        <span class="badge bg-label-warning rounded-pill">{{today()->format('d-m-y')}}</span>
                                     </div>
                                     <div class="mt-sm-auto">
-                                        <small class="text-success text-nowrap fw-semibold"
-                                        ><i class="bx bx-chevron-up"></i> 68.2%</small
-                                        >
-                                        <h3 class="mb-0">$84,686k</h3>
+                                        <h3 class="mb-0">{{$daily_consumption}}</h3>
                                     </div>
                                 </div>
                                 <div id="profileReportChart"></div>
@@ -62,6 +59,7 @@
                             <th>Reason</th>
                             <th>Payment</th>
                             <th>Type</th>
+                            <th>Date</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -71,6 +69,7 @@
                                 <td>{{ $finance->reason }}</td>
                                 <td>{{ $finance->payment }}</td>
                                 <td>{{ $finance->type_name }}</td>
+                                <td>{{ $finance->created_at }}</td>
                                 <td>
                                     <div class="d-flex">
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceExport;
 use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\Group;
@@ -9,6 +10,7 @@ use App\Models\StudentInformation;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 use function Symfony\Component\Translation\t;
 
@@ -161,6 +163,32 @@ class GroupExtraController extends Controller
 
     }
 
+    public function export($groupId, $year, $month)
+    {
+        $group = Group::find($groupId);
+
+        $students = User::role('student')->where('group_id', $group->id)->get();
+
+        $attendances = Attendance::where('group_id', $groupId)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get();
+
+        $data = [];
+        foreach ($students as $student) {
+            $data[$student->name] = [];
+            for ($i = 1; $i <= 31; $i++) {
+                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
+            }
+        }
+
+        foreach ($attendances as $attendance) {
+            $day = $attendance->created_at->format('d');
+            $data[$attendance->user->name][$day] = $attendance->status;
+        }
+
+        return Excel::download(new AttendanceExport($group, $year, $month, $data), 'attendance.xlsx');
+    }
 
 
 }

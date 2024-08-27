@@ -23,10 +23,8 @@ class AttendanceExport implements FromArray, WithHeadings, WithStyles
 
     public function array(): array
     {
-        // Get the number of days in the month
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $this->month, $this->year);
 
-        // Fetch attendance data
         $data = Attendance::where('group_id', $this->groupId)
             ->whereYear('created_at', $this->year)
             ->whereMonth('created_at', $this->month)
@@ -37,18 +35,19 @@ class AttendanceExport implements FromArray, WithHeadings, WithStyles
         $rows = [];
         foreach ($data as $userId => $attendances) {
             $userName = $attendances->first()->user->name;
-            $days = array_fill(1, $daysInMonth, ''); // Initialize days for the month
+            $days = array_fill(1, $daysInMonth, '');
 
             foreach ($attendances as $attendance) {
                 $day = $attendance->created_at->format('d');
                 $days[intval($day)] = $attendance->status;
             }
 
-            $rows[] = array_merge([$userName], array_values($days));
+            $statusSum = array_sum(array_filter($days, 'is_numeric'));
+
+            $rows[] = array_merge([$userName], array_values($days), [$statusSum]);
         }
 
-        // Create the header row
-        $header = array_merge(['Name'], array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth)));
+        $header = array_merge(['Name'], array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth)), ['Total']);
 
         return array_merge([$header], $rows);
     }
@@ -56,7 +55,7 @@ class AttendanceExport implements FromArray, WithHeadings, WithStyles
     public function headings(): array
     {
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $this->month, $this->year);
-        return ['Name'] + array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth));
+        return array_merge(['Name'], array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth)), ['Total']);
     }
 
     public function styles(Worksheet $sheet)
@@ -72,9 +71,5 @@ class AttendanceExport implements FromArray, WithHeadings, WithStyles
                 'startColor' => ['rgb' => 'B7B7B7'],
             ],
         ]);
-
-        return [
-            // Apply styles to columns dynamically if needed
-        ];
     }
 }

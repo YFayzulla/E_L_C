@@ -46,6 +46,7 @@
                             <th class="{{ $isToday ? 'bg-success' : '' }}">{{ $day }}</th>
                             <!-- Add a class to highlight today's column -->
                         @endfor
+                        <th>Total</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -67,6 +68,7 @@
                                     @endif
                                 </td>
                             @endfor
+                            <td></td>
                         </tr>
                     @endforeach
                     </tbody>

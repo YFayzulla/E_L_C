@@ -65,7 +65,7 @@ class TeacherController extends Controller
             'location' => $request->location,
             'phone' => 998 . $request->phone,
             'photo' => $path ?? null,
-//            'percent' => $request->percent
+            'percent' => $request->percent
         ])->assignRole('user');
 
 

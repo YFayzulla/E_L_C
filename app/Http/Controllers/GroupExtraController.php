@@ -168,10 +168,10 @@ class GroupExtraController extends Controller
 
     }
 
-    public function export(Request $request, $id)
+    public function export($id)
     {
-        $year = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        $date = request('date', now()->format('Y-m'));
+        list($year, $month) = explode('-', $date);
 
         return Excel::download(new AttendanceExport($id, $year, $month), 'attendance.xlsx');
     }

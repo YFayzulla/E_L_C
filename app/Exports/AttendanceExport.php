@@ -2,74 +2,71 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use App\Models\Group;
+use App\Models\User;
 use App\Models\Attendance;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 
-class AttendanceExport implements FromArray, WithHeadings, WithStyles
+class AttendanceExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $groupId;
     protected $year;
     protected $month;
 
-    public function __construct($group, $year, $month)
+    public function __construct($groupId, $year, $month)
     {
-        $this->groupId = $group;
+        $this->groupId = $groupId;
         $this->year = $year;
         $this->month = $month;
     }
 
-    public function array(): array
+    public function collection()
     {
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $this->month, $this->year);
-
-        $data = Attendance::where('group_id', $this->groupId)
+        $group = Group::find($this->groupId);
+        $students = User::role('student')->where('group_id', $group->id)->get();
+        $attendances = Attendance::where('group_id', $this->groupId)
             ->whereYear('created_at', $this->year)
             ->whereMonth('created_at', $this->month)
-            ->with('user')
-            ->get()
-            ->groupBy('user_id');
+            ->get();
 
-        $rows = [];
-        foreach ($data as $userId => $attendances) {
-            $userName = $attendances->first()->user->name;
-            $days = array_fill(1, $daysInMonth, '');
+        $data = [];
 
-            foreach ($attendances as $attendance) {
-                $day = $attendance->created_at->format('d');
-                $days[intval($day)] = $attendance->status;
+        foreach ($students as $student) {
+            $data[$student->name] = [];
+
+            for ($i = 1; $i <= 31; $i++) {
+                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = '';
             }
-
-            $statusSum = array_sum(array_filter($days, 'is_numeric'));
-
-            $rows[] = array_merge([$userName], array_values($days), [$statusSum]);
         }
 
-        $header = array_merge(['Name'], array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth)), ['Total']);
+        foreach ($attendances as $attendance) {
+            $day = $attendance->created_at->format('d');
+            $data[$attendance->user->name][$day] = $attendance->status;
+        }
 
-        return array_merge([$header], $rows);
+        $collection = collect();
+
+        foreach ($data as $studentName => $attendanceDays) {
+            $collection->push(array_merge(['Student Name' => $studentName], $attendanceDays));
+        }
+
+        return $collection;
+    }
+
+    public function map($row): array
+    {
+        return array_values($row);
     }
 
     public function headings(): array
     {
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $this->month, $this->year);
-        return array_merge(['Name'], array_map(fn($i) => str_pad($i, 2, '0', STR_PAD_LEFT), range(1, $daysInMonth)), ['Total']);
-    }
+        $days = range(1, 31);
+        $daysFormatted = array_map(function($day) {
+            return str_pad($day, 2, '0', STR_PAD_LEFT);
+        }, $days);
 
-    public function styles(Worksheet $sheet)
-    {
-        $highestColumn = $sheet->getHighestColumn();
-        $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
-
-        $sheet->getStyle('A1:' . $sheet->getCellByColumnAndRow($highestColumnIndex, 1)->getColumn() . '1')->applyFromArray([
-            'font' => ['bold' => true],
-            'alignment' => ['horizontal' => 'center'],
-            'fill' => [
-                'fillType' => 'solid',
-                'startColor' => ['rgb' => 'B7B7B7'],
-            ],
-        ]);
+        return array_merge(['Student Name'], $daysFormatted);
     }
 }

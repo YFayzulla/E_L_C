@@ -28,7 +28,7 @@
 
                     @role('admin')
                     <div class="d-flex align-items-center">
-                        <form method="GET" action="{{ route('attendance.export', [$group->id, $year, $month]) }}">
+                        <form method="GET" action="{{ route('export.attendances', ['id' => $group->id, 'date' => $year . '-' . $month]) }}"">
                             <button type="submit" class="btn btn-danger">Export to Excel</button>
                         </form>
                     </div>

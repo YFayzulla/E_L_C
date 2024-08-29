@@ -49,7 +49,11 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping
         $collection = collect();
 
         foreach ($data as $studentName => $attendanceDays) {
-            $collection->push(array_merge(['Student Name' => $studentName], $attendanceDays));
+            $total = array_reduce($attendanceDays, function ($sum, $status) {
+                return $sum + ($status ? 1 : 0);
+            }, 0);
+
+            $collection->push(array_merge(['Student Name' => $studentName], $attendanceDays, ['Total' => $total]));
         }
 
         return $collection;
@@ -63,10 +67,10 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         $days = range(1, 31);
-        $daysFormatted = array_map(function($day) {
+        $daysFormatted = array_map(function ($day) {
             return str_pad($day, 2, '0', STR_PAD_LEFT);
         }, $days);
 
-        return array_merge(['Student Name'], $daysFormatted);
+        return array_merge(['Student Name'], $daysFormatted, ['Total']);
     }
 }

@@ -19,9 +19,19 @@
                 <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
-
-                <label for="phone" class="text-dark">Tel</label>
-                <input id="phone" name="phone" value="{{$student->phone}}" type="text" class="form-control">
+                <label for="phone" class="text-dark">Phone</label>
+                <div class="input-group input-group-merge">
+                <span class="input-group-text">+99 8</span>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    pattern="[0-9]{9}"
+                    maxlength="9"
+                    class="form-control"
+                    value="{{$student->phone}}"
+                />
+                </div>
 
                 @error('phone')
                 <div class="alert alert-danger" role="alert">This place should be written</div>

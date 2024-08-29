@@ -46,7 +46,7 @@
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th>{{$teacher->name}}</th>
-                        <th>+{{$teacher->phone}}</th>
+                        <th>+998 {{$teacher->phone}}</th>
                         <th>{{$teacher->location}}</th>
                         <th>{{$teacher->date_born}}</th>
                         <td>

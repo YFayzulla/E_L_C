@@ -36,7 +36,7 @@
                 <tr>
                     <th>id</th>
                     <th>name</th>
-                    <th>tel</th>
+                    <th>phone</th>
                     <th>Parents tel</th>
                     {{--                <th>oylik to`lov</th>--}}
                     <th>group</th>
@@ -49,7 +49,7 @@
                         <th>{{$loop->index+1}}</th>
                         {{--                    @dd($student->name)--}}
                         <th>{{$student->name}}</th>
-                        <th>{{$student->phone}}</th>
+                        <th>+998 {{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         {{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
                         <th>{{$student->group->name}}</th>

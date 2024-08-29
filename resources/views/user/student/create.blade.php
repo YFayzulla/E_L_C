@@ -21,8 +21,18 @@
                 <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
 
 
-                <label for="phone" class="text-dark">Tel</label>
-                <input id="phone" name="phone" value="{{old('phone')}}" type="text" class="form-control" placeholder="+998(__)_______">
+                <label for="phone" class="text-dark">phone</label>
+                <span class="input-group-text">+99 8</span>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        pattern="[0-9]{9}"
+                        maxlength="9"
+                        class="form-control"
+                        placeholder="912345678"
+                        value="{{ old('phone') }}"
+                    />
 
                 @error('phone')
                 <div class="alert alert-danger" role="alert">This place should be written</div>

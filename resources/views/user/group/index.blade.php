@@ -1,34 +1,40 @@
 @extends('template.master')
 @section('content')
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-0">Groups</h5>
+            <div class="dt-action-buttons text-end pt-3 pt-md-0">
+                <div class="dt-buttons btn-group flex-wrap">
+                    <div class="btn-group">
+                        <a class="btn buttons-collection dropdown-toggle btn-label-primary me-2" tabindex="0"
+                           aria-controls="DataTables_Table_0" type="button" id="dropdownMenuButton"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <span><i class="bx bx-export me-sm-1"></i> <span
+                                    class="d-none d-sm-inline-block">Export</span></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="{{URL::to('/group/pdf') }}"><i
+                                        class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
+                        </ul>
+                    </div>
+                    <a href="{{ route('group.create')  }}" class="btn btn-secondary create-new btn-primary" tabindex="0"
+                       aria-controls="DataTables_Table_0">
 
-
-        <h1 class="text-center">Groups</h1>
-
-        <ul class="nav nav-pills flex-column flex-md-row mb-3">
-            <li class="nav-item me-2 mt-2">
-                <a class="btn btn-outline-success" href="{{route('group.create')}}">
-                    <i class="bx bx-plus"></i>
-                </a>
-            </li>
-            <li class="nav-item me-2 mt-2">
-                <a class="btn btn-danger" href="{{ URL::to('/group/pdf') }}">
-                    Report
-                </a>
-            </li>
-        </ul>
+                        <span><i class="bx bx-plus me-sm-1"></i> <span
+                                class="d-none d-sm-inline-block">Add New Group</span></span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <div class="table-responsive text-nowrap">
-
             <table class="table">
                 <thead>
                 <tr>
                     <th>id</th>
                     <th>Name</th>
-                    <th>opened date</th>
                     <th>start time</th>
                     <th>finish time</th>
-                    <th>level</th>
                     <th>cost</th>
                     <th class="text-center">action</th>
                 </tr>
@@ -38,10 +44,8 @@
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th>{{$group->name}}</th>
-                        <th>{{$group->created_at}}</th>
                         <th>{{$group->start_time}}</th>
                         <th>{{$group->finish_time}}</th>
-                        <th>{{$group->level}}</th>
                         <th>{{number_format($group->monthly_payment ,0, '.', ' ')}}</th>
                         <th class="d-flex">
                             <a href="{{route('group.students',$group->id)}}" class="btn btn-outline-info m-1">

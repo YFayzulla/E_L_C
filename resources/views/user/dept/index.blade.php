@@ -1,7 +1,7 @@
 @extends('template.master')
 @section('content')
 
-    <div class="card ">
+    <div class="card">
         <div class="max-w-xl">
             <div class="table-responsive text-nowrap">
                 <table class="table">

@@ -15,19 +15,27 @@ class PdfController extends Controller
 {
     public function RoomListPDF(Request $request)
     {
-
-        $today = now()->toDateString();
-
-        // Fetch your table data here (e.g., from a database)
-        $tableData = HistoryPayments::query()->whereBetween('date', [$request->startDate, $request->endDate])->get();
+        // Fetch table data based on flexible date range
+        $tableData = HistoryPayments::query()
+            ->when($request->startDate && $request->endDate, function ($query) use ($request) {
+                // If both startDate and endDate are provided, filter between these dates
+                $query->whereBetween('date', [$request->startDate, $request->endDate]);
+            })
+            ->when($request->startDate && !$request->endDate, function ($query) use ($request) {
+                // If only startDate is provided, treat it as a single day filter
+                $query->whereDate('date', $request->startDate);
+            })
+            ->when(!$request->startDate && $request->endDate, function ($query) use ($request) {
+                // If only endDate is provided, treat it as a single day filter
+                $query->whereDate('date', $request->endDate);
+            })
+            ->get();
 
         // Generate the PDF
         $pdf = PDF::loadView('user.pdf.payments', ['users' => $tableData]);
-        // Optionally, you can customize the PDF settings here, e.g., set paper size, orientation, etc.
 
         // Download the PDF or display it in the browser
         return $pdf->download('orders.pdf');
-
     }
 
     public function history($id)

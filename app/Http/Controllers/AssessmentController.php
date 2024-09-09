@@ -102,12 +102,13 @@ class AssessmentController extends Controller
         for ($i = 0; $i < $count; $i++) {
             $data = new Assessment();
             if ($end_mark[$i] != null || $end_mark [$i] != 0) {
-                $data->get_mark = $end_mark[$i];
+                $data->new_get_mark = $end_mark[$i];
                 $data->user_id = $user[$i];
                 $data->for_what = $reason[$i];
                 $data->rec_group = $rec_group[$i];
                 $data->group = $group->name ;
                 $data->history_id = $history->id ;
+                $data->get_mark = 0;
                 $data->save();
             }
 

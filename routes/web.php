@@ -18,10 +18,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/1', function () {
-    $student = User::find(3);
-    return view('user.pdf.student_show', compact('student'));
-});
+//Route::get('/1', function () {
+//    $student = User::find(3);
+//    return view('user.pdf.student_show', compact('student'));
+//});
 
 //attendance list
 

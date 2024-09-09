@@ -21,7 +21,7 @@
                                 <tr>
                                     <td>{{ $topStudent->student->name }}</td>
                                     <td>{{ $topStudent->group }}</td>
-                                    <td>{{ $topStudent->get_mark }}</td>
+                                    <td>{{ $topStudent->new_get_mark }}</td>
                                 </tr>
                             @endforeach
                             </tbody>

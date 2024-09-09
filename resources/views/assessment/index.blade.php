@@ -44,7 +44,7 @@
                             </td>
                             <th>{{$loop->index+1}}</th>
                             <th>{{$assessment->student->name}}</th>
-                            <th>{{$assessment->get_mark}}</th>
+                            <th>{{$assessment->new_get_mark}}</th>
                             <th>{{$assessment->for_what}}</th>
                             <th>{{$assessment->rec_group}}</th>
                             <th>

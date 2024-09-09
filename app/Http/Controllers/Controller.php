@@ -20,7 +20,6 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
 
-
     public function index()
     {
 
@@ -34,56 +33,53 @@ class Controller extends BaseController
 
             $profit = $summa - $consumption;
 
-            $pie_chart = [ $summa, $consumption ];
+            $pie_chart = [$summa, $consumption];
 
             return view('dashboard', [
                     'teachers' => $teachers,
                     'number_of_students' => User::query()->role('student')->count(),
                     'daily_income' => HistoryPayments::query()->whereDate('created_at', today())->sum('payment'),
                     'trent' => HistoryPayments::query()->whereDate('created_at', today())->get(['payment', 'name']),
-                    'students' => User::role('student')->where('status' ,'<',0 )->get(),
-                    'attendances'=>Attendance::query()->whereDate('created_at', today())->get(),
+                    'students' => User::role('student')->where('status', '<', 0)->get(),
+                    'attendances' => Attendance::query()->whereDate('created_at', today())->get(),
                     'profit' => $profit,
-                    'pie_chart'=> $pie_chart
+                    'pie_chart' => $pie_chart
                 ]
             );
-        }
-        else
+        } else
             return view('dashboard');
 
     }
 
-
-
     public function search(Request $request)
     {
-        // Convert input dates to Carbon instances and format them as strings
-        $startDate = $request->start_date ? Carbon::parse($request->start_date)->subDay()->startOfDay() : null;
+        // Convert input dates to Carbon instances and format them
+        $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
         $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
 
-        // If both dates are provided, perform the whereBetween query
+        // Start building the query
+        $query = HistoryPayments::query();
+
+        // Apply filters based on provided dates
         if ($startDate && $endDate) {
-            $users = HistoryPayments::whereBetween('date', [$startDate, $endDate])->get();
-        } else {
-            // If only one date is provided, check for that specific date
-            $users = HistoryPayments::query()
-                ->when($startDate, function ($query, $startDate) {
-                    return $query->whereDate('date', $startDate);
-                })
-                ->when($endDate, function ($query, $endDate) {
-                    return $query->orWhereDate('date', $endDate);
-                })
-                ->get();
+            // Both start and end dates are provided
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            // Only start date is provided
+            $query->whereDate('date', $startDate);
+        } elseif ($endDate) {
+            // Only end date is provided
+            $query->whereDate('date', $endDate);
         }
 
-        $date = [$startDate, $endDate];
+        // Execute the query
+        $users = $query->get();
 
         // Pass the users and date range to the view
         return view('user.index', [
             'users' => $users,
             'start_date' => $startDate ? $startDate->toDateString() : null,
             'end_date' => $endDate ? $endDate->toDateString() : null,
-//            'date' => $date,
         ]);
     }
 

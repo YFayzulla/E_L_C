@@ -9,7 +9,7 @@ class Assessment extends Model
 {
 
     use HasFactory;
-    protected $fillable=['user_id','get_mark','group','overall_result','for_what','rec_group','history_id'];
+    protected $fillable=['user_id','get_mark','new_get_mark','group','overall_result','for_what','rec_group','history_id'];
 
     public function student(){
         return $this->belongsTo(User::class , 'user_id','id' );

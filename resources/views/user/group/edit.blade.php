@@ -11,8 +11,8 @@
 
                 @csrf
                 @method('PUT')
-                <label for="name" class="text-dark">name</label>
-                <input id="name" name="name" value="{{$group->name}}" type="text" class="form-control">
+{{--                <label for="name" class="text-dark">name</label>--}}
+{{--                <input id="name" name="name" value="{{$group->name}}" type="text" class="form-control">--}}
 
                 @error('name')
                 <div class="alert alert-danger" role="alert">This place should be written</div>

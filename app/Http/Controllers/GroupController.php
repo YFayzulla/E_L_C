@@ -96,14 +96,14 @@ class GroupController extends Controller
     public function update(Request $request, Group $group)
     {
         $request->validate([
-            'name' => 'required',
+//            'name' => 'required',
 //            'start_time' => 'required',
 //            'finish_time' => 'required',
             'monthly_payment' => 'required',
         ]);
 
         $group->update([
-            'name' => $request->name,
+//            'name' => $request->name,
             'start_time' => $request->start_time,
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,

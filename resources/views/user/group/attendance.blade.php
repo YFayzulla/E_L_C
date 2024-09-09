@@ -96,12 +96,6 @@
                         <td>{{ $attendance->teacher->name }}</td>
                         <td>{{ $attendance->lesson->name }}</td>
                         <td>{{ $attendance->created_at }}</td>
-                        <td>{{$loop->index+1}}</td>
-                        <td>{{$attendance->user->name}}</td>
-                        <td>{{$attendance->teacher->name}}</td>
-                        <td>{{$attendance->lesson->name}}</td>
-                        <td>{{$attendance->created_at}}</td>
-
                         <td>
                             <form action="{{route('attendance.delete',$attendance->id)}}" method="POST">
                                 @csrf

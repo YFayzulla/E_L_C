@@ -13,6 +13,7 @@ use PDF;
 
 class PdfController extends Controller
 {
+
     public function RoomListPDF(Request $request)
     {
         // Fetch table data based on flexible date range

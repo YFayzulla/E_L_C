@@ -10,6 +10,7 @@
                         <td>No</td>
                         <td>name</td>
                         <td>group</td>
+                        <td>payment</td>
                         <td>status</td>
                         <td>pay</td>
                     </tr>
@@ -21,6 +22,7 @@
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
                             <th>{{$student->group->name}}</th>
+                            <th>{{$student->should_pay}}</th>
                             <th>@if( $student->status <= 0 )
                                     <p class="text-danger"> debtor </p>
                                 @else

@@ -12,7 +12,7 @@ class TestResultController extends Controller
     public function index()
     {
         return view('assessment.main', [
-            'data' => LessonAndHistory::query()->where('data', '=', 2)->paginate(10),
+            'data' => LessonAndHistory::query()->where('data', '=', 2)->paginate(7),
             'topStudents' => Assessment::query()->orderBy('new_get_mark', 'desc')
                 ->take(5)->get()
         ]);

@@ -14,7 +14,8 @@
                                     <div class="d-flex flex-column align-items-start justify-content-between w-100">
                                         <div class="card-title">
                                             <h5 class="text-nowrap mb-2">Students</h5>
-                                            <span class="badge bg-label-success rounded-pill">{{ now()->format('d-m-y') }}</span>
+                                            <span
+                                                class="badge bg-label-success rounded-pill">{{ now()->format('d-m-y') }}</span>
                                         </div>
                                         <div class="mt-3">
                                             <h3 class="mb-0"><b>{{ $number_of_students }}</b></h3>
@@ -130,7 +131,8 @@
                             ><i class="bx bx-minus"></i
                                 ></span>
                                     </div>
-                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div
+                                        class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                         <div class="me-2">
                                             <h6 class="mb-0">{{$student->name}}</h6>
                                         </div>
@@ -138,7 +140,8 @@
                                             <small class="fw-semibold">{{$student->group->name}}</small>
                                         </div>
                                         <div class="user-progress">
-                                            <small class="fw-semibold">{{$student->status == - 1  ? "Qarzdor" : 'To`lagan'}}</small>
+                                            <small
+                                                class="fw-semibold">{{$student->status == - 1  ? "Qarzdor" : 'To`lagan'}}</small>
                                         </div>
                                         <div class="user-progress">
                                             <small class="fw-semibold">+{{$student->phone}}</small>
@@ -164,10 +167,10 @@
                     </div>
                     <div class="card-body">
                         <ul class="p-0 m-0">
-
                             @foreach($attendances as $attendance)
                                 <li class="d-flex mb-4 pb-1">
-                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                    <div
+                                        class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                         <div class="me-2">
                                             <h6 class="mb-0">{{$loop->index+1}}</h6>
                                         </div>
@@ -184,6 +187,9 @@
                                 </li>
                             @endforeach
                         </ul>
+                    </div>
+                    <div class="card-body">
+                        {{ $attendances->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>

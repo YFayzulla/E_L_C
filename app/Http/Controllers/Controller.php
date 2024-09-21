@@ -41,7 +41,7 @@ class Controller extends BaseController
                     'daily_income' => HistoryPayments::query()->whereDate('created_at', today())->sum('payment'),
                     'trent' => HistoryPayments::query()->whereDate('created_at', today())->get(['payment', 'name']),
                     'students' => User::role('student')->where('status', '<', 0)->get(),
-                    'attendances' => Attendance::query()->whereDate('created_at', today())->get(),
+                    'attendances' => Attendance::query()->whereDate('created_at', today())->paginate(10),
                     'profit' => $profit,
                     'pie_chart' => $pie_chart
                 ]

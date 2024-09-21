@@ -122,10 +122,10 @@ class AssessmentController extends Controller
                 'mark' => $end_mark[$i]
             ]);
 
-
         }
 
         return redirect()->route('assessment.index')->with('success', 'Grades saved');
+
     }
 
     /**

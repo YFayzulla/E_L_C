@@ -14,4 +14,11 @@ class LessonAndHistory extends Model
         'data',
         'group'
     ];
+
+
+    public function groupName()
+    {
+        return $this->belongsTo(Group::class, 'group');
+    }
+
 }

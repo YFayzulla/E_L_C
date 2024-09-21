@@ -39,6 +39,7 @@
                             <thead>
                             <tr>
                                 <td>Name</td>
+                                <td>Group</td>
                                 <td>Data</td>
                             </tr>
                             </thead>
@@ -49,6 +50,11 @@
                                         <b><a href="{{route('test.show',$item->id)}}"
                                               class="mb-0 m-2 text-secondary">{{ $item->name }}</a></b>
                                     </td>
+
+                                    <td>
+                                        <h6>{{$item->groupName->name}}</h6>
+                                    </td>
+
                                     <td>
                                         <div class="user-progress d-flex align-items-center gap-1">
                                             <h6 class="mb-0">{{ $item->created_at->format('d-m-y') }}</h6>

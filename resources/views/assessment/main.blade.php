@@ -36,7 +36,6 @@
                     <h5 class="card-header">Test List</h5>
                     <div class="table-responsive text-nowrap">
                         <table class="table">
-
                             <thead>
                             <tr>
                                 <td>Name</td>
@@ -44,18 +43,16 @@
                                 <td>Data</td>
                             </tr>
                             </thead>
-
                             <tbody>
                             @foreach($data as $item)
-                                <tr>
+                                <tr class="clickable-row" data-href="{{ route('test.show', $item->id) }}">
                                     <td>{{$item->name}}</td>
                                     <td>{{$item->groupName->name}}</td>
-                                    <td>{{$item->created_at->format("D-M-Y")}}</td>
+                                    <td>{{$item->created_at->format('D-M-Y')}}</td>
                                 </tr>
                             @endforeach
                             </tbody>
                         </table>
-
                         <div class="card-footer">
                             {{ $data->links('pagination::bootstrap-5') }}
                         </div>
@@ -64,6 +61,18 @@
             </div>
         </div>
     </div>
+
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const rows = document.querySelectorAll('.clickable-row');
+            rows.forEach(function (row) {
+                row.addEventListener('click', function () {
+                    window.location.href = row.getAttribute('data-href');
+                });
+            });
+        });
+    </script>
 
 @endsection
 

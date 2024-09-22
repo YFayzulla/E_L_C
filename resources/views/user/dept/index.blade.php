@@ -2,6 +2,27 @@
 @section('content')
 
     <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-0">Payment</h5>
+            <div class="dt-action-buttons text-end pt-3 pt-md-0">
+                <div class="dt-buttons btn-group flex-wrap">
+                    <div class="btn-group">
+                        <a class="btn buttons-collection dropdown-toggle btn-label-primary me-2" tabindex="0"
+                           aria-controls="DataTables_Table_0" type="button" id="dropdownMenuButton"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <span><i class="bx bx-export me-sm-1"></i> <span
+                                    class="d-none d-sm-inline-block">Export</span></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="{{URL::to('/student/payment/pdf') }}"><i
+                                        class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="max-w-xl">
             <div class="table-responsive text-nowrap">
                 <table class="table">
@@ -29,7 +50,8 @@
                                     <p class="text-success"> paid </p>
                                 @endif</th>
                             <th>
-                                <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
+                                <a class="btn btn-outline-primary m-1"
+                                   href="{{ route('student.show',$student->id) }}"><i
                                         class="bx bx-show-alt"></i></a>
 
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
@@ -57,7 +79,7 @@
                                                 <form action="{{route('dept.update',$student->id)}}" method="post">
                                                     @csrf
                                                     @method('PUT')
-{{--                                                    <div class="table-responsive">--}}
+                                                    {{--                                                    <div class="table-responsive">--}}
                                                     <label for="recipient-name"
                                                            class="col-form-label">{{$student->name}} is going to pay,
                                                         monthly payment {{$student->should_pay}}</label>
@@ -68,12 +90,12 @@
 
 
                                                     @endif
-                                                        @if($student->status < 0)
-                                                            <p>
-                                                                the student has a debt of {{abs($student->status)}} month
-                                                            </p>
-                                                        @endif
-{{--                                                    </div>--}}
+                                                    @if($student->status < 0)
+                                                        <p>
+                                                            the student has a debt of {{abs($student->status)}} month
+                                                        </p>
+                                                    @endif
+                                                    {{--                                                    </div>--}}
                                                     <div class="mb-3 d-flex">
                                                         <input type="number" class="form-control me-1"
                                                                value="@if($student->studentdept->payed != null){{$student->studentdept->dept  -  $student->studentdept->payed}}@endif"

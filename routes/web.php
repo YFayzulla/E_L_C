@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::get('/teacher/pdf', [PdfController::class, 'teacher']);
     Route::get('/group/pdf', [PdfController::class, 'group']);
     Route::get('/student/pdf', [PdfController::class, 'student']);
+    Route::get('/student/payment/pdf', [PdfController::class, 'studentPayment']);
 
 //    Excel
     Route::get('export-attendances/{id}', [GroupExtraController::class, 'export'])->name('export.attendances');

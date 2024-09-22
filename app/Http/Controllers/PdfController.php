@@ -66,7 +66,7 @@ class PdfController extends Controller
     {
         set_time_limit(300); // Set to a value greater than 60 seconds
         $today = now()->toDateString();
-        $group = Group::where('id','!=',1)->get();
+        $group = Group::where('id', '!=', 1)->get();
         $pdf = PDF::loadView('user.pdf.group', ['group' => $group]);
         return $pdf->download('orders.pdf');
 
@@ -93,6 +93,19 @@ class PdfController extends Controller
         $pdf = PDF::loadView('user.pdf.group_assessment', ['groups' => $groups]);
 
         return $pdf->download('orders.pdf');
+
+    }
+
+    public function studentPayment()
+    {
+
+        $students = User::role('student')->orderby('name')->get();
+
+        $pdf = PDF::loadView('user.pdf.studentpayment', ['students' => $students]);
+
+        return $pdf->download('orders.pdf');
+
+        return "PDF generation job dispatched successfully!";
 
     }
 }

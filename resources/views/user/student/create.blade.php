@@ -1,5 +1,5 @@
 @section('content')
-@extends('template.master')
+    @extends('template.master')
 
     <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
@@ -21,23 +21,17 @@
                 <input id="passport" name="passport" value="{{old('passport')}}" type="text" class="form-control">
 
 
-                <label for="phone" class="text-dark">phone</label>
-                <span class="input-group-text">+99 8</span>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        pattern="[0-9]{9}"
-                        maxlength="9"
-                        class="form-control"
-                        placeholder="912345678"
-                        value="{{ old('phone') }}"
-                    />
-
-                @error('phone')
-                <div class="alert alert-danger" role="alert">This place should be written</div>
-                @enderror
-
+                <div class="mb-3">
+                    <label for="phone" class="form-label text-dark">Phone</label>
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text">+99 8</span>
+                        <input type="tel" id="phone" name="phone" maxlength="9" placeholder="912345678"
+                               value="{{ old('phone') }}" class="form-control">
+                    </div>
+                    @error('phone')
+                    <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
                 <label for="location" class="text-dark">Location</label>
                 <input id="location" name="location" value="{{old('location')}}" type="text" class="form-control">
 
@@ -46,29 +40,33 @@
                 @enderror
 
                 <label for="parents_name" class="text-dark">Parents name</label>
-                <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text" class="form-control">
+                <input id="parents_name" name="parents_name" value="{{old('parents_name')}}" type="text"
+                       class="form-control">
 
                 @error('parents_name')
                 <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
                 <label for="parents_tel" class="text-dark">Parents tel</label>
-                <input id="parents_tel" name="parents_tel" value="{{old('parents_tel')}}" type="text" class="form-control">
+                <input id="parents_tel" name="parents_tel" value="{{old('parents_tel')}}" type="text"
+                       class="form-control">
 
                 @error('parents_tel')
                 <div class="alert alert-danger" role="alert">This place should be written</div>
                 @enderror
 
                 <label for="should_pay" class="text-dark">Should Pay</label>
-                <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="number" class="form-control">
+                <input id="should_pay" name="should_pay" value="{{old('should_pay')}}" type="number"
+                       class="form-control">
 
                 <label for="description" class="text-dark">Description "not necessary"</label>
-                <input id="description" name="description" value="{{old('description')}}" type="text" class="form-control">
+                <input id="description" name="description" value="{{old('description')}}" type="text"
+                       class="form-control">
 
                 <label for="group_id" class="text-dark">Group</label>
-                <select class="form-control" name="group_id" >
+                <select class="form-control" name="group_id">
                     @foreach($groups as $group)
-                    <option value="{{$group->id}}">{{$group->name}}</option>
+                        <option value="{{$group->id}}">{{$group->name}}</option>
                     @endforeach
                 </select>
 
@@ -80,7 +78,7 @@
                 <label for="photo" class="text-dark"> Photo </label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 
-                <button type="submit" class="btn btn-warning m-4 "> submit </button>
+                <button type="submit" class="btn btn-warning m-4 "> submit</button>
 
             </form>
         </div>

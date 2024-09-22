@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\AttendanceExport;
 use App\Models\Assessment;
 use App\Models\Attendance;
+use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
@@ -35,7 +36,10 @@ class GroupExtraController extends Controller
 
         $user->update([
             'group_id' => $request->group_id,
+            'should_pay'=>$request->should_pay
         ]);
+
+        DeptStudent::query()->where('user_id', $id)->update(['dept' => $request->should_pay]);
 
         $group = Group::find($request->group_id);
 
@@ -149,7 +153,6 @@ class GroupExtraController extends Controller
             $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
 
         }
-
 
 
 //new code ended

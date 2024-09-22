@@ -74,17 +74,24 @@
                     <div class="modal-body">
                         <form action="{{route('student.change.group',$assessment->user_id)}}" method="post">
                             @csrf
-                            <label for="recipient-name"
-                                   class="form-label"> change group </label>
-                            <select name="group_id" class="form-select">
+                            {{$assessment->student->name}}
+
+                            <label for="recipient-name" class="form-label">Change group</label>
+                            <select name="group_id" class="form-select" id="group-select">
                                 @foreach($groups as $group)
-                                    <option value="{{$group->id}}">{{$group->name}}</option>
+                                    <option value="{{ $group->id }}" data-payment="{{ $group->monthly_payment }}">
+                                        {{ $group->name }}
+                                    </option>
                                 @endforeach
                             </select>
+
+                            <label for="payment" class="form-label mt-2">Payment</label>
+                            <input type="number" name="should_pay" class="form-control" id="payment-input">
+
                             <div class="mt-3">
-                                <button type="submit" class="btn btn-outline-success m-2">save
-                                </button>
+                                <button type="submit" class="btn btn-outline-success m-2">Save</button>
                             </div>
+
                         </form>
                     </div>
                 </div>
@@ -98,8 +105,9 @@
                 $(".checkbox").prop("checked", true);
             });
         });
+
     </script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 @endsection
-`
+

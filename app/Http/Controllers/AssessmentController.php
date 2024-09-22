@@ -82,6 +82,7 @@ class AssessmentController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $end_mark = $request->end_mark;
         $rec_group = $request->recommended;
         $reason = $request->reason;
@@ -97,8 +98,6 @@ class AssessmentController extends Controller
             ]);
 //        }
 
-//        dd($request->lesson);
-//        if ()
         for ($i = 0; $i < $count; $i++) {
             $data = new Assessment();
             if ($end_mark[$i] != null || $end_mark [$i] != 0) {
@@ -117,9 +116,9 @@ class AssessmentController extends Controller
 
 //            $student = StudentInformation::where('user_id',$user[$i])->where('group_id',$group)->get();
 //            dd($student);
-
             $student->update([
-                'mark' => $end_mark[$i]
+                'mark' => $end_mark[$i],
+                'should_pay' => $request->payment
             ]);
 
         }

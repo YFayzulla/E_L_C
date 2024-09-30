@@ -110,41 +110,26 @@ class GroupExtraController extends Controller
 
     public function attendance($id)
     {
-
-
-//        dd($id);
         $today = now()->day;
         $group = Group::find($id);
 
-        //       new code !!!
-
-        $date = request('date', now()->format('Y-m')); // Default to current year-month if not provided
+        $date = request('date', now()->format('Y-m'));
 
         list($year, $month) = explode('-', $date);
 
-        // Fetch students
-
-        $students = User::role('student')->where('group_id', $group->id)->get();
-
-        // Fetch attendances
+        $students = User::role('student')->where('group_id', $group->id)->orderby('name')->get();
 
         $attendances = Attendance::where('group_id', $id)->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)->get();
-
         $data = [];
-
-//        dd($attendances, $data);
-
         foreach ($students as $student) {
 
             $data[$student->name] = [];
 
             for ($i = 1; $i <= 31; $i++) {
 
-                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = ''; // Initialize all days as empty
-
+                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = '';
             }
-
         }
 
         foreach ($attendances as $attendance) {
@@ -153,9 +138,6 @@ class GroupExtraController extends Controller
             $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
 
         }
-
-
-//new code ended
 
         return view('user.group.attendance', [
             'group' => $group,

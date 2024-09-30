@@ -118,39 +118,6 @@
 
                         <span class="badge bg-label-info rounded-pill mb-2">{{today()->format('d-m-y')}}</span>
                         <h6 class="mb-2">{{number_format($profit, 0, '.', ' ')}} sum</h6>
-
-                        {{--                                                        @dd($pie_chart)--}}
-                        {{--                                                                                    <div id="orderStatisticsChart" data-pie-chart="{{ json_encode($pie_chart) }}"></div>--}}
-                        {{--                        </div>--}}
-
-                        @foreach($students as $student)
-                            <ul class="p-0 m-0">
-                                <li class="d-flex mb-4 pb-1">
-                                    <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-danger"
-                            ><i class="bx bx-minus"></i
-                                ></span>
-                                    </div>
-                                    <div
-                                        class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div class="me-2">
-                                            <h6 class="mb-0">{{$student->name}}</h6>
-                                        </div>
-                                        <div class="user-progress">
-                                            <small class="fw-semibold">{{$student->group->name}}</small>
-                                        </div>
-                                        <div class="user-progress">
-                                            <small
-                                                class="fw-semibold">{{$student->status == - 1  ? "Qarzdor" : 'To`lagan'}}</small>
-                                        </div>
-                                        <div class="user-progress">
-                                            <small class="fw-semibold">+{{$student->phone}}</small>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        @endforeach
-
                     </div>
                 </div>
 

@@ -18,7 +18,7 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups=Group::where('id','!=',1)->orderby('name') ->get();
+        $groups=Group::where('id','!=',1)->orderby('name')->get();
         return view('user.group.index',compact('groups'));
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Group;
+use App\Models\GroupTeacher;
 use App\Models\Level;
 use App\Models\StudentInformation;
 use App\Models\User;
@@ -18,8 +19,8 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups=Group::where('id','!=',1)->orderby('name')->get();
-        return view('user.group.index',compact('groups'));
+        $groups = Group::where('id', '!=', 1)->orderby('name')->get();
+        return view('user.group.index', compact('groups'));
     }
 
     /**
@@ -29,15 +30,15 @@ class GroupController extends Controller
      */
     public function create()
     {
-        $level=Level::all();
+        $level = Level::all();
 
-        return view('user.group.create',compact('level'));
+        return view('user.group.create', compact('level'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -60,7 +61,7 @@ class GroupController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Group  $group
+     * @param \App\Models\Group $group
      * @return \Illuminate\Http\Response
      */
     public function show(Group $group)
@@ -77,20 +78,20 @@ class GroupController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Group  $group
+     * @param \App\Models\Group $group
      * @return \Illuminate\Http\Response
      */
     public function edit(Group $group)
     {
-        $level=Level::all();
-        return view('user.group.edit',compact('group','level'));
+        $level = Level::all();
+        return view('user.group.edit', compact('group', 'level'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Group  $group
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Group $group
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Group $group)
@@ -110,6 +111,10 @@ class GroupController extends Controller
             'level' => $request->level,
         ]);
 
+        $teacher = User::query()->where('room_id', $request->room)->first();
+        GroupTeacher::query()->where('group_id', $group->id)->update(['teacher_id' => $teacher->id]);
+
+
         return redirect()->route('group.index')->with('success', 'Information has been updated');
 
 
@@ -118,13 +123,13 @@ class GroupController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Group  $group
+     * @param \App\Models\Group $group
      * @return \Illuminate\Http\Response
      */
     public function destroy(Group $group)
     {
         $group->delete();
         User::where('group_id', $group->id)->update(['group_id' => 1]);// Assuming 1 is the default group ID
-        return redirect()->back()->with('success','Information deleted');
+        return redirect()->back()->with('success', 'Information deleted');
     }
 }

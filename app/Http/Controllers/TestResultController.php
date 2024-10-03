@@ -22,7 +22,8 @@ class TestResultController extends Controller
     public function showResults($id)
     {
         $assessment = Assessment::query()->where('history_id', '=', $id)->get();
-        $name = $assessment[0]->group;
+        $name = $assessment->first()->group;
+//        dd($name,$assessment);
         return view('assessment.index', [
             'assessments' => Assessment::query()->where('history_id', '=', $id)->get(),
             'groups'=>Group::query()->orderBy('name')->get(),

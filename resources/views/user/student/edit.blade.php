@@ -21,16 +21,16 @@
 
                 <label for="phone" class="text-dark">Phone</label>
                 <div class="input-group input-group-merge">
-                <span class="input-group-text">+99 8</span>
-                <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    pattern="[0-9]{9}"
-                    maxlength="9"
-                    class="form-control"
-                    value="{{$student->phone}}"
-                />
+                    <span class="input-group-text">+99 8</span>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        pattern="[0-9]{9}"
+                        maxlength="9"
+                        class="form-control"
+                        value="{{$student->phone}}"
+                    />
                 </div>
 
                 @error('phone')
@@ -40,7 +40,6 @@
 
                 <label for="passport" class="text-dark">Passport</label>
                 <input id="passport" name="passport" value="{{$student->passport}}" type="text" class="form-control">
-
 
 
                 <label for="parents_name" class="text-dark">Parents name</label>
@@ -79,7 +78,8 @@
                 <select class="form-control" name="group_id">
                     <option value="{{$student->group_id}}">{{$student->group->name}}</option>
                     @foreach($groups as $group)
-                        <option value="{{$group->id}}" >{{$group->name}}</option>
+                        <option
+                            value="{{$group->id}}">{{($group->name == "waiters") ? 'Waiting room' : $group->name }}</option>
                     @endforeach
                 </select>
 
@@ -92,7 +92,7 @@
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">
 
 
-                <button class="btn btn-warning m-4 "> Submit </button>
+                <button class="btn btn-warning m-4 "> Submit</button>
 
             </form>
         </div>

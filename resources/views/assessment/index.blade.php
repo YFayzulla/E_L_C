@@ -46,7 +46,8 @@
                             <th>{{$assessment->student->name}}</th>
                             <th>{{$assessment->new_get_mark}}</th>
                             <th>{{$assessment->for_what}}</th>
-                            <th>{{$assessment->rec_group}}</th>
+                            <th>{{($assessment->rec_group == 'waiters')?'waiting room':$assessment->rec_group }}</th>
+
                             <th>
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                         data-bs-target="#exampleModal{{$assessment->user_id}}" data-bs-whatever="@mdo"
@@ -80,7 +81,7 @@
                             <select name="group_id" class="form-select" id="group-select">
                                 @foreach($groups as $group)
                                     <option value="{{ $group->id }}" data-payment="{{ $group->monthly_payment }}">
-                                        {{ $group->name }}
+                                        {{($group->name == "waiters") ? 'Waiting room' : $group->name }}
                                     </option>
                                 @endforeach
                             </select>

@@ -27,7 +27,7 @@
                     <th>{{$student->name}}</th>
                     <th>{{$student->phone}}</th>
                     <th>{{$student->parents_tel}}</th>
-                    <th>{{$student->group->name}}</th>
+                    <th>{{($student->group->name == 'waiters')?'Waiting room' : $student->group->name }}</th>
                     <th>
                         <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal{{$student->id}}" data-bs-whatever="@mdo"

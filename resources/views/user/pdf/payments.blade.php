@@ -17,7 +17,7 @@
                     <th>{{$loop->index+1}}</th>
                     <th>{{$student->name}}</th>
                     <th>{{$student->payment}}</th>
-                    <th>{{$student->group}}</th>
+                    <th>{{($student->group=='waiters')?'Waiting room' : $student->group}}</th>
                     <th>{{$student->type_of_money}}</th>
                     <th>{{$student->date}}</th>
                     @php

@@ -83,7 +83,7 @@
 
                             <tr>
                                 <th>{{$loop->index+1}}</th>
-                                <th>{{$item->group}}</th>
+                                <th>{{($item->group == 'waiters')?'Waiting room':$item->group}}</th>
                                 <th>{{$item->created_at}}</th>
                             </tr>
                         @endforeach

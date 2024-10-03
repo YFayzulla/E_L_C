@@ -23,7 +23,7 @@
                         <th>{{$students->parents_tel}}</th>
                         <th>{{$students->parents_name}}</th>
                         {{--                    <th>@if(Carbon::parse( $student->studentdept->date)->greaterThan(Carbon::parse(now()->format('Y-m-d')) )) <p style="color: #a52834" >{{ 'qarz' }}</p> @else <p style="color: #0f5132">{{ 't`olangan' }}</p> @endif </th>--}}
-                        <th>{{$students->group->name}}</th>
+                        <th>{{($students->group->name=='waiters')?'Waiting room':$students->group->name}}</th>
                         <th>{{$students->should_pay}}</th>
                     </tr>
                 @endforeach

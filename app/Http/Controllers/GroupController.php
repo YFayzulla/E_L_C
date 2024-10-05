@@ -104,19 +104,21 @@ class GroupController extends Controller
         ]);
 
         $group->update([
-//            'name' => $request->name,
+            'name' => $request->name,
             'start_time' => $request->start_time,
             'finish_time' => $request->finish_time,
             'monthly_payment' => $request->monthly_payment,
             'level' => $request->level,
         ]);
 
-        $teacher = User::query()->where('room_id', $request->room)->first();
-        GroupTeacher::query()->where('group_id', $group->id)->update(['teacher_id' => $teacher->id]);
-
+        foreach ($group->users() as $user) {
+            StudentInformation::create([
+                'user_id' => $user->id,
+                'group_id' =>$group->id
+            ]);
+        }
 
         return redirect()->route('group.index')->with('success', 'Information has been updated');
-
 
     }
 

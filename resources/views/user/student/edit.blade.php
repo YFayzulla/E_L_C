@@ -70,7 +70,7 @@
                        class="form-control">
 
                 <label for="should_pay" class="text-dark">Should pay</label>
-                <input id="should_pay" name="should_pay" value="{{$student->should_pay}}" type="text"
+                <input id="should_pay" name="should_pay" value="{{$student->should_pay}}" type="number"
                        class="form-control">
 
                 <label for="should_pay" class="text-dark">Group</label>
@@ -82,11 +82,6 @@
                             value="{{$group->id}}">{{($group->name == "waiters") ? 'Waiting room' : $group->name }}</option>
                     @endforeach
                 </select>
-
-
-                @error('should_pay')
-                <div class="alert alert-danger" role="alert">This place should be written</div>
-                @enderror
 
                 <label for="photo" class="text-dark"> Photo </label>
                 <input id="photo" name="photo" value="{{old('photo')}}" type="file" class="form-control">

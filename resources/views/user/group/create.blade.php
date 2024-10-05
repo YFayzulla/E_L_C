@@ -32,7 +32,7 @@
                 @enderror
 
                 <label for="monthly_payment" class="text-dark">cost</label>
-                <input id="monthly_payment" name="monthly_payment" value="{{old('monthly_payment')}}" type="text" class="form-control">
+                <input id="monthly_payment" name="monthly_payment" value="{{old('monthly_payment')}}" type="number" class="form-control">
 
                 @error('monthly_payment')
                 <div class="alert alert-danger" role="alert">This place should be written</div>

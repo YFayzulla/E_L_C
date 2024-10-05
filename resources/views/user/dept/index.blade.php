@@ -15,7 +15,7 @@
                                     class="d-none d-sm-inline-block">Export</span></span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" href="{{URL::to('/student/payment/pdf') }}"><i
+                            <li><a class="dropdown-item" href="{{URL::to('/student/payment/phdf') }}"><i
                                         class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
                         </ul>
                     </div>
@@ -43,7 +43,7 @@
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
                             <th>{{($student->group->name == 'waiters')?'Waiting room' : $student->group->name }}</th>
-                            <th>{{$student->should_pay}}</th>
+                            <th>{{number_format($student->should_pay,'0','',' ')}}</th>
                             <th>@if( $student->status <= 0 )
                                     <p class="text-danger"> debtor </p>
                                 @else

@@ -111,10 +111,13 @@ class GroupController extends Controller
             'level' => $request->level,
         ]);
 
-        foreach ($group->users() as $user) {
+
+        foreach ($group->users() as $student) {
+
             StudentInformation::create([
-                'user_id' => $user->id,
-                'group_id' =>$group->id
+                'user_id' => $student->id,
+                'group_id' =>$group->id,
+                'group'=>$group->name
             ]);
         }
 

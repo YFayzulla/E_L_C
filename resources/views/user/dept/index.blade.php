@@ -43,7 +43,7 @@
                             <th>{{$loop->index+1}}</th>
                             <th>{{$student->name}}</th>
                             <th>{{($student->group->name == 'waiters')?'Waiting room' : $student->group->name }}</th>
-                            <th>{{number_format($student->should_pay,'0','',' ')}}</th>
+                            <th>{{ is_numeric($student->should_pay) ? number_format($student->should_pay, 0, '', ' ') : "payment didnt call" }}</th>
                             <th>@if( $student->status <= 0 )
                                     <p class="text-danger"> debtor </p>
                                 @else

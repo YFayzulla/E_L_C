@@ -93,7 +93,7 @@
                     <tr>
                         <td>{{ $loop->index + 1 }}</td>
                         <td>{{ $attendance->user->name }}</td>
-                        <td>{{ $attendance->teacher->name }}</td>
+                        <td>{{ $attendance->teacher->name?? null  }}</td>
                         <td>{{ $attendance->lesson->name ?? null }}</td>
                         <td>{{ $attendance->created_at }}</td>
                         <td>

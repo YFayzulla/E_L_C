@@ -47,7 +47,7 @@
                             @foreach($data as $item)
                                 <tr class="clickable-row" type="button" data-href="{{ route('test.show', $item->id) }}">
                                     <td>{{$item->name}}</td>
-                                    <td>{{$item->groupName->name}}</td>
+                                    <td>{{$item->groupName->name??"no data"}}</td>
                                     <td>{{$item->created_at->format('D-M-Y')}}</td>
                                 </tr>
                             @endforeach

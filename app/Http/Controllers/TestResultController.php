@@ -21,14 +21,17 @@ class TestResultController extends Controller
 
     public function showResults($id)
     {
-        $assessment = Assessment::query()->where('history_id', '=', $id)->get();
+        $assessment = Assessment::query()->where('history_id', '=', $id)->first();
+        if ($assessment == null) {
+            return redirect()->back()->with('error',  'no information in this action');
+        }else{
         $name = $assessment->first()->group;
-//        dd($name,$assessment);
         return view('assessment.index', [
             'assessments' => Assessment::query()->where('history_id', '=', $id)->get(),
-            'groups'=>Group::query()->orderBy('name')->get(),
-            'id'=>$name,
+            'groups' => Group::query()->orderBy('name')->get(),
+            'id' => $name,
         ]);
+        }
 
     }
 }

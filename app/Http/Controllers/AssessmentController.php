@@ -110,17 +110,6 @@ class AssessmentController extends Controller
                 $data->get_mark = 0;
                 $data->save();
             }
-
-
-            $student = User::find($user[$i]);
-
-//            $student = StudentInformation::where('user_id',$user[$i])->where('group_id',$group)->get();
-//            dd($student);
-            $student->update([
-                'mark' => $end_mark[$i],
-                'should_pay' => $request->payment
-            ]);
-
         }
 
         return redirect()->route('assessment.index')->with('success', 'Grades saved');

@@ -58,6 +58,9 @@ class FakeForSeeder extends Seeder
                 'name'=> 'student'.$i,
                 'password' => Hash::make('student'.$i),
                 'phone' => '012345678'.$i,
+                'parents_tel' => '012345678'.$i,
+                'description' => '012345678'.$i,
+                'location' => '012345678'.$i,
                 'should_pay'=>10000,
                 'group_id' => rand($group1->id, $group2->id)
             ])->assignRole('student');
@@ -72,7 +75,7 @@ class FakeForSeeder extends Seeder
             DeptStudent::create([
                 'user_id' => $student->id,
                 'payed' => 0,
-                'dept' => 1000000,
+                'dept' => 10000,
                 'status_month' => 0
             ]);
         }

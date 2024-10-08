@@ -1,6 +1,6 @@
 @extends('template.master')
 @section('content')
-     <div class="card">
+    <div class="card">
         @php
             use Illuminate\Support\Carbon;
         @endphp
@@ -73,6 +73,11 @@
                     </tr>
                     </tbody>
                 @endforeach
+                <tfoot>
+{{--                <center>--}}
+{{--                    {{ $students->links('pagination::bootstrap-5') }}--}}
+{{--                --}}
+{{--                </tfoot>--}}
             </table>
         </div>
     </div>

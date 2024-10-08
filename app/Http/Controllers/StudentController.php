@@ -182,7 +182,7 @@ class StudentController extends Controller
         $dept=DeptStudent::where('user_id',$id)->first();
 
         $dept->update([
-            'dept' => $request->should_pay
+            'dept' => $request->should_pay ?? $student->should_pay,
         ]);
 
         $dd = Attendance::where('user_id', $student->id)

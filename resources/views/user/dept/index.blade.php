@@ -5,22 +5,7 @@
 
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <h5 class="mb-0">Payment</h5>
-            <div class="dt-action-buttons text-end pt-3 pt-md-0">
-                <div class="dt-buttons btn-group flex-wrap">
-                    <div class="btn-group">
-                        <a class="btn buttons-collection dropdown-toggle btn-label-primary me-2" tabindex="0"
-                           aria-controls="DataTables_Table_0" type="button" id="dropdownMenuButton"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <span><i class="bx bx-export me-sm-1"></i> <span
-                                    class="d-none d-sm-inline-block">Export</span></span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" href="{{URL::to('/student/payment/phdf') }}"><i
-                                        class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <div class="max-w-xl">

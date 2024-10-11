@@ -52,6 +52,11 @@
                                             d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
                                     </svg>
                                 </button>
+                                <a class="btn btn-outline-info m-1"
+                                   onclick="return confirm('Do you want to refresh the student\'s department?')"
+                                   href="{{ route('refresh.update', $student->id) }}">
+                                    <i class="bx bx-refresh"></i>
+                                </a>
                                 {{--Modal--}}
                                 <div class="modal fade" id="exampleModal{{$student->id}}" tabindex="-1"
                                      aria-labelledby="exampleModalLabel"

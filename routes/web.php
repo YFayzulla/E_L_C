@@ -9,23 +9,13 @@ use App\Http\Controllers\GroupExtraController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\RefreshController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherAdminPanel;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TestResultController;
 use App\Http\Controllers\WaitersController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-
-
-//Route::get('/1', function () {
-//    $student = User::find(3);
-//    return view('user.pdf.student_show', compact('student'));
-//});
-
-//attendance list
-
-//Route::get('/2', [ FinanceController::class,'index'] );
 
 
 Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
@@ -82,6 +72,9 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::resource('student', StudentController::class);
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
     Route::resource('dept', DeptStudentController::class);
+    Route::get('refresh/{id}/update',[RefreshController::class,'update'])->name('refresh.update');
+
+
 
 //    teacher
 

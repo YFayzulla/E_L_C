@@ -33,7 +33,7 @@
                 <div class="card">
                     <h5 class="card-header">Test List</h5>
                     <div class="table-responsive text-nowrap">
-                        <table class="table">
+                        <table class="table" style="width: 100%; table-layout: fixed; word-wrap: break-word;">
                             <thead>
                             <tr>
                                 <td>Name</td>
@@ -45,7 +45,7 @@
                             @foreach($data as $item)
                                 <tr class="clickable-row" type="button" data-href="{{ route('test.show', $item->id) }}">
                                     <td>{{$item->name}}</td>
-                                    <td>{{$item->groupName->name??"no data"}}</td>
+                                    <td>{{$item->groupName->name ?? "no data"}}</td>
                                     <td>{{$item->created_at->format('D-M-Y')}}</td>
                                 </tr>
                             @endforeach
@@ -57,6 +57,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 

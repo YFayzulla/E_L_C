@@ -19,7 +19,12 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups = Group::where('id', '!=', 1)->orderby('name')->get();
+        $groups = Group::where('id', '!=', 1)->get()->sort(function ($a, $b) {
+            $numA = (int)filter_var($a->name, FILTER_SANITIZE_NUMBER_INT);
+            $numB = (int)filter_var($b->name, FILTER_SANITIZE_NUMBER_INT);
+            return $numA <=> $numB;
+        });
+
         return view('user.group.index', compact('groups'));
     }
 
@@ -116,8 +121,8 @@ class GroupController extends Controller
 
             StudentInformation::create([
                 'user_id' => $student->id,
-                'group_id' =>$group->id,
-                'group'=>$group->name
+                'group_id' => $group->id,
+                'group' => $group->name
             ]);
         }
 

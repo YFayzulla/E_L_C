@@ -39,14 +39,19 @@
                                 <td>Name</td>
                                 <td>Group</td>
                                 <td>Data</td>
+                                <td>show</td>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($data as $item)
-                                <tr class="clickable-row" type="button" data-href="{{ route('test.show', $item->id) }}">
+                                <tr>
                                     <td>{{$item->name}}</td>
                                     <td>{{$item->groupName->name ?? "no data"}}</td>
                                     <td>{{$item->created_at->format('D-M-Y')}}</td>
+                                    <td>
+                                        <a href="{{route('test.show', $item->id)}}" class="btn btn-info"><i
+                                                class="bx bx-show-alt"></i></a>
+                                    </td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -57,19 +62,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
-
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            const rows = document.querySelectorAll('.clickable-row');
-            rows.forEach(function (row) {
-                row.addEventListener('click', function () {
-                    window.location.href = row.getAttribute('data-href');
-                });
-            });
-        });
-    </script>
 @endsection

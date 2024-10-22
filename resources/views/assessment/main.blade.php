@@ -33,7 +33,7 @@
                 <div class="card">
                     <h5 class="card-header">Test List</h5>
                     <div class="table-responsive text-nowrap">
-                        <table class="table" style="width: 100%; table-layout: fixed; word-wrap: break-word;">
+                        <table class="table">
                             <thead>
                             <tr>
                                 <td>Name</td>
@@ -42,7 +42,8 @@
                                 <td>show</td>
                             </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="table-border-bottom-0">
+
                             @foreach($data as $item)
                                 <tr>
                                     <td>{{$item->name}}</td>

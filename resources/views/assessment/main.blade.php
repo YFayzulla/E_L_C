@@ -39,7 +39,6 @@
                         <thead>
                         <tr>
                             <td>Name</td>
-                            <td>Group</td>
                             <td>Data</td>
                             <td>show</td>
                         </tr>
@@ -49,7 +48,6 @@
                         @foreach($data as $item)
                             <tr>
                                 <td>{{$item->name}}</td>
-                                <td>{{$item->groupName->name ?? "no data"}}</td>
                                 <td>{{$item->created_at->format('D-M-Y')}}</td>
                                 <td>
                                     <a href="{{route('test.show', $item->id)}}" class="btn btn-info"><i

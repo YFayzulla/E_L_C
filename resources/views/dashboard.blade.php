@@ -68,7 +68,7 @@
             <div class="col-lg-4">
                 <!-- Profit Card -->
                 <div class="card mb-3">
-                    <div class="card-body text-center">
+                    <div class="card-body ">
                         <h5>Profit</h5>
                         <span class="badge bg-label-info rounded-pill">{{ today()->format('d-m-y') }}</span>
                         <h6 class="mt-2">{{ number_format($profit, 0, '.', ' ') }} sum</h6>

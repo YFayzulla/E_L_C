@@ -26,6 +26,7 @@ class TestResultController extends Controller
             return redirect()->back()->with('error',  'no information in this action');
         }else{
         return view('assessment.index', [
+            'id' => $id,
             'assessments' => Assessment::query()->where('history_id', '=', $id)->get(),
             'groups' => Group::query()->orderBy('name')->get(),
         ]);

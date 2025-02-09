@@ -1,7 +1,7 @@
-`@extends('template.master')
+@extends('template.master')
 @section('content')
 
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
+    <div class=" p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
 
         <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a>
 
@@ -17,7 +17,6 @@
                     <thead class="table-active">
 
                     <TR>
-
                         <td>+</td>
                         <th>id</th>
                         <th>name</th>

@@ -40,7 +40,7 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <td>Name</td>
+                            <td>Test Name</td>
                             <td>Data</td>
                             <td>show</td>
                         </tr>

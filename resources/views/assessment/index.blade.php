@@ -2,20 +2,15 @@
 @section('content')
 
     <div class=" p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
-
-        <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a>
-
+        <a href="{{ URL::to('/assessment/pdf',$id)}}" class="btn btn-danger mb-3 float-end"> Report </a
         <form action="{{route('deleteMultiple')}}" method="post">
             @csrf
             @method('DELETE')
-
             <button type="button" id="selectAllBtn" class="btn btn-primary mb-3 me-1">Select All</button>
             <button class="btn btn-danger mb-3 text-white">Delete specified data</button>
-
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
                     <thead class="table-active">
-
                     <TR>
                         <td>+</td>
                         <th>id</th>
@@ -24,13 +19,9 @@
                         <th>information</th>
                         <th>rec group</th>
                         <th>change group</th>
-
                     </TR>
-
                     </thead>
-
                     {{--                    @dd($groups)--}}
-
                     @foreach($assessments as $assessment)
                         <tbody id="myTable" class="table-group-divider">
                         <tr>

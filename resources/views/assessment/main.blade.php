@@ -7,6 +7,7 @@
                 <div class="table-responsive text-nowrap">
                     <table class="table">
                         <thead>
+                        @dd('test')
                         <tr>
                             <td>Name</td>
                             <td>Group</td>

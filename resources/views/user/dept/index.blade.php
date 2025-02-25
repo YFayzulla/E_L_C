@@ -80,7 +80,7 @@
 
 
                                                     @endif
-                                                    @if($student->status <= 0)
+                                                    @if($student->status < 0)
                                                         <p>
                                                             the student has a debt of {{abs($student->status)}} month
                                                         </p>

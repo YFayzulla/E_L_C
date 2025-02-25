@@ -49,8 +49,8 @@
 
                         @foreach($data as $item)
                             <tr>
-                                <td>{{$item->name}}</td>
-                                <td>{{$item->created_at->format('m-m-Y')}}</td>
+                                <td>{{$item->groupName->name}}</td>
+                                <td>{{$item->updated_at->format('d-m-Y')}}</td>
                                 <td>
                                     <a href="{{route('test.show', $item->id)}}" class="btn btn-info"><i
                                             class="bx bx-show-alt"></i></a>

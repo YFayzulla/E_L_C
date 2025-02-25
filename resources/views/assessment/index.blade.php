@@ -48,7 +48,7 @@
             </div>
         </form>
     </div>
-
+{{--@dd('asd')--}}
     <!-- Modal -->
     @foreach($assessments as $assessment)
         <div class="modal fade" id="exampleModal{{$assessment->user_id}}" tabindex="-1"

@@ -76,16 +76,16 @@
                 </div>
 
                 <!-- Attendance Card -->
-                <div class="card">
+                <div class="card ">
                     <div class="card-header">
                         <h5>{{ count($attendances) == 0 ? 'Attendance is ok' : count($attendances) . " Students didn't come" }}</h5>
                     </div>
                     <div class="card-body">
-                        <ul class="list-unstyled">
+                        <ul class="list-unstyled border-1">
                             @foreach($attendances as $attendance)
                                 <li class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                                    <span>{{ $loop->index + 1 }}</span>
-                                    <span>{{ $attendance->user->name }}</span>
+                                    <span class="border-1">{{ $loop->index + 1 }}</span>
+                                    <span class="border-1">{{ $attendance->user->name }}</span>
                                     <span>{{ $attendance->group->name }}</span>
                                     <span>{{ $attendance->created_at }}</span>
                                 </li>

@@ -74,25 +74,36 @@
                         <h6 class="mt-2">{{ number_format($profit, 0, '.', ' ') }} sum</h6>
                     </div>
                 </div>
-
                 <!-- Attendance Card -->
-                <div class="card ">
-                    <div class="card-header">
-                        <h5>{{ count($attendances) == 0 ? 'Attendance is ok' : count($attendances) . " Students didn't come" }}</h5>
+                <div class="card border border-2">
+                    <div class="card-header border-bottom border-2 text-center">
+                        <h5 class="mb-0">{{ count($attendances) == 0 ? 'Attendance is OK' : count($attendances) . " Students didn't come" }}</h5>
                     </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled border-1">
-                            @foreach($attendances as $attendance)
-                                <li class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                                    <span class="border-1">{{ $loop->index + 1 }}</span>
-                                    <span class="border-1">{{ $attendance->user->name }}</span>
-                                    <span>{{ $attendance->group->name }}</span>
-                                    <span>{{ $attendance->created_at }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mb-0">
+                                <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Group</th>
+                                    <th>Date</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($attendances as $attendance)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $attendance->user->name }}</td>
+                                        <td>{{ $attendance->group->name }}</td>
+                                        <td>{{ $attendance->created_at }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer text-center border-top border-2">
                         {{ $attendances->links('pagination::bootstrap-5') }}
                     </div>
                 </div>

@@ -27,11 +27,17 @@ class Controller extends BaseController
 
             $teachers = User::query()->role('user')->get();
 
-            $summa = HistoryPayments::query()->sum('payment');
+            $summa = HistoryPayments::query()
+                ->selectRaw("strftime('%Y', created_at) as year, SUM(payment) as total_payment")
+                ->groupBy('year')
+                ->get();
 
-            $consumption = Finance::query()->sum('payment');
+            $consumption = Finance::query()
+                ->selectRaw("strftime('%Y', created_at) as year, SUM(payment) as total_payment")
+                ->groupBy('year')
+                ->get();
 
-            $profit = $summa - $consumption;
+            $profit = $summa[0]->total_payment??0 - $consumption[0]->total_payment??0;
 
             $pie_chart = [$summa, $consumption];
 

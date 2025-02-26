@@ -31,9 +31,63 @@
             </div>
         </div>
     </div>
-
     <div class="row">
+        <!-- Left Side: Travel of Group and Comment -->
+        <div class="col-md-6 mt-4">
+            <!-- Travel of Group -->
+            <div class="card mb-4">
+                <h5 class="card-header">Travel of group</h5>
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-dark">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Group</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                        @foreach($student->studentinformation as $item)
+                            <tr>
+                                <th>{{$loop->index+1}}</th>
+                                <th>{{($item->group == 'waiters') ? 'Waiting room' : $item->group}}</th>
+                                <th>{{$item->created_at}}</th>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+            <!-- Comment -->
+            <div class="card">
+                <h5 class="card-header">Comment for student</h5>
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-dark">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>teacher</th>
+                            <th>comment</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                        @foreach($comments as $item)
+                            <tr>
+                                <th>{{$loop->index+1}}</th>
+                                <th>{{$item->teacher}}</th>
+                                <th>{{$item->comment}}</th>
+                                <th>{{$item->created_at}}</th>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Payment History -->
         <div class="col-md-6 mt-4">
             <div class="card">
                 <h5 class="card-header">Payment history</h5>
@@ -43,7 +97,7 @@
                         <tr>
                             <th>No</th>
                             <th>Paid</th>
-                            <th>type</th>
+                            <th>Type</th>
                             <th>Date</th>
                         </tr>
                         </thead>
@@ -53,38 +107,11 @@
                                 <th>{{$loop->index+1}}</th>
                                 <th>{{$item->payment}}</th>
                                 <th>{{$item->type_of_money}}</th>
-                                <th>@if($item->date ==null)
-                                        {{$item->created_at.'data'}}
+                                <th>@if($item->date == null)
+                                        {{$item->created_at.' data'}}
                                     @else
                                         {{$item->date}}
                                     @endif</th>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mt-4">
-            <div class="card">
-                <h5 class="card-header">Travel of group</h5>
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-dark">
-                        <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>group</th>
-                            <th>Date</th>
-                        </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                        @foreach($student->studentinformation as $item)
-
-                            <tr>
-                                <th>{{$loop->index+1}}</th>
-                                <th>{{($item->group == 'waiters')?'Waiting room':$item->group}}</th>
-                                <th>{{$item->created_at}}</th>
                             </tr>
                         @endforeach
                         </tbody>

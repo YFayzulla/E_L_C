@@ -37,7 +37,8 @@ class Controller extends BaseController
                 ->groupBy('year')
                 ->get();
 
-            $profit = $summa[0]->total_payment??0 - $consumption[0]->total_payment??0;
+            $profit = ($summa->isNotEmpty() ? $summa[0]->total_payment : 0) -
+                ($consumption->isNotEmpty() ? $consumption[0]->total_payment : 0);
 
             $pie_chart = [$summa, $consumption];
 

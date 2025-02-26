@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\CommentStudentController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\FinanceController;
@@ -65,6 +66,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
 
     //    Route::get('group/attendance/filter/{id}', [GroupExtraController::class, 'filter'])->name('attendance.filter');
 
+
     Route::get('group/student/{id}', [GroupExtraController::class, 'show'])->name('group.students');
 
 //    student
@@ -72,9 +74,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::resource('student', StudentController::class);
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
     Route::resource('dept', DeptStudentController::class);
-    Route::get('refresh/{id}/update',[RefreshController::class,'update'])->name('refresh.update');
-
-
+    Route::get('refresh/{id}/update', [RefreshController::class, 'update'])->name('refresh.update');
 
 //    teacher
 
@@ -82,15 +82,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function () {
     Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
     Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
 
-
 //     finance
+
     Route::get('finance', [FinanceController::class, 'index'])->name('finance.other');
     Route::post('finance/store', [FinanceController::class, 'store'])->name('finance.store');
     Route::put('finance/update/{id}', [FinanceController::class, 'update'])->name('finance.update');
     Route::delete('finance/delete/{id}', [FinanceController::class, 'destroy'])->name('finance.destroy');
 
 });
-
 
 //Teachers
 
@@ -101,6 +100,8 @@ Route::group(['middleware' => ['auth', 'role:user']], function () {
     Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
     Route::resource('assessment', AssessmentController::class);
+    Route::get('comment', [CommentStudentController::class, 'index'])->name('comment');
+    Route::post('comment/store', [CommentStudentController::class, 'store'])->name('comment.store');
 
 });
 

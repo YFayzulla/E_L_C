@@ -160,6 +160,12 @@
                 <div data-i18n="Analytics">List Attendance</div>
             </a>
         </li>
+        <li class="menu-item @if(request()->routeIs('comment')) active @endif">
+            <a href="{{ route('comment') }}" class="menu-link"> <!-- Default group ID if needed -->
+                <i class="menu-icon tf-icons bx bx-comment-add"></i>
+                <div data-i18n="Analytics">Comment</div>
+            </a>
+        </li>
         @endrole
 
     </ul>

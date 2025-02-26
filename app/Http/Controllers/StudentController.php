@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\CommentStudent;
 use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\Level;
@@ -10,6 +11,7 @@ use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\Comment;
 
 class StudentController extends Controller
 {
@@ -106,7 +108,8 @@ class StudentController extends Controller
         $attendances = Attendance::where('user_id', $id)->get();
         $student = User::find($id);
         $groups = Group::all();
-        return view('user.student.show', compact('student', 'attendances', 'groups'));
+        $comments = CommentStudent::query()->where('student_id', $id)->get();
+        return view('user.student.show', compact('student', 'attendances', 'groups', 'comments'));
     }
 
     /**

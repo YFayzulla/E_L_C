@@ -21,11 +21,16 @@ class Group extends Model
     public function users()
     {
 //        return $this->hasMany(User::class, 'group_id', 'id');
-        return User::query()->where('group_id',$this->id)->get();
+        return User::query()->where('group_id', $this->id)->get();
     }
 
     public function level(): BelongsTo
     {
         return Level::where('id', 'level');
+    }
+
+    public function students()
+    {
+        return $this->hasMany(User::class, 'group_id');
     }
 }

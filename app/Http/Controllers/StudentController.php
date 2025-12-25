@@ -24,7 +24,7 @@ class StudentController extends Controller
     {
         try {
             $students = User::role('student')
-                ->with('groups.room')
+                ->with('groups')
                 ->orderBy("name")
                 ->paginate(20);
 
@@ -41,9 +41,7 @@ class StudentController extends Controller
     public function create()
     {
         try {
-            $groups = Group::with('room:id,room')
-            ->orderBy('room_id')
-                ->get();
+            $groups = Group::orderBy('name')->get();
             return view('admin.student.create', compact('groups'));
         } catch (\Exception $e) {
             Log::error('StudentController@create error: ' . $e->getMessage());
@@ -126,7 +124,7 @@ class StudentController extends Controller
     public function show($id)
     {
         try {
-            $student = User::with('groups.room')->findOrFail($id);
+            $student = User::with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
             $groupHistory = StudentInformation::where('user_id', $id)->orderBy('created_at', 'desc')->get();
 

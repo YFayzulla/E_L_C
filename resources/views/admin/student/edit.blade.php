@@ -42,7 +42,7 @@
                             @foreach($groups as $group)
                                 <option value="{{ $group->id }}"
                                         data-payment="{{ $group->monthly_payment }}" {{ $student->groups->contains($group->id) ? 'selected' : '' }}>
-                                    {{ optional($group->room)->room ?? 'No Room' }} -> {{ $group->name }}
+                                    {{ $group->name }}
                                 </option>
                             @endforeach
                         </select>

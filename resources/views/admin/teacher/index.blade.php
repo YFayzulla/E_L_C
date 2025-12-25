@@ -38,9 +38,7 @@
                     <th>id</th>
                     <th>Name</th>
                     <th>Phone</th>
-                    <th>Location</th>
-                    <th>Date born</th>
-{{--                    <th>photo</th>--}}
+                    <th>Groups</th>
                     <th>action</th>
                 </tr>
                 </thead>
@@ -50,22 +48,12 @@
                         <td>{{$loop->index+1}}</td>
                         <td>{{$teacher->name}}</td>
                         <td>+{{$teacher->phone}}</td>
-                        <td>{{$teacher->location}}</td>
-                        <td>{{$teacher->date_born}}</td>
-{{--                        <td>--}}
-{{--                            <ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">--}}
-{{--                                <li--}}
-{{--                                        data-bs-toggle="modal"--}}
-{{--                                        data-bs-target="#imageModal{{$teacher->id}}"--}}
-{{--                                        data-bs-placement="top"--}}
-{{--                                        class="avatar avatar-md pull-up"--}}
-{{--                                >--}}
-{{--                                    <img src="{{ asset('storage/'.$teacher->photo) }}" class="rounded-circle" alt="??"/>--}}
-{{--                                </li>--}}
-{{--                            </ul>--}}
-
-{{--                        </td>--}}
-                        <th class="d-flex">
+                        <td>
+                            @foreach($teacher->teacherGroups as $group)
+                                <span class="badge bg-label-primary me-1">{{ $group->name }}</span>
+                            @endforeach
+                        </td>
+                        <td class="d-flex">
 
                             <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-1">
                                 <i class='bx bx-edit-alt'></i>
@@ -78,24 +66,9 @@
                                     <i class='bx bx-trash-alt'></i>
                                 </button>
                             </form>
-                        </th>
+                        </td>
                     </tr>
                     </tbody>
-                    <div class="modal fade" id="imageModal{{$teacher->id}}" tabindex="-1" role="dialog"
-                         aria-labelledby="imageModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Закрыть"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="{{ asset('storage/'.$teacher->photo) }}" class="img-fluid"
-                                         alt="Modal Image">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 @endforeach
             </table>
         </div>

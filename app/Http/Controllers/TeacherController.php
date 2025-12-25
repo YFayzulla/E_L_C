@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Teacher\StoreRequest;
 use App\Http\Requests\Teacher\UpdateRequest;
 use App\Models\Group;
-use App\Models\GroupTeacher;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,8 +19,9 @@ class TeacherController extends Controller
     public function index()
     {
         try {
-            $teachers = User::role('user') // Changed from 'user' to 'teacher'
-            ->orderBy('name')
+            $teachers = User::role('user')
+                ->with('teacherGroups')
+                ->orderBy('name')
                 ->paginate(20);
 
             return view('admin.teacher.index', compact('teachers'));
@@ -37,7 +37,8 @@ class TeacherController extends Controller
     public function create()
     {
         try {
-            return view('admin.teacher.create');
+            $groups = Group::orderBy('name')->get();
+            return view('admin.teacher.create', compact('groups'));
         } catch (\Exception $e) {
             Log::error('TeacherController@create error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Sahifani yuklashda xatolik.');
@@ -51,7 +52,6 @@ class TeacherController extends Controller
     {
         $uploadedFilePath = null;
 
-        // 1. Faylni yuklash (Tranzaksiyadan tashqarida)
         if ($request->hasFile('photo')) {
             try {
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
@@ -64,20 +64,22 @@ class TeacherController extends Controller
         DB::beginTransaction();
 
         try {
-            // 2. User yaratish
             $teacher = User::create([
                 'name' => $request->name,
-                'password' => Hash::make($request->phone), // Telefon raqam parol sifatida
+                'password' => Hash::make($request->phone),
                 'passport' => $request->passport,
                 'date_born' => $request->date_born,
                 'location' => $request->location,
-                // Telefon formatlash: Faqat raqamlarni qoldirib, oldiga 998 qo'shish (logikangiz bo'yicha)
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'photo' => $uploadedFilePath,
                 'percent' => $request->percent,
             ]);
 
-            $teacher->assignRole('user'); // Changed from 'user' to 'teacher'
+            $teacher->assignRole('user');
+
+            if ($request->has('group_id')) {
+                $teacher->teacherGroups()->attach($request->group_id);
+            }
 
             DB::commit();
 
@@ -86,7 +88,6 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // XATO BO'LSA: Yuklangan rasmni o'chirib tashlash
             if ($uploadedFilePath && Storage::disk('public')->exists($uploadedFilePath)) {
                 Storage::disk('public')->delete($uploadedFilePath);
             }
@@ -102,8 +103,9 @@ class TeacherController extends Controller
     public function edit($id)
     {
         try {
-            $teacher = User::findOrFail($id);
-            return view('admin.teacher.edit', compact('teacher'));
+            $teacher = User::with('teacherGroups')->findOrFail($id);
+            $groups = Group::orderBy('name')->get();
+            return view('admin.teacher.edit', compact('teacher', 'groups'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'O\'qituvchi topilmadi.');
         }
@@ -123,7 +125,6 @@ class TeacherController extends Controller
             $teacher = User::findOrFail($id);
             $oldPhotoPath = $teacher->photo;
 
-            // 1. Rasm yuklash
             if ($request->hasFile('photo')) {
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
                 $newPhotoPath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
@@ -131,7 +132,6 @@ class TeacherController extends Controller
                 $newPhotoPath = $oldPhotoPath;
             }
 
-            // 2. Ma'lumotlarni tayyorlash
             $updateData = [
                 'name' => $request->name,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
@@ -148,9 +148,10 @@ class TeacherController extends Controller
 
             $teacher->update($updateData);
 
+            $teacher->teacherGroups()->sync($request->group_id);
+
             DB::commit();
 
-            // MUVAFFAQIYATLI: Eski rasmni o'chirish (agar yangisi yuklangan bo'lsa)
             if ($request->hasFile('photo') && $oldPhotoPath && Storage::disk('public')->exists($oldPhotoPath)) {
                 Storage::disk('public')->delete($oldPhotoPath);
             }
@@ -160,7 +161,6 @@ class TeacherController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // XATOLIK: Yangi yuklangan rasmni o'chirish
             if ($request->hasFile('photo') && $newPhotoPath && Storage::disk('public')->exists($newPhotoPath)) {
                 Storage::disk('public')->delete($newPhotoPath);
             }
@@ -181,28 +181,22 @@ class TeacherController extends Controller
             $teacher = User::findOrFail($id);
             $photoPath = $teacher->photo;
 
-            // 1. Bog'liq ma'lumotlarni o'chirish
-            GroupTeacher::where('teacher_id', $teacher->id)->delete();
-
-            // Agar o'qituvchiga bog'liq boshqa jadvallar bo'lsa (masalan, dars jadvallari, davomatlar),
-            // ularni ham shu yerda ko'rib chiqish kerak (Set Null yoki Delete).
-
-            // 2. Userni o'chirish
+            $teacher->teacherGroups()->detach();
+            
             $teacher->delete();
 
             DB::commit();
 
-            // 3. Rasmni o'chirish (Tranzaksiya tugagandan keyin)
             if ($photoPath && Storage::disk('public')->exists($photoPath)) {
                 Storage::disk('public')->delete($photoPath);
             }
 
-            return redirect()->back()->with('success', 'O\'qituvchi muvaffaqiyatli o\'chirildi.');
+            return redirect()->back()->with('success', 'O\'qituvchi va unga tegishli barcha ma\'lumotlar o\'chirildi.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('TeacherController@destroy error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'O\'chirishda xatolik yuz berdi. O\'qituvchiga bog\'liq ma\'lumotlar mavjud bo\'lishi mumkin.');
+            return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
         }
     }
 }

@@ -42,6 +42,21 @@
                         @enderror
                     </div>
 
+                    <div class="mb-3">
+                        <label for="group_id" class="form-label text-dark">Groups</label>
+                        <select id="group_id" name="group_id[]" class="form-select choices" multiple data-placeholder="Select groups">
+                            <option value="">-- Select Groups --</option>
+                            @foreach($groups as $group)
+                                <option value="{{ $group->id }}" {{ (is_array(old('group_id')) && in_array($group->id, old('group_id'))) ? 'selected' : '' }}>
+                                    {{ $group->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('group_id')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     {{-- Additional Information --}}
                     <div class="md:col-span-2">
                         <h2 class="text-lg font-semibold border-b pb-2 mb-4 mt-6">Additional Information</h2>

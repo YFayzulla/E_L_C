@@ -33,15 +33,15 @@ class User extends Authenticatable
 
     public function teacherHasStudents()
     {
-        $groupIds = $this->groups()->pluck('groups.id');
-        return User::role('student')->whereHas('groups', function ($q) use ($groupIds) {
+        $groupIds = $this->teacherGroups()->pluck('groups.id');
+        return User::role('student')->whereHas('studentGroups', function ($q) use ($groupIds) {
             $q->whereIn('groups.id', $groupIds);
         })->count();
     }
 
     public function teacherPayment()
     {
-        $groups = $this->groups()->withCount('students')->get();
+        $groups = $this->teacherGroups()->withCount('students')->get();
 
         $totalPayment = $groups->sum(function ($group) {
             if ($group) {
@@ -53,9 +53,14 @@ class User extends Authenticatable
         return $totalPayment * $this->percent / 100;
     }
 
-    public function groups(): BelongsToMany
+    public function studentGroups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'group_user', 'user_id', 'group_id');
+    }
+
+    public function teacherGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_teachers', 'teacher_id', 'group_id');
     }
 
     public function studentinformation()
@@ -85,7 +90,7 @@ class User extends Authenticatable
 
     public function teacherHasGroup()
     {
-        return $this->groups()->count();
+        return $this->teacherGroups()->count();
     }
 
     public function checkAttendanceStatus()
@@ -107,7 +112,7 @@ class User extends Authenticatable
 
     public function studentsGroup()
     {
-        $groups = $this->groups;
+        $groups = $this->studentGroups;
 
         if ($groups->isEmpty()) {
             return 'students without a group';

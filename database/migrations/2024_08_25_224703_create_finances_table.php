@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->text('reason');
             $table->decimal('payment',10)->default(0);
-            $table->tinyInteger('type');
-            $table->tinyInteger('status')->default(0);
+            $table->unsignedtinyInteger('type');
+            $table->unsignedtinyInteger('status')->default(0);
             $table->timestamps();
         });
     }

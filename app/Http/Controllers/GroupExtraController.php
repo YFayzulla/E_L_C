@@ -5,160 +5,209 @@ namespace App\Http\Controllers;
 use App\Exports\AttendanceExport;
 use App\Models\Assessment;
 use App\Models\Attendance;
-use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
+use App\Services\AttendanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 
 class GroupExtraController extends Controller
 {
+    public function __construct(protected AttendanceService $serviceAttendance)
+    {
+        // Service avtomatik inject qilinadi
+    }
 
+    /**
+     * Ko'plab baholarni birdaniga o'chirish.
+     */
     public function deleteMultiple(Request $request)
     {
+        $request->validate(['selectedItems' => 'required|array']);
 
-        $selectedItems = $request->input('selectedItems', []);
+        try {
+            $selectedItems = $request->input('selectedItems');
 
-        // Delete the selected items from the database
-        Assessment::whereIn('id', $selectedItems)->delete();
+            // Xavfsizlik: Faqat raqamli ID larni ajratib olish
+            $validatedItems = array_filter($selectedItems, 'is_numeric');
 
-        return redirect()->back()->with('success', 'Selected items deleted successfully');
+            if (!empty($validatedItems)) {
+                // Tranzaksiya shart emas (bitta query), lekin try-catch muhim
+                Assessment::whereIn('id', $validatedItems)->delete();
+            }
 
+            return redirect()->back()->with('success', 'Tanlangan elementlar muvaffaqiyatli o\'chirildi.');
+
+        } catch (\Exception $e) {
+            Log::error('GroupExtraController@deleteMultiple error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
+        }
     }
 
+    /**
+     * Talabaning guruhini o'zgartirish.
+     */
     public function change_group(Request $request, $id)
     {
+        $request->validate(['group_id' => 'required|exists:groups,id']);
 
-        $user = User::find($id);
+        DB::beginTransaction();
 
-        $user->update([
-            'group_id' => $request->group_id,
-            'should_pay'=>$request->should_pay
-        ]);
+        try {
+            $user = User::findOrFail($id);
+            $group = Group::findOrFail($request->group_id);
 
-        DeptStudent::query()->where('user_id', $id)->update(['dept' => $request->should_pay]);
+            // 1. User guruhini yangilash (Eski guruhlardan chiqarib, yangisiga qo'shish)
+            // Agar faqat qo'shish kerak bo'lsa attach() ishlatilardi, lekin "change" bo'lgani uchun sync()
+            $user->groups()->sync([$group->id]);
 
-        $group = Group::find($request->group_id);
+            // 2. Tarix (StudentInformation) yaratish
+            StudentInformation::create([
+                'user_id' => $user->id,
+                'group_id' => $group->id,
+                'group' => $group->name,
+            ]);
 
-        StudentInformation::create([
-            'user_id' => $id,
-            'group_id' => $request->group_id,
-            'group' => $group->name,
-        ]);
+            // 3. Eski davomatlarni yangi guruhga o'tkazish
+            // (Mantiqan to'g'riligini loyiha talabidan kelib chiqib tekshiring.
+            // Odatda eski davomat eski guruhda qolishi kerak, lekin sizning kodingizda o'zgartirilmoqda)
+            Attendance::where('user_id', $user->id)->update(['group_id' => $group->id]);
 
-        $dd = Attendance::where('user_id', $user->id)
-            ->update(['group_id' => $request->group_id]);
+            DB::commit();
 
+            return redirect()->back()->with('success', 'Guruh muvaffaqiyatli o\'zgartirildi.');
 
-        return redirect()->back()->with('success', 'Updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('GroupExtraController@change_group error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Guruhni o\'zgartirishda xatolik yuz berdi.');
+        }
     }
 
-
+    /**
+     * Davomatni filtrlash yoki PDF hisobot chiqarish.
+     */
     public function filter(Request $request, $id)
     {
+        try {
+            $selectedDate = $request->filled('filter_date') ? Carbon::parse($request->input('filter_date')) : Carbon::today();
+            $group = Group::findOrFail($id);
+            $task = $request->input('task');
 
+            // Umumiy query
+            $items = Attendance::whereDate('created_at', $selectedDate)
+                ->where('group_id', $id)
+                ->with('user:id,name') // Optimizatsiya: N+1 oldini olish
+                ->get();
 
-        if ($request->filter_date == null) {
-            $selectedDate = $request->filter_date = Carbon::today();
-        } else
-            $selectedDate = $request->input('filter_date');
+            if ($task === 'show') {
+                // Endi bu metod ishlatilmasligi mumkin, chunki biz attendance metodini o'zgartirdik.
+                // Lekin agar filter alohida ishlatilsa, uni ham teacher view ga yo'naltirish kerak.
+                // Hozircha qoldiramiz, lekin attendance metodi asosiy hisoblanadi.
+                return view('admin.group.attendance', compact('items', 'group', 'selectedDate'));
+            }
 
-        if ($request->input('task') === 'show') {
+            if ($task === 'report') {
+                try {
+                    $pdf = PDF::loadView('admin.pdf.attendance_in_group', [
+                        'items' => $items,
+                        'group' => $group,
+                        'date' => $selectedDate
+                    ]);
 
-            // Retrieve the selected date from the form input
+                    $fileName = 'attendance_report_' . $group->name . '_' . $selectedDate->format('Y-m-d') . '.pdf';
+                    return $pdf->download($fileName);
+                } catch (\Exception $pdfEx) {
+                    Log::error('PDF Generation error: ' . $pdfEx->getMessage());
+                    return redirect()->back()->with('error', 'PDF hujjatini yaratishda xatolik.');
+                }
+            }
 
-            // Query the database for attendance records matching the selected date
+            return redirect()->back()->with('error', 'Noto\'g\'ri amal tanlandi.');
 
-            $group = Group::find($id);
-
-
-            $items = Attendance::whereDate('created_at', $selectedDate)->where('group_id', $id)->get();
-
-
-            // Pass the filtered attendance records to the view
-
-            return view('user.group.attendance', compact('items', 'group'));
-
-        } elseif ($request->input('task') === 'report') {
-
-            $items = Attendance::whereDate('created_at', $selectedDate)->get();
-
-            $pdf = PDF::loadView('user.pdf.attendance_in_group', ['items' => $items]);
-
-            return $pdf->download('orders.pdf');
-
-            GeneratePdfJob::dispatch($id);
-
-            return "PDF generation job dispatched successfully!";
-
-        } else {
-
+        } catch (\Exception $e) {
+            Log::error('GroupExtraController@filter error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Ma\'lumotlarni yuklashda xatolik.');
         }
     }
 
+    /**
+     * Guruhdagi talabalar ro'yxatini ko'rsatish.
+     */
     public function show($id)
     {
-
-        $students = User::where('group_id', $id)->orderby('name')->role('student')->get();
-
-        return view('user.group.student', compact('students'));
-
+        try {
+            // Guruhga tegishli talabalarni pivot jadval orqali olish
+            $students = User::whereHas('groups', function ($query) use ($id) {
+                    $query->where('groups.id', $id);
+                })
+                ->role('student')
+                // Guruh nomini olish uchun relationshipni yuklaymiz
+                ->with('groups:id,name')
+                ->orderBy('name')
+                ->select('id', 'name', 'phone', 'status') // group_id olib tashlandi
+                ->get();
+                
+            return view('admin.group.student', compact('students'));
+        } catch (\Exception $e) {
+            Log::error('GroupExtraController@show error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talabalar ro\'yxatini yuklashda xatolik.');
+        }
     }
 
+    /**
+     * Oylik davomat jadvalini shakllantirish (Matritsa).
+     */
     public function attendance($id)
     {
-        $today = now()->day;
-        $group = Group::find($id);
+        try {
+            // Use the shared AttendanceService to get data
+            $serviceData = $this->serviceAttendance->attendance($id);
 
-        $date = request('date', now()->format('Y-m'));
+            // Return the TEACHER view instead of the admin view
+            return view('teacher.attendance.attendance', [
+                'id' => $id,
+                'today' => $serviceData['today'] ?? now(),
+                'data' => $serviceData['data'] ?? [],
+                'year' => $serviceData['year'] ?? date('Y'),
+                'month' => $serviceData['month'] ?? date('m'),
+                'attendances' => $serviceData['attendances'] ?? [],
+                'group' => $serviceData['group'] ?? null,
+                'students' => $serviceData['students'] ?? [],
+            ]);
 
-        list($year, $month) = explode('-', $date);
-
-        $students = User::role('student')->where('group_id', $group->id)->orderby('name')->get();
-
-        $attendances = Attendance::where('group_id', $id)->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)->get();
-        $data = [];
-        foreach ($students as $student) {
-
-            $data[$student->name] = [];
-
-            for ($i = 1; $i <= 31; $i++) {
-
-                $data[$student->name][str_pad($i, 2, '0', STR_PAD_LEFT)] = '';
-            }
+        } catch (\Exception $e) {
+            Log::error('GroupExtraController@attendance error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Davomat jadvalini yuklashda xatolik: ' . $e->getMessage());
         }
-
-        foreach ($attendances as $attendance) {
-
-            $day = $attendance->created_at->format('d');
-            $data[$attendance->user->name][$day] = $attendance->status; // Adjust status if needed
-
-        }
-
-        return view('user.group.attendance', [
-            'group' => $group,
-            //new items
-            'students' => Attendance::where('group_id', $id)->orderByDesc('created_at')->paginate(10),
-            'today' => $today,
-            'data' => $data,
-            'year' => $year,
-            'month' => $month,
-            'attendances' => $attendances,
-
-        ]);
-
     }
 
+    /**
+     * Excelga eksport qilish.
+     */
     public function export($id)
     {
-        $date = request('date', now()->format('Y-m'));
-        list($year, $month) = explode('-', $date);
+        try {
+            $date = request('date', now()->format('Y-m'));
+            // Sana formatini tekshirish uchun oddiy parsing
+            $parts = explode('-', $date);
 
-        return Excel::download(new AttendanceExport($id, $year, $month), 'attendance.xlsx');
+            if (count($parts) !== 2) {
+                return redirect()->back()->with('error', 'Noto\'g\'ri sana formati.');
+            }
+
+            list($year, $month) = $parts;
+
+            return Excel::download(new AttendanceExport($id, $year, $month), 'attendance.xlsx');
+
+        } catch (\Exception $e) {
+            Log::error('GroupExtraController@export error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Excel faylini yuklashda xatolik yuz berdi.');
+        }
     }
-
 }

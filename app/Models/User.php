@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -14,11 +14,6 @@ class User extends Authenticatable
 
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'phone',
@@ -28,56 +23,40 @@ class User extends Authenticatable
         'location',
         'parents_name',
         'parents_tel',
-        'group_id',
         'photo',
         'should_pay',
         'description',
         'status',
         'percent',
-        'mark'
+        'mark',
+        'room_id',
     ];
-
-//    public function teacherhasGroup()
-//    {
-//        return $this->hasMany(Group::class);
-//    }
 
     public function teacherHasStudents()
     {
-
-        $groupIds = GroupTeacher::query()
-            ->where('teacher_id', $this->id)
-            ->pluck('group_id');
-
-
-        return User::role('student')
-            ->whereIn('group_id', $groupIds)
-            ->count();
-
+        $groupIds = $this->groups()->pluck('groups.id');
+        return User::role('student')->whereHas('groups', function ($q) use ($groupIds) {
+            $q->whereIn('groups.id', $groupIds);
+        })->count();
     }
 
     public function teacherPayment()
     {
+        $groups = $this->groups()->withCount('students')->get();
 
-        $summa =  0;
-        $groups = GroupTeacher::query()->where('teacher_id', $this->id)->get();
+        $totalPayment = $groups->sum(function ($group) {
+            if ($group) {
+                return $group->monthly_payment * $group->students_count;
+            }
+            return 0;
+        });
 
-        foreach ($groups as $group) {
-            $payment = Group::query()->findOrFail( $group->group_id);
-            $number =  User::query()->where('group_id', $group->group_id)->count();
-//            dd($number,$payment->monthly_payment);
-            $summa += $payment->monthly_payment * $number;
-        }
-
-        $summa = $summa*$this->percent/100;
-        return  $summa;
-
+        return $totalPayment * $this->percent / 100;
     }
 
-
-    public function group()
+    public function groups(): BelongsToMany
     {
-        return $this->belongsTo(Group::class);
+        return $this->belongsToMany(Group::class, 'group_user', 'user_id', 'group_id');
     }
 
     public function studentinformation()
@@ -95,7 +74,7 @@ class User extends Authenticatable
         return $this->hasMany(Assessment::class);
     }
 
-    public function studentdept()
+    public function deptStudent()
     {
         return $this->hasOne(DeptStudent::class, 'user_id', 'id');
     }
@@ -107,30 +86,42 @@ class User extends Authenticatable
 
     public function teacherHasGroup()
     {
-        return GroupTeacher::query()->where('teacher_id' , $this->id)->count()  ;
+        return $this->groups()->count();
     }
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    public function checkAttendanceStatus()
+    {
+        return $this->attendances()
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->exists();
+    }
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
-    private function teacherGroups()
+    public function room()
     {
-        return $this->belongsTo(GroupTeacher::class);
+        return $this->hasOne(Room::class, 'id', 'room_id');
+    }
+
+    public function studentsGroup()
+    {
+        $groups = $this->groups;
+
+        if ($groups->isEmpty()) {
+            return 'students without a group';
+        }
+
+        return $groups->map(function ($group) {
+            $room = $group->room;
+            return ($room ? $room->room . '->' : '') . $group->name;
+        })->implode(', ');
     }
 }

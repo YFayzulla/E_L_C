@@ -19,8 +19,9 @@ return new class extends Migration {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedBigInteger('group_id');
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-            $table->string('who_checked');
-            $table->integer('status')->nullable();
+            $table->unsignedMediumInteger('who_checked');
+            $table->unsignedTinyInteger('status')->nullable();
+            $table->unsignedTinyInteger('lesson_id')->nullable();
             $table->timestamps();
         });
     }

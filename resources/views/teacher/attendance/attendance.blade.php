@@ -1,35 +1,209 @@
 @extends('template.master')
+
 @section('content')
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg">
-        <form action="{{route('attendance.submit', $id)}}" method="post">
+
+    @role('user|admin')
+    <div class="card shadow-md rounded-lg mb-4">
+        <form action="{{ route('attendance.submit', $id) }}" method="post">
             @csrf
-            <div class="d-flex justify-content-end mb-4">
-                <label for="lesson" class="mr-2 align-self-center">Lesson:</label>
-                <input type="text" name="lesson" id="lesson" class="form-control w-25">
+            <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap py-3">
+                <h5 class="card-title mb-0 text-primary">Mark Attendance</h5>
+                <div class="d-flex align-items-center">
+                    {{-- Lesson input removed as per request --}}
+                </div>
             </div>
-            <table class="table table">
-                <thead>
-                <tr>
-                    <th>no</th>
-                    <th>name</th>
-                    <th class="text-center">status</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($students as $student)
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead class="table-light">
                     <tr>
-                        <td>{{$loop->index + 1}}</td>
-                        <td><b>{{$student->name}}</b></td>
-                        <td class="text-center">
-                            <input type="checkbox" name="status[{{$student->id}}]" value="on">
-                        </td>
+                        <th>No</th>
+                        <th>Name</th>
+                        <th class="text-center">Status</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
-            <div class="d-flex justify-content-end mt-2">
-                <button type="submit" class="btn btn-primary">submit</button>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                    @forelse($students as $index => $student)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td><b>{{ $student->name }}</b></td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group" aria-label="Attendance status">
+                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-present-{{ $student->id }}" value="1" checked>
+                                    <label class="btn btn-outline-success" for="status-present-{{ $student->id }}">Present</label>
+
+                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-absent-{{ $student->id }}" value="0">
+                                    <label class="btn btn-outline-danger" for="status-absent-{{ $student->id }}">Absent</label>
+
+                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-late-{{ $student->id }}" value="2">
+                                    <label class="btn btn-outline-warning" for="status-late-{{ $student->id }}">Late</label>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">No students found in this group.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
             </div>
+
+            <div class="card-footer text-end py-3">
+                <button type="submit" class="btn btn-primary">Submit Attendance</button>
+            </div>
+
         </form>
     </div>
+    @endrole
+
+
+    <div class="card shadow-md rounded-lg mt-4">
+        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap py-3">
+            <h5 class="card-title mb-0 text-primary">Attendance for {{ \Carbon\Carbon::createFromDate($year, $month)->format('F Y') }}</h5>
+
+            <div class="d-flex align-items-center">
+                @role('user|admin')
+                <form method="GET" action="{{ route('group.attendance', $group->id) }}" class="d-flex me-3">
+                    <select id="month" name="date" class="form-select me-2">
+                        <option value="">Select Month</option>
+                        @php
+                            $currentYear = date('Y');
+                            for ($monthOption = 1; $monthOption <= 12; $monthOption++) {
+                                $monthNum = str_pad($monthOption, 2, '0', STR_PAD_LEFT);
+                                $monthYear = $currentYear . '-' . $monthNum;
+                                $monthName = date('F', mktime(0, 0, 0, $monthOption, 1));
+                                $selected = ($year . '-' . $monthNum == $monthYear) ? 'selected' : '';
+                                echo "<option value=\"$monthYear\" $selected>$monthName $currentYear</option>";
+                            }
+                        @endphp
+                    </select>
+                    <button type="submit" class="btn btn-outline-primary">Show</button>
+                </form>
+
+                <form method="GET" action="{{ route('export.attendances', ['id' => $group->id, 'date' => $year . '-' . $month]) }}">
+                    <button type="submit" class="btn btn-success d-flex align-items-center">
+                        <i class="bx bxs-file-export me-1"></i> Export to Excel
+                    </button>
+                </form>
+                @endrole
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-center">
+                @php
+                    use Carbon\Carbon;
+                    $currentMonthDays = Carbon::createFromDate($year, $month)->daysInMonth;
+                @endphp
+
+                <thead class="table-light">
+                <tr>
+                    <th class="text-start">Name</th>
+                    @for ($i = 1; $i <= $currentMonthDays; $i++)
+                        @php
+                            $currentDate = Carbon::createFromDate($year, $month, $i);
+                            $isWeekend = $currentDate->isWeekend();
+                            $isToday = ($i == Carbon::now()->day && $month == Carbon::now()->month && $year == Carbon::now()->year);
+                        @endphp
+                        <th class="{{ $isToday ? 'bg-primary text-white' : ($isWeekend ? 'bg-secondary text-white' : '') }}">
+                            {{ $i }}
+                        </th>
+                    @endfor
+                </tr>
+                </thead>
+
+                <tbody>
+                @forelse ($data as $userName => $days)
+                    <tr>
+                        <td class="text-start fw-bold">{{ $userName }}</td>
+                        @for ($i = 1; $i <= $currentMonthDays; $i++)
+                            @php
+                                $day = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                $status = $days[$day] ?? null;
+                                $isAbsent = ($status === '0' || $status === 0);
+                                $isPresent = ($status === '1' || $status === 1);
+                                $isLate = ($status === '2' || $status === 2);
+                                $currentDate = Carbon::createFromDate($year, $month, $i);
+                                $isWeekend = $currentDate->isWeekend();
+                            @endphp
+                            <td class="{{ $isAbsent ? 'bg-danger-subtle text-danger' : ($isWeekend ? 'bg-secondary-subtle text-secondary' : ($isLate ? 'bg-warning-subtle text-warning' : ($isPresent ? 'text-success' : ''))) }}">
+                                @if ($isPresent)
+                                    <i class="bx bx-check-circle"></i>
+                                @elseif ($isAbsent)
+                                    <i class="bx bx-x-circle"></i>
+                                @elseif ($isLate)
+                                    <i class="bx bx-time-five"></i>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                        @endfor
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ $currentMonthDays + 1 }}" class="text-center py-4 text-muted">No attendance data available for this month.</td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-md rounded-lg mt-4">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="card-title mb-0 text-primary">Recent Attendance Records</h5>
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Teacher</th>
+                        <th>Lesson</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($attendances as $attendance)
+                    <tr>
+                        <td>{{ $loop->index + 1 }}</td>
+                        <td>{{ $attendance->user->name }}</td>
+                        <td>{{ $attendance->teacher->name }}</td>
+                        <td>{{ $attendance->lesson->name }}</td>
+                        <td>
+                            @if($attendance->status == 1)
+                                <span class="badge bg-success">Present</span>
+                            @elseif($attendance->status == 0)
+                                <span class="badge bg-danger">Absent</span>
+                            @elseif($attendance->status == 2)
+                                <span class="badge bg-warning">Late</span>
+                            @endif
+                        </td>
+                        <td>{{ $attendance->created_at->format('d M Y H:i') }}</td>
+                        <td class="text-center">
+                            <form action="{{route('attendance.delete', $attendance->id)}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this attendance record?');">
+                                @csrf
+                                @method("DELETE")
+                                <button type="submit" class="btn btn-sm btn-danger d-inline-flex align-items-center">
+                                    <i class="bx bx-trash-alt me-1"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No recent attendance records found.</td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+            <div class="card-footer">
+                {{ $attendances->links('pagination::bootstrap-5') }}
+            </div>
+        </div>
+    </div>
+
 @endsection

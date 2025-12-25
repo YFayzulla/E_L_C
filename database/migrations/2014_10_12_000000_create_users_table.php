@@ -17,17 +17,20 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('password');
-            $table->string('phone')->nullable();
-            $table->string('passport')->nullable();
+            $table->unsignedBigInteger('phone')->nullable()->unique();
+            $table->string('passport',9)->nullable()->unique();
             $table->date('date_born')->nullable();
             $table->string('location')->nullable();
             $table->string('description')->nullable();
             $table->string('parents_name')->nullable();
-            $table->string('parents_tel')->nullable();
-            $table->string('group_id')->nullable();
+            $table->unsignedBigInteger('parents_tel')->unique()->nullable();
+            // $table->integer('group_id')->nullable(); // Removed group_id
             $table->string('photo')->nullable();
-            $table->string('should_pay')->nullable();
-            $table->string('status')->nullable();
+            $table->mediumInteger('should_pay')->nullable();
+            $table->tinyinteger('status')->nullable();
+            $table->integer('percent')->nullable();
+            $table->foreignId('room_id')->nullable();
+            $table->integer('mark')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

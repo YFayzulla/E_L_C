@@ -17,7 +17,7 @@ class AdminTableSeeder extends Seeder
     {
         User::create([
             'name' => 'admin',
-            'phone' => '+998930430959',
+            'phone' => '930430959',
             'password' => bcrypt('a'),
         ])->assignRole('admin');
     }

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\CommentStudentController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\FinanceController;
@@ -18,91 +17,139 @@ use App\Http\Controllers\TestResultController;
 use App\Http\Controllers\WaitersController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/', [Controller::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-
-//attendance
-
-    Route::get('group/assessment/{id}', [GroupExtraController::class, 'attendance'])->name('group.attendance');
-
-});
-
-/*                          Admin                */
-
-Route::group(['middleware' => ['auth', 'role:admin']], function () {
-
-
-    Route::get('Test', [TestResultController::class, 'index'])->name('test');
-    Route::get('Test/{id}/show', [TestResultController::class, 'showResults'])->name('test.show');
-
-//    Route::get('dashboard',
-
-//    PDF
-
-    Route::get('/student/pdf/{id}', [PdfController::class, 'history']);
-    Route::get('/dept/pdf', [PdfController::class, 'RoomListPDF']);
-    Route::get('/assessment/pdf/{date}', [PdfController::class, 'Assessment']);
-    Route::get('/teacher/pdf', [PdfController::class, 'teacher']);
-    Route::get('/group/pdf', [PdfController::class, 'group']);
-    Route::get('/student/pdf', [PdfController::class, 'student']);
-    Route::get('/student/payment/pdf', [PdfController::class, 'studentPayment']);
-
-//    Excel
-    Route::get('export-attendances/{id}', [GroupExtraController::class, 'export'])->name('export.attendances');
-
-//    group
-
-    Route::resource('group', GroupController::class);
-    Route::delete('/delete-multiple', [GroupExtraController::class, 'deleteMultiple'])->name('deleteMultiple');
-    Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');
-    Route::post('group/change/{id}', [GroupExtraController::class, 'change_group'])->name('student.change.group');
-
-    //    Route::get('group/attendance/filter/{id}', [GroupExtraController::class, 'filter'])->name('attendance.filter');
-
-
-    Route::get('group/student/{id}', [GroupExtraController::class, 'show'])->name('group.students');
-
-//    student
-
-    Route::resource('student', StudentController::class);
-    Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
-    Route::resource('dept', DeptStudentController::class);
-    Route::get('refresh/{id}/update', [RefreshController::class, 'update'])->name('refresh.update');
-
-//    teacher
-
-    Route::resource('teacher', TeacherController::class);
-    Route::delete('teacher/group/delete/{id}', [ExtraTeacherController::class, 'group_delete'])->name('teacher_group.delete');
-    Route::put('teacher/group/{id}/store', [ExtraTeacherController::class, 'add_group'])->name('teacher_group.store');
-
-//     finance
-
-    Route::get('finance', [FinanceController::class, 'index'])->name('finance.other');
-    Route::post('finance/store', [FinanceController::class, 'store'])->name('finance.store');
-    Route::put('finance/update/{id}', [FinanceController::class, 'update'])->name('finance.update');
-    Route::delete('finance/delete/{id}', [FinanceController::class, 'destroy'])->name('finance.destroy');
-
-});
-
-//Teachers
-
-Route::group(['middleware' => ['auth', 'role:user']], function () {
-//teacher panel
-    Route::get('attendance/lists', [TeacherAdminPanel::class, 'attendanceIndex'])->name('attendance.index');
-    Route::get('groups', [TeacherAdminPanel::class, 'group'])->name('attendance');
-    Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
-    Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
-    Route::resource('assessment', AssessmentController::class);
-    Route::get('comment', [CommentStudentController::class, 'index'])->name('comment');
-    Route::post('comment/store', [CommentStudentController::class, 'store'])->name('comment.store');
-
-});
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 require __DIR__ . '/auth.php';
+
+// --- AUTHENTICATED USERS (Common) ---
+Route::middleware('auth')->group(function () {
+    Route::get('/', [Controller::class, 'index'])->name('dashboard');
+
+    // Profile Routes
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::patch('/', 'update')->name('update');
+        Route::delete('/', 'destroy')->name('destroy');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| TEACHER ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::controller(TeacherAdminPanel::class)->group(function () {
+        Route::get('teacher/groups', 'groups')->name('teacher.groups');
+        Route::get('teacher/attendance', 'attendanceGroups')->name('attendance');
+        Route::get('teacher/assessment/groups', 'assessmentGroups')->name('assessment.teacher.groups');
+    });
+
+    // O'qituvchilar davomatni tekshirishi va yuborishi mumkin
+    Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
+    Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
+    Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    // --- TEST ROUTES (TUZATILDI) ---
+    Route::controller(TestResultController::class)->prefix('Test')->group(function () {
+        Route::get('/', 'index')->name('test');
+        Route::get('/{id}/show', 'showResults')->name('test.show');
+        Route::delete('/{id}/delete', 'destroyAll')->name('test.destroy.all');
+    });
+
+    // --- PDF REPORTS ---
+    Route::controller(PdfController::class)->group(function () {
+        Route::get('/student/pdf/{id}', 'history');
+        Route::get('/dept/pdf', 'RoomListPDF');
+        Route::get('/assessment/pdf/{date}', 'Assessment');
+        Route::get('/teacher/pdf', 'teacher');
+        Route::get('/group/pdf', 'group');
+        Route::get('/student/pdf-list', 'student');
+    });
+
+    // --- EXCEL EXPORT ---
+    Route::get('export-attendances/{id}', [GroupExtraController::class, 'export'])->name('export.attendances');
+
+    // --- GROUPS & WAITERS ---
+    Route::resource('group', GroupController::class);
+    Route::controller(GroupController::class)->prefix('group')->name('group.')->group(function(){
+        Route::get('{id}/room', 'makeGroup')->name('create.room');
+    });
+
+    Route::controller(GroupExtraController::class)->group(function () {
+        Route::delete('/delete-multiple', 'deleteMultiple')->name('deleteMultiple');
+        Route::post('group/change/{id}', 'change_group')->name('student.change.group');
+        Route::get('group/student/{id}', 'show')->name('group.students');
+    });
+
+    Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');
+
+    // --- STUDENTS & DEPT ---
+    Route::resource('student', StudentController::class);
+    Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
+
+    Route::resource('dept', DeptStudentController::class);
+    Route::get('payment-receipt/{paymentId}', [DeptStudentController::class, 'showReceipt'])->name('payment.receipt');
+    Route::get('refresh/{id}/update', [RefreshController::class, 'update'])->name('refresh.update');
+
+    // --- TEACHERS ---
+    Route::resource('teacher', TeacherController::class);
+    Route::controller(ExtraTeacherController::class)->prefix('teacher/group')->name('teacher_group.')->group(function () {
+        Route::delete('delete/{id}', 'group_delete')->name('delete');
+        Route::put('{id}/store', 'add_group')->name('store');
+    });
+
+    // --- FINANCE ---
+    Route::controller(FinanceController::class)->prefix('finance')->name('finance.')->group(function () {
+        Route::get('/', 'index')->name('other');
+        Route::post('/store', 'store')->name('store');
+        Route::put('/update/{id}', 'update')->name('update');
+        Route::delete('/delete/{id}', 'destroy')->name('destroy');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| SHARED ROUTES (Admin || User)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin|user'])->group(function () {
+    Route::get('group/attendance/{id}', [GroupExtraController::class, 'attendance'])->name('group.attendance');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| SHARED ROUTES (Student || Admin || User)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:student|admin|user'])->group(function () {
+    Route::resource('assessment', AssessmentController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
+| STUDENT ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:student'])->group(function () {
+    // Studentlarga tegishli marshrutlar
+    // Masalan, o'z test natijalarini ko'rish, davomatini ko'rish
+    Route::controller(TeacherAdminPanel::class)->group(function () {
+        Route::get('attendance/lists', 'attendanceIndex')->name('attendance.index');
+        Route::get('groups', 'group')->name('student.attendance');
+    });
+});

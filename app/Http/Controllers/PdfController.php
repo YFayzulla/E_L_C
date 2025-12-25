@@ -7,105 +7,184 @@ use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\HistoryPayments;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use PDF;
+use Illuminate\Support\Facades\Log;
+use PDF; // Assuming Barryvdh\DomPDF\Facade\Pdf is used
 
 class PdfController extends Controller
 {
+    public function __construct()
+    {
+        // Increase execution time and memory limit for PDF generation
+        set_time_limit(300);
+        ini_set('memory_limit', '512M'); // Increased to 512M
+    }
 
+    /**
+     * Download payment history as PDF.
+     */
     public function RoomListPDF(Request $request)
     {
-        // Fetch table data based on flexible date range
-        $tableData = HistoryPayments::query()
-            ->when($request->startDate && $request->endDate, function ($query) use ($request) {
-                // If both startDate and endDate are provided, filter between these dates
-                $query->whereBetween('date', [$request->startDate, $request->endDate]);
-            })
-            ->when($request->startDate && !$request->endDate, function ($query) use ($request) {
-                // If only startDate is provided, treat it as a single day filter
-                $query->whereDate('date', $request->startDate);
-            })
-            ->when(!$request->startDate && $request->endDate, function ($query) use ($request) {
-                // If only endDate is provided, treat it as a single day filter
-                $query->whereDate('date', $request->endDate);
-            })
-            ->get();
+        $request->validate([
+            'startDate' => 'nullable|date',
+            'endDate'   => 'nullable|date',
+        ]);
 
-        // Generate the PDF
-        $pdf = PDF::loadView('user.pdf.payments', ['users' => $tableData]);
+        try {
+            $startDate = $request->input('startDate') ? Carbon::parse($request->input('startDate')) : null;
+            $endDate   = $request->input('endDate') ? Carbon::parse($request->input('endDate')) : null;
 
-        // Download the PDF or display it in the browser
-        return $pdf->download('orders.pdf');
+            $query = HistoryPayments::select('id', 'name', 'payment', 'date', 'group', 'type_of_money');
+
+            if ($startDate && $endDate) {
+                $query->whereBetween('date', [$startDate->startOfDay(), $endDate->endOfDay()]);
+            } elseif ($startDate) {
+                $query->whereDate('date', $startDate);
+            } elseif ($endDate) {
+                $query->whereDate('date', $endDate);
+            }
+
+            $payments = $query->latest('date')->get();
+
+            $pdf = PDF::loadView('admin.pdf.payments', ['users' => $payments]);
+            $fileName = 'payments_report_' . now()->format('Y-m-d_H-i') . '.pdf';
+
+            return $pdf->download($fileName);
+
+        } catch (\Exception $e) {
+            Log::error('PdfController@RoomListPDF error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'PDF hisobotini yaratishda xatolik yuz berdi.');
+        }
     }
 
+    /**
+     * Student's personal history and attendance.
+     */
     public function history($id)
     {
-        set_time_limit(300); // Set to a value greater than 60 seconds
-        $today = now()->toDateString();
-        $student = User::find($id);
-        $attendances = Attendance::where('user_id', $id)->get();
-        $pdf = PDF::loadView('user.pdf.student_show', ['student' => $student, 'attendances' => $attendances]);
-        return $pdf->download('orders.pdf');
-        GeneratePdfJob::dispatch($id);
-        return "PDF generation job dispatched successfully!";
+        try {
+            $student = User::with('groups') // Eager load groups without column constraints
+                ->findOrFail($id);
+
+            // Fetch attendances with necessary relationships
+            $attendances = Attendance::where('user_id', $id)
+                ->with(['group', 'user']) // Load group and user info
+                ->latest()
+                ->get();
+
+            $pdf = PDF::loadView('admin.pdf.student_show', [
+                'student'     => $student,
+                'attendances' => $attendances
+            ]);
+
+            $fileName = 'student_history_' . $student->id . '_' . now()->format('Y-m-d') . '.pdf';
+
+            return $pdf->download($fileName);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Talaba topilmadi.');
+        } catch (\Exception $e) {
+            Log::error('PdfController@history error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talaba tarixini yuklashda xatolik.');
+        }
     }
 
+    /**
+     * Teachers list PDF.
+     */
     public function teacher()
     {
-        set_time_limit(300); // Set to a value greater than 60 seconds
-        $today = now()->toDateString();
-        $teacher = User::role('user')->get();
-        $pdf = PDF::loadView('user.pdf.teacher', ['teacher' => $teacher]);
-        return $pdf->download('orders.pdf');
+        try {
+            $teachers = User::role('user')
+                ->select('id', 'name', 'phone')
+                ->orderBy('name')
+                ->get();
 
-        return "PDF generation job dispatched successfully!";
+            $pdf = PDF::loadView('admin.pdf.teacher', ['teacher' => $teachers]);
+            $fileName = 'teachers_list_' . now()->format('Y-m-d') . '.pdf';
+
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            Log::error('PdfController@teacher error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'O\'qituvchilar ro\'yxatini yuklashda xatolik.');
+        }
     }
 
+    /**
+     * Groups list PDF.
+     */
     public function group()
     {
-        set_time_limit(300); // Set to a value greater than 60 seconds
-        $today = now()->toDateString();
-        $group = Group::where('id', '!=', 1)->get();
-        $pdf = PDF::loadView('user.pdf.group', ['group' => $group]);
-        return $pdf->download('orders.pdf');
+        try {
+            $groups = Group::where('id', '!=', 1)
+                ->select('id', 'name', 'start_time', 'finish_time', 'monthly_payment', 'room_id')
+                ->with('room:id,room') // Eager load room name
+                ->orderBy('name')
+                ->get();
 
-        return "PDF generation job dispatched successfully!";
+            $pdf = PDF::loadView('admin.pdf.group', ['group' => $groups]);
+            $fileName = 'groups_list_' . now()->format('Y-m-d') . '.pdf';
+
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            Log::error('PdfController@group error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Guruhlar ro\'yxatini yuklashda xatolik.');
+        }
     }
 
-
+    /**
+     * Students list PDF.
+     */
     public function student()
     {
-        set_time_limit(300); // Set to a value greater than 60 seconds
-        $today = now()->toDateString();
-        $student = User::role('student')->get();
-        $pdf = PDF::loadView('user.pdf.student', ['student' => $student]);
-        return $pdf->download('orders.pdf');
+        try {
+            // Select only necessary columns to reduce memory usage
+            $students = User::role('student')
+                ->select('id', 'name', 'phone', 'parents_tel', 'parents_name', 'should_pay')
+                ->with('groups:id,name') // Load only id and name of groups
+                ->orderBy('name')
+                ->get();
 
-        return "PDF generation job dispatched successfully!";
+            $pdf = PDF::loadView('admin.pdf.student', ['student' => $students]);
+            $fileName = 'students_list_' . now()->format('Y-m-d') . '.pdf';
+
+            return $pdf->download($fileName);
+        } catch (\Exception $e) {
+            // Log the full error for debugging
+            Log::error('PdfController@student error: ' . $e->getMessage());
+            // Return the actual error message to the user for now (for debugging purposes)
+            return redirect()->back()->with('error', 'Xatolik: ' . $e->getMessage());
+        }
     }
 
+    /**
+     * Group assessment PDF.
+     */
     public function Assessment($id)
     {
+        try {
+            $group = Group::findOrFail($id);
+            
+            // Assessment jadvalida 'group' ustuni string bo'lgani uchun, nom bo'yicha qidiramiz
+            $assessments = Assessment::where('group', $group->name)
+                ->with('user:id,name') // Eager load student name
+                ->get();
 
-        $groups = Assessment::where('group', $id)->get();
+            if ($assessments->isEmpty()) {
+                 return redirect()->back()->with('warning', 'Ushbu guruh uchun baholash natijalari topilmadi.');
+            }
+            
+            $groupName = $group->name;
 
-        $pdf = PDF::loadView('user.pdf.group_assessment', ['groups' => $groups]);
+            $pdf = PDF::loadView('admin.pdf.group_assessment', ['groups' => $assessments, 'groupName' => $groupName]);
+            $fileName = 'group_assessment_' . str_replace(' ', '_', $groupName) . '_' . now()->format('Y-m-d') . '.pdf';
 
-        return $pdf->download('orders.pdf');
+            return $pdf->download($fileName);
 
-    }
-
-    public function studentPayment()
-    {
-
-        $students = User::role('student')->orderby('name')->get();
-
-        $pdf = PDF::loadView('user.pdf.studentpayment', ['students' => $students]);
-
-        return $pdf->download('orders.pdf');
-
-        return "PDF generation job dispatched successfully!";
-
+        } catch (\Exception $e) {
+            Log::error('PdfController@Assessment error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Baho hisobotini yuklashda xatolik.');
+        }
     }
 }

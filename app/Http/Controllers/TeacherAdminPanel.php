@@ -3,67 +3,166 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
-use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\LessonAndHistory;
-use App\Models\StudentInformation;
-use App\Models\User;
+use App\Services\AttendanceService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TeacherAdminPanel extends Controller
 {
+    public function __construct(protected AttendanceService $serviceAttendance)
+    {
+        // Service avtomatik inject qilinadi
+    }
 
+    /**
+     * O'qituvchiga biriktirilgan guruhlar ro'yxati.
+     */
     public function group()
     {
-        $id = auth()->id();
-        $groups = GroupTeacher::where('teacher_id', $id)->get();
-        return view('teacher.group', compact('groups'));
+        try {
+            $teacherId = auth()->id();
+            $groups = GroupTeacher::where('teacher_id', $teacherId)
+                ->with('group')
+                ->get();
+            return view('teacher.group', compact('groups'));
+        } catch (\Exception $e) {
+            Log::error('TeacherAdminPanel@group error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik yuz berdi.');
+        }
     }
-//one
+
+    /**
+     * Davomat qilish sahifasi (Service orqali ma'lumot oladi).
+     */
     public function attendance($id)
     {
-
-        $students = User:: where('group_id', $id)->orderBy('name')->get();
-        return view('teacher.attendance.attendance', compact('students', 'id'));
-
+        try {
+            $serviceData = $this->serviceAttendance->attendance($id);
+            return view('teacher.attendance.attendance', [
+                'id' => $id,
+                'today' => $serviceData['today'] ?? now(),
+                'data' => $serviceData['data'] ?? [],
+                'year' => $serviceData['year'] ?? date('Y'),
+                'month' => $serviceData['month'] ?? date('m'),
+                'attendances' => $serviceData['attendances'] ?? [],
+                'group' => $serviceData['group'] ?? null,
+                'students' => $serviceData['students'] ?? [],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('TeacherAdminPanel@attendance error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Davomat sahifasini ochishda xatolik.');
+        }
     }
 
+    /**
+     * Davomatni saqlash (Submit).
+     */
     public function attendance_submit(Request $request, $id)
     {
-        $lesson = LessonAndHistory::create([
-            'name' => $request->lesson,
-            'data' => 1,
-            'group' => $id,
+        $request->validate([
+            'lesson' => 'nullable|string|max:255', // Made nullable
+            'status' => 'required|array',
         ]);
 
-//        dd($request->status);
-        if ($request->status) {
-            foreach ($request->status as $name => $status) {
-                $user_id = auth()->id();
-                Attendance::create([
-                    'user_id' => $name,
-                    'group_id' => $id,
-                    'who_checked' => $user_id,
-                    'status' => 1,
-                    'lesson_id' => $lesson->id,
-                ]);
+        $statuses = $request->input('status', []);
+
+        DB::beginTransaction();
+        try {
+            // Auto-generate lesson name if not provided
+            $lessonName = $request->lesson ?? 'Lesson: ' . now()->format('d M Y');
+
+            $lesson = LessonAndHistory::create([
+                'name' => $lessonName,
+                'data' => 1,
+                'group' => $id,
+            ]);
+
+            $attendancesToInsert = [];
+            $checkerId = auth()->id();
+            $now = now();
+
+            foreach ($statuses as $userId => $statusValue) {
+                // ONLY save if status is NOT 'Present' (1)
+                // 0 = Absent, 2 = Late. We skip 1.
+                if ((int)$statusValue !== 1) {
+                    if (!is_numeric($userId)) continue;
+
+                    $attendancesToInsert[] = [
+                        'user_id' => $userId,
+                        'group_id' => $id,
+                        'who_checked' => $checkerId,
+                        'status' => (int)$statusValue, // Will be 0 (Absent) or 2 (Late)
+                        'lesson_id' => $lesson->id,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
             }
-            return redirect()->route('attendance')->with('success', 'Saved');
 
-        } else {
-            return redirect()->back()->with('error', 'Something went wrong');
+            if (!empty($attendancesToInsert)) {
+                Attendance::insert($attendancesToInsert);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Davomat muvaffaqiyatli saqlandi.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('TeacherAdminPanel@attendance_submit error: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
         }
-
     }
 
-//    second
+    /**
+     * Davomat bo'limi bosh sahifasi.
+     */
     public function attendanceIndex()
     {
-//        dd('s');
-        return view('teacher.attendance.index',[
-            'groups'=>GroupTeacher::query()->where('teacher_id', auth()->id())->get(),
-        ]);
+        try {
+            $user = Auth::user();
+
+            if ($user->hasRole('student')) {
+                // Students now only see their absences and lates.
+                $attendances = Attendance::where('user_id', $user->id)
+                    ->whereIn('status', [0, 2]) // Absent or Late
+                    ->with(['lesson', 'group'])
+                    ->orderByDesc('created_at')
+                    ->paginate(20);
+                return view('student.attendance', compact('attendances'));
+            }
+
+            // Default behavior for teachers
+            $groups = GroupTeacher::where('teacher_id', $user->id)
+                ->with('group')
+                ->get();
+            return view('teacher.attendance.index', compact('groups'));
+        } catch (\Exception $e) {
+            Log::error('TeacherAdminPanel@attendanceIndex error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Ma\'lumotlarni yuklashda xatolik.');
+        }
     }
 
+    public function groups()
+    {
+        $teacherId = Auth::id();
+        $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
+        return view('teacher.group.index', compact('groups'));
+    }
 
+    public function attendanceGroups()
+    {
+        $teacherId = Auth::id();
+        $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
+        return view('teacher.attendance.index', compact('groups'));
+    }
+
+    public function assessmentGroups()
+    {
+        $teacherId = Auth::id();
+        $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
+        return view('teacher.assessment.index', compact('groups'));
+    }
 }

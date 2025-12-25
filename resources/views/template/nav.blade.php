@@ -10,78 +10,45 @@
 
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
         <!-- Search -->
-        @role('admin')
         <div class="navbar-nav align-items-center">
             <div class="nav-item d-flex align-items-center">
                 <i class="bx bx-search fs-4 lh-0"></i>
                 <input
-                        id="myInput"
                         type="text"
                         class="form-control border-0 shadow-none"
                         placeholder="Search..."
                         aria-label="Search..."
+                        id="myInput"
                 />
             </div>
         </div>
         <!-- /Search -->
-        <!-- Search by date -->
-        <div class="d-none d-md-block">
-            <form action="{{route('student.search')}}" method="post">
-                @csrf
-                <div class="navbar-nav align-items-center">
-                    <div class="nav-item d-flex align-items-center">
-                        <input
-                                type="date"
-                                class="form-control border-0 shadow-none"
-                                placeholder="Start Date"
-                                name="start_date"
-                                aria-label="Start Date"
-                        />
-                    </div>
-
-                    <div class="nav-item d-flex align-items-center">
-                        <input
-                                type="date"
-                                class="form-control border-0 shadow-none"
-                                placeholder="End Date"
-                                name="end_date"
-                                aria-label="End Date"
-                        />
-                    </div>
-
-                    <button type="submit" class="btn btn-outline-dark">Search</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- /Search -->
-        @endrole
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Place this tag where you want the button to render. -->
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
-                   data-bs-toggle="dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
-                        <img src="{{ asset('icon/avatar.png') }}" alt class="w-px-40 h-auto rounded-circle"/>
+                        <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('assets/img/avatars/1.png') }}"
+                             alt class="w-px-40 h-auto rounded-circle"/>
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
                         <a class="dropdown-item" href="#">
                             <div class="d-flex">
-                                <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="{{ asset('icon/avatar.png') }}" alt
-                                             class="w-px-40 h-auto rounded-circle"/>
-                                    </div>
-                                </div>
+                                {{--                                    <div class="flex-shrink-0 me-3">--}}
+                                {{--                                        <div class="avatar avatar-online">--}}
+                                {{--                                            <img src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('assets/img/avatars/1.png') }}" alt class="w-px-40 h-auto rounded-circle" />--}}
+                                {{--                                        </div>--}}
+                                {{--                                    </div>--}}
                                 <div class="flex-grow-1">
-                                    <span
-                                            class="fw-semibold d-block">{{ \Illuminate\Support\Facades\Auth::user()->name }}</span>
-                                    @foreach(\Illuminate\Support\Facades\Auth::user()->getRoleNames() as $item)
-                                        <small class="text-muted">{{ $item }}</small>
-                                    @endforeach
+                                    <span class="fw-semibold d-block">{{ Auth::user()->name }}</span>
+                                    <small class="text-muted">
+                                        {{ Auth::user()->getRoleNames()->first() === 'user' ? 'Teacher' : Auth::user()->getRoleNames()->first() }}
+                                    </small>
+
                                 </div>
                             </div>
                         </a>
@@ -90,30 +57,25 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route("profile.edit") }}">
+                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
                             <i class="bx bx-user me-2"></i>
                             <span class="align-middle">My Profile</span>
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="{{ route("profile.edit") }}">
-                            <i class="bx bx-cog me-2"></i>
-                            <span class="align-middle">Settings</span>
-                        </a>
+                        <div class="dropdown-divider"></div>
                     </li>
-                    <!-- Authentication -->
-
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <input type="hidden" name="logout" value="1">
-                            <button type="submit" class="dropdown-item">
+                            <a class="dropdown-item" href="{{ route('logout') }}"
+                               onclick="event.preventDefault();
+                                                this.closest('form').submit();">
                                 <i class="bx bx-power-off me-2"></i>
-                                <span class="align-middle">Log out</span>
-                            </button>
+                                <span class="align-middle">Log Out</span>
+                            </a>
                         </form>
                     </li>
-
                 </ul>
             </li>
             <!--/ User -->

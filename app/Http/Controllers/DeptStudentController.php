@@ -5,147 +5,160 @@ namespace App\Http\Controllers;
 use App\Models\DeptStudent;
 use App\Models\HistoryPayments;
 use App\Models\User;
-use DateTime;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use function PHPUnit\Framework\lessThanOrEqual;
+use Illuminate\Support\Facades\DB;
 
 class DeptStudentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $students = User::role('student')->orderby('status')->orderby('name')->get();
-        return view('user.dept.index', compact('students'));
+        $students = User::role('student')
+            ->with('deptStudent', 'groups')
+            ->leftJoin('dept_students', 'users.id', '=', 'dept_students.user_id')
+            ->select('users.*') // Select only user columns to avoid conflicts, dept_students data is loaded via with() or we can select specific columns if needed for sorting
+            // Order groups explicitly:
+            // 0) Partially Paid (payed > 0)
+            // 1) Debtor (status <= 0)
+            // 2) Paid (status > 0)
+            // 3) Disabled (status IS NULL)
+            ->orderByRaw("
+                CASE 
+                    WHEN users.status IS NULL THEN 3 
+                    WHEN COALESCE(dept_students.payed, 0) > 0 THEN 0 
+                    WHEN users.status <= 0 THEN 1 
+                    ELSE 2 
+                END
+            ")
+            // Inside groups, sort by status then by name
+            ->orderBy('users.status')
+            ->orderBy('users.name')
+            ->get();
+
+        return view('admin.dept.index', compact('students'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
+        // This action is not implemented.
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        // This action is not implemented.
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\DeptStudent $deptStudent
-     * @return \Illuminate\Http\Response
-     */
     public function show(DeptStudent $deptStudent)
     {
-        //
+        // This action is not implemented.
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\DeptStudent $deptStudent
-     * @return \Illuminate\Http\Response
-     */
     public function edit(DeptStudent $deptStudent)
     {
-
+        // This action is not implemented.
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\DeptStudent $deptStudent
-     * @return \Illuminate\Http\Response
-     */
-
-
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $student = DeptStudent::where('user_id', $id)->first();
-        $user = User::find($id);
-        $payment = $request->payment;
-        $dept = $student->dept;
-//        dd($student->student->should_pay, $request);
-
-
-        if ($dept == $payment) {
-
-            $student->status_month += 1;
-            $user->status += 1;
-            $student->date = $request->date_paid;
-
-        } elseif ($dept - $payment > 0) {
-
-
-            if ($student->payed == 0) {
-
-                $student->payed = $payment;
-                $student->date = Carbon::now()->format('Y-m-d');
-
-            } elseif($payment + $student->payed == $student->dept ) {
-                $student->payed = 0;
-                $student->status_month++;
-                $user->status += 1;
-            }else{
-                $student->payed += $payment;
-            }
-
-
-        } else {
-            $item = ($payment / $dept);
-            if ((int)$item == $item) {
-                $student->status_month += $item;
-                $user->status += $item;
-                $student->date = $request->date_paid ?? Carbon::now()->format('Y-m-d');
-
-            } else {
-                $student->status_month += (int)$item;
-                $user->status += (int)$item;
-                $item = $item - (int)$item;
-                $student->payed = $item * $student->dept;
-                $student->date = Carbon::now()->addMonths((int)$item)->format('Y-m-d');
-            }
-        }
-
-        $student->save();
-        $user->save();
-
-        HistoryPayments::create([
-            'user_id' => $student->user_id,
-            'name' => $user->name,
-            'payment' => $request->payment,
-            'group' => $user->group->name,
-            'date' => $request->date_paid ?? Carbon::now()->format('Y-m-d'),
-            'type_of_money' => $request->money_type,
+        $request->validate([
+            'payment' => 'required|string',
+            'date_paid' => 'nullable|date',
+            'money_type' => 'required|string|max:255',
         ]);
 
-        return redirect()->back()->with('success', 'Successful');
+        $cleanPayment = (float) str_replace([' ', ','], '', $request->payment);
+
+        if ($cleanPayment <= 0) {
+            return redirect()->back()->with('error', 'To\'lov miqdori noto\'g\'ri kiritildi.');
+        }
+
+        $user = User::with('deptStudent', 'groups')->findOrFail($id);
+        $deptStudent = $user->deptStudent;
+
+        if (!$deptStudent) {
+            return redirect()->back()->with('error', 'Talabaning to\'lov ma\'lumotlari topilmadi.');
+        }
+
+        $monthlyDept = $deptStudent->dept;
+        $paidDate = $request->date_paid ? Carbon::parse($request->date_paid) : Carbon::now();
+        
+        $paymentHistoryId = null;
+
+        DB::transaction(function () use ($deptStudent, $user, $cleanPayment, $monthlyDept, $paidDate, $request, &$paymentHistoryId) {
+            $remainingPayment = $cleanPayment;
+
+            if ($deptStudent->payed > 0) {
+                $neededToCompleteMonth = $monthlyDept - $deptStudent->payed;
+                if ($remainingPayment >= $neededToCompleteMonth) {
+                    $remainingPayment -= $neededToCompleteMonth;
+                    $deptStudent->payed = 0;
+                    $deptStudent->status_month++;
+                    $user->status++;
+                } else {
+                    $deptStudent->payed += $remainingPayment;
+                    $remainingPayment = 0;
+                }
+            }
+
+            if ($monthlyDept > 0 && $remainingPayment >= $monthlyDept) {
+                $fullMonthsPaid = floor($remainingPayment / $monthlyDept);
+                $deptStudent->status_month += $fullMonthsPaid;
+                $user->status += $fullMonthsPaid;
+                $remainingPayment -= ($fullMonthsPaid * $monthlyDept);
+            }
+
+            if ($remainingPayment > 0) {
+                $deptStudent->payed += $remainingPayment;
+            }
+
+            $deptStudent->date = $paidDate->format('Y-m-d');
+            $deptStudent->save();
+            $user->save();
+
+            // Handle group name for history. If multiple groups, maybe join names or pick first.
+            // For now, picking the first group name or 'No Group'
+            $groupName = $user->groups->isNotEmpty() ? $user->groups->first()->name : 'No Group';
+
+            $paymentHistory = HistoryPayments::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'payment' => $cleanPayment,
+                'group' => $groupName,
+                'date' => $paidDate->format('Y-m-d'),
+                'type_of_money' => $request->money_type,
+            ]);
+            
+            $paymentHistoryId = $paymentHistory->id;
+        });
+
+        // Redirect back with a success message and the ID of the payment history for the receipt
+        return redirect()->back()
+            ->with('success', 'To\'lov muvaffaqiyatli amalga oshirildi.')
+            ->with('payment_receipt_id', $paymentHistoryId);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Generate and show a payment receipt (check).
      *
-     * @param \App\Models\DeptStudent $deptStudent
-     * @return \Illuminate\Http\Response
+     * @param int $paymentId
+     * @return \Illuminate\View\View
      */
+    public function showReceipt(int $paymentId)
+    {
+        // Eager load groups instead of group
+        $payment = HistoryPayments::with(['user.groups.room'])->findOrFail($paymentId);
+        $student = $payment->user;
+        $monthlyDept = $student->deptStudent->dept ?? $student->should_pay;
+
+        return view('admin.pdf.chek', [
+            'payment' => $payment,
+            'student' => $student,
+            'dept' => $monthlyDept,
+        ]);
+    }
+
     public function destroy(DeptStudent $deptStudent)
     {
-
+        // This action is not implemented.
     }
 }

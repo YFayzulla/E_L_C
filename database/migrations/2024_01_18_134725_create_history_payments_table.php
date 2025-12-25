@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('history_payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedSmallInteger('user_id');
             $table->string('name');
-            $table->string('payment');
+            $table->unsignedSmallInteger('payment');
             $table->string('group');
             $table->date('date');
             $table->string('type_of_money')->nullable();

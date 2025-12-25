@@ -16,9 +16,9 @@ class GroupSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker::create();
         Group::create([
-            'name' => 'waiters'
+            'name' => 'Waiting Room',
+            'description' => 'This is the waiting room for new members.',
         ]);
     }
 }

@@ -47,17 +47,15 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        /*
-        if (! Auth::attempt($this->only('name', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $loginValue = $this->input('login');
 
-            throw ValidationException::withMessages([
-                'login' => __('auth.failed'),
-            ]);
-        }*/
+        // Normalize the input if it looks like a phone number.
+        // This will convert inputs like "+998(90) 123-45-67" or "901234567" to "998901234567".
+        $normalizedPhone = '998' . substr(preg_replace('/[^0-9]/', '', $loginValue), -9);
 
-        $user = User::where('name', $this->login)
-            ->orWhere('phone', $this->login)
+        $user = User::where('name', $loginValue)
+            ->orWhere('phone', $loginValue) // Check against original input
+            ->orWhere('phone', $normalizedPhone) // Check against normalized phone
             ->first();
 
         if (!$user || !Hash::check($this->password, $user->password)) {
@@ -90,7 +88,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -104,6 +102,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey()
     {
-        return Str::lower($this->input('email')).'|'.$this->ip();
+        return Str::lower($this->input('login')).'|'.$this->ip();
     }
 }

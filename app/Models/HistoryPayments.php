@@ -12,8 +12,16 @@ class HistoryPayments extends Model
 
     protected $fillable=['user_id','name','payment','group','date','type_of_money'];
 
-    public function student(){
-        return $this->belongsTo(User::class,'id');
+    // Primary relation to the payer (student user)
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Backward-compatible alias used in some views/code
+    public function student()
+    {
+        return $this->user();
     }
 
 }

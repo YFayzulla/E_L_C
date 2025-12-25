@@ -13,7 +13,7 @@ class SmsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'sms:send';
+    protected $signature = 'sms:test';
 
     /**
      * The console command description.

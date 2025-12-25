@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('lesson_and_histories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
-            $table->string('data')->nullable();
-            $table->string('group')->nullable();
+            $table->unsignedTinyInteger('data')->nullable();
+            $table->unsignedTinyInteger('group')->nullable();
             $table->timestamps();
         });
     }

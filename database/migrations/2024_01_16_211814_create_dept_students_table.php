@@ -18,9 +18,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('payed')->nullable();
-            $table->string('dept')->nullable();
-            $table->string('status_month')->nullable();
+            $table->mediumInteger('payed')->nullable();
+            $table->mediumInteger('dept')->nullable();
+            $table->tinyInteger('status_month')->nullable();
             $table->date('date')->nullable();
         });
 

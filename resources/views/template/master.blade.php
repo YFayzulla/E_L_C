@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html
-    lang="en"
-    class="light-style layout-menu-fixed"
-    dir="ltr"
-    data-theme="theme-default"
-    data-assets-path="../assets/"
-    data-template="vertical-menu-template-free"
+        lang="en"
+        class="light-style layout-menu-fixed"
+        dir="ltr"
+        data-theme="theme-default"
+        data-assets-path="../assets/"
+        data-template="vertical-menu-template-free"
 >
 <head>
     <meta charset="utf-8"/>
     <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
     <title>Dashboard - Analytics | Sneat - Bootstrap 5 HTML user Template - Pro</title>
@@ -19,15 +19,17 @@
     <meta name="description" content=""/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}"/>
+    <link rel="icon" type="image/x-icon" href="{{ asset('logos/SymbolRed.svg') }}"/>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="{{ asset('assets/css/index.css')}}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link
-        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-        rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+            rel="stylesheet"
     />
 
     <!-- Icons. Uncomment required icon fonts -->
@@ -45,6 +47,9 @@
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}"/>
 
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+
     <!-- Page CSS -->
 
     <!-- Helpers -->
@@ -54,7 +59,7 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('assets/js/config.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
             $("#myInput").on("keyup", function () {
@@ -123,7 +128,6 @@
 </div>
 <!-- / Layout wrapper -->
 
-<!-- Core JS -->
 
 <!-- build:js assets/vendor/js/core.js -->
 <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
@@ -131,7 +135,9 @@
 <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
 <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
 
 
 <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
@@ -148,5 +154,51 @@
 
 <!-- Place this tag in your head or just before your close body tag. -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Choices.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function initializeChoices(selects) {
+            selects.forEach(select => {
+                if (select.choicesInstance) {
+                    select.choicesInstance.destroy();
+                }
+                select.choicesInstance = new Choices(select, {
+                    removeItemButton: true,
+                    searchEnabled: true,
+                    placeholder: true,
+                    placeholderValue: select.dataset.placeholder || '',
+                    noResultsText: 'No results found',
+                    itemSelectText: '',
+                    shouldSort: false,
+                    callbackOnInit: function () {
+                        const selectedValues = Array.from(select.querySelectorAll('option[selected]')).map(opt => opt.value);
+                        if (selectedValues.length > 0) {
+                            this.setChoiceByValue(selectedValues);
+                        }
+                    }
+                });
+            });
+        }
+
+        initializeChoices(document.querySelectorAll('.choices:not(.modal .choices)'));
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('shown.coreui.modal', function () { // Adjust event name if not using CoreUI
+                initializeChoices(modal.querySelectorAll('.choices'));
+            });
+            // Fallback for standard Bootstrap modal
+            modal.addEventListener('shown.bs.modal', function () {
+                initializeChoices(modal.querySelectorAll('.choices'));
+            });
+        });
+    });
+</script>
+
 </body>
+
 </html>

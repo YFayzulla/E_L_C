@@ -21,31 +21,35 @@ class FakeForSeeder extends Seeder
     public function run()
     {
 
-        $teacher = User::query()->forceCreate([
+        $teacher1 = User::query()->forceCreate([
             'name' => 'test',
             'password' => Hash::make('a'),
-            'phone' => '0123456789',
+            'phone' => '987456327',
+            'room_id' => 1
         ])->assignRole('user');
 
-        User::query()->forceCreate([
+        $teacher2=User::query()->forceCreate([
             'name' => 'test2',
             'password' => Hash::make('a'),
-            'phone' => '0123456780',
+            'phone' => '987456321',
+            'room_id' => 2
         ])->assignRole('user');
 
         $group1 = Group::query()->firstOrCreate([
+            'room_id' => 2,
             'name' => 'group_test1',
         ]);
         $group2 = Group::query()->firstOrCreate([
+            'room_id' => 1,
             'name' => 'group_test2',
         ]);
 
         GroupTeacher::query()->firstOrCreate([
-            'teacher_id' => $teacher->id,
+            'teacher_id' => $teacher1->id,
             'group_id' => $group1->id,
         ]);
         GroupTeacher::query()->firstOrCreate([
-            'teacher_id' => $teacher->id,
+            'teacher_id' => $teacher2->id,
             'group_id' => $group2->id,
         ]);
 
@@ -55,13 +59,10 @@ class FakeForSeeder extends Seeder
 
 
             $student = User::query()->forceCreate([
-                'name'=> 'student'.$i,
-                'password' => Hash::make('student'.$i),
-                'phone' => '012345678'.$i,
-                'parents_tel' => '012345678'.$i,
-                'description' => '012345678'.$i,
-                'location' => '012345678'.$i,
-                'should_pay'=>10000,
+                'name' => 'student' . $i,
+                'password' => Hash::make('student' . $i),
+                'phone' => '93043096' . $i,
+                'should_pay' => 10000,
                 'group_id' => rand($group1->id, $group2->id)
             ])->assignRole('student');
 

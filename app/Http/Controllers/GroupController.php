@@ -2,144 +2,139 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Assessment;
 use App\Models\Group;
 use App\Models\GroupTeacher;
-use App\Models\Level;
-use App\Models\StudentInformation;
+use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class GroupController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $groups = Group::where('id', '!=', 1)->get()->sort(function ($a, $b) {
-            $numA = (int)filter_var($a->name, FILTER_SANITIZE_NUMBER_INT);
-            $numB = (int)filter_var($b->name, FILTER_SANITIZE_NUMBER_INT);
-            return $numA <=> $numB;
-        });
-
-        return view('user.group.index', compact('groups'));
+        try {
+            $rooms = Room::orderBy('room')->get();
+            return view('admin.group.room', compact('rooms'));
+        } catch (\Exception $e) {
+            Log::error('GroupController@index error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Xonalarni yuklashda xatolik yuz berdi.');
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function makeGroup($id)
     {
-        $level = Level::all();
-
-        return view('user.group.create', compact('level'));
+        // This method simply shows the form to create a group for a specific room.
+        return view('admin.group.create', ['id' => $id]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'monthly_payment' => 'required',
+            'name' => 'required|string|max:255',
+            'start_time' => 'required|date_format:H:i',
+            'finish_time' => 'required|date_format:H:i|after:start_time',
+            'monthly_payment' => 'required|numeric|min:0',
+            'room' => 'required|exists:rooms,id',
         ]);
 
-        Group::create([
-            'name' => $request->name,
-            'start_time' => $request->start_time,
-            'finish_time' => $request->finish_time,
-            'monthly_payment' => $request->monthly_payment,
-            'level' => $request->level,
-        ]);
-        return redirect()->route('group.index')->with('success', 'Information has been added');
+        try {
+            // The GroupObserver will automatically handle assigning the teacher
+            // after the group is created.
+            $group = Group::create([
+                'name' => $request->name,
+                'start_time' => $request->start_time,
+                'finish_time' => $request->finish_time,
+                'monthly_payment' => (int)$request->monthly_payment,
+                'room_id' => $request->room,
+            ]);
+             // Agar guruh modelida hasTeacher() metodi bo'lsa va u ID qaytarsa
+            // (Bu mantiq sizning modelingizda borligiga tayandim)
+            if (method_exists($group, 'hasTeacher')) {
+                $teacherId = $group->hasTeacher();
+                if ($teacherId) {
+                    GroupTeacher::create([
+                        'group_id' => $group->id,
+                        'teacher_id' => $teacherId,
+                    ]);
+                }
+            }
+
+            return redirect()->route('group.show', $group->room_id)
+                ->with('success', 'Guruh muvaffaqiyatli qo\'shildi va o\'qituvchiga biriktirildi.');
+
+        } catch (\Exception $e) {
+            Log::error('GroupController@store error: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Guruhni saqlashda xatolik yuz berdi.');
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param \App\Models\Group $group
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Group $group)
+    public function show($id)
     {
+        try {
+            $groups = Group::where('room_id', $id)
+                ->where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
+                ->orderBy('start_time')
+                ->get();
 
-//        $id=$group->name;
-//        $groups=Group::orderby('name')->get();
-//        $assessments=Assessment::where('Group',$group->name)->orderby('created_at')->get();
-//        return view('user.group.show',compact('assessments','groups','id'));
+            return view('admin.group.index', compact('groups', 'id'));
 
-
+        } catch (\Exception $e) {
+            Log::error('GroupController@show error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik.');
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param \App\Models\Group $group
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Group $group)
     {
-        $level = Level::all();
-        return view('user.group.edit', compact('group', 'level'));
+        $rooms = Room::orderBy('room')->get();
+        return view('admin.group.edit', compact('group', 'rooms'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Group $group
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Group $group)
     {
         $request->validate([
-//            'name' => 'required',
-//            'start_time' => 'required',
-//            'finish_time' => 'required',
-            'monthly_payment' => 'required',
+            'name' => 'required|string|max:255',
+            'start_time' => 'required|date_format:H:i',
+            'finish_time' => 'required|date_format:H:i|after:start_time',
+            'monthly_payment' => 'required|numeric|min:0',
+            'room' => 'required|exists:rooms,id',
         ]);
 
-        $group->update([
-            'name' => $request->name,
-            'start_time' => $request->start_time,
-            'finish_time' => $request->finish_time,
-            'monthly_payment' => $request->monthly_payment,
-            'level' => $request->level,
-        ]);
+        try {
+            $group->update($request->all());
+            // Note: If the room_id changes, the teacher assignment should also be updated.
+            // This logic can be added to the GroupObserver's "updated" method.
 
+            return redirect()->back()->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
 
-        foreach ($group->users() as $student) {
-
-            StudentInformation::create([
-                'user_id' => $student->id,
-                'group_id' => $group->id,
-                'group' => $group->name
-            ]);
+        } catch (\Exception $e) {
+            Log::error('GroupController@update error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Yangilashda xatolik yuz berdi.');
         }
-
-        return redirect()->route('group.index')->with('success', 'Information has been updated');
-
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Group $group
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Group $group)
     {
-        $group->delete();
-        User::where('group_id', $group->id)->update(['group_id' => 1]);// Assuming 1 is the default group ID
-        return redirect()->back()->with('success', 'Information deleted');
+        DB::beginTransaction();
+        try {
+            // 1. O'qituvchi bog'lanishini o'chirish
+            GroupTeacher::where('group_id', $group->id)->delete();
+            
+            // 2. Talabalar bog'lanishini o'chirish (Pivot jadvaldan)
+            // detach() metodi pivot jadvaldan (group_user) yozuvlarni o'chiradi
+            $group->students()->detach();
+
+            // 3. Guruhni o'chirish
+            $group->delete();
+            
+            DB::commit();
+            return redirect()->back()->with('success', 'Guruh muvaffaqiyatli o\'chirildi.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('GroupController@destroy error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Guruhni o\'chirishda xatolik yuz berdi.');
+        }
     }
 }

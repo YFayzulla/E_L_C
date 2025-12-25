@@ -8,21 +8,22 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     /**
-     * Define the application's command schedule.
+     * The application's command schedule.
      *
      * @param \Illuminate\Console\Scheduling\Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-        //        $schedule->command('sms:send')->everyMinute();
-//        $schedule->command('user:status:update')->monthlyOn(1,'7:00');
-                $schedule->command('user:status:update')->everyMonth();
-        //        $schedule->command('sms:send')->everyMinute();
+        // Update student statuses at the beginning of each month.
+        $schedule->command('user:status:update')->monthlyOn(3, '07:00');
+
+        // Other commands (example)
+        // $schedule->command('sms:send')->daily();
     }
 
     /**
+     *
      * Register the commands for the application.
      *
      * @return void

@@ -2,214 +2,264 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Student\StoreRequest;
+use App\Http\Requests\Student\UpdateRequest;
 use App\Models\Attendance;
-use App\Models\CommentStudent;
 use App\Models\DeptStudent;
 use App\Models\Group;
-use App\Models\Level;
 use App\Models\StudentInformation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\Comment;
 
 class StudentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Barcha talabalar ro'yxati.
      */
     public function index()
     {
-        $students = User::orderBy("name")->role('student')->get();
+        try {
+            $students = User::role('student')
+                ->with('groups.room')
+                ->orderBy("name")
+                ->paginate(20);
 
-//        foreach ($students as $user)
-//        {
-////            var_dump($user->name);
-//        }
-        return view('user.student.index', compact('students'));
+            return view('admin.student.index', compact('students'));
+        } catch (\Exception $e) {
+            Log::error('StudentController@index error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talabalar ro\'yxatini yuklashda xatolik.');
+        }
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Yangi talaba qo'shish sahifasi.
      */
-
     public function create()
     {
-        $groups = Group::all();
-        return view('user.student.create', compact('groups'));
+        try {
+            $groups = Group::with('room:id,room')
+            ->orderBy('room_id')
+                ->get();
+            return view('admin.student.create', compact('groups'));
+        } catch (\Exception $e) {
+            Log::error('StudentController@create error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Sahifani yuklashda xatolik.');
+        }
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * Yangi talabani saqlash.
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'phone' => ['required'],
-            'group_id' => 'required'
-        ]);
+        $uploadedFilePath = null;
 
         if ($request->hasFile('photo')) {
-            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
-            $path = $request->file('photo')->storeAs('Photo', $fileName);
+            try {
+                $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+                $uploadedFilePath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Rasmni yuklashda xatolik: ' . $e->getMessage());
+            }
         }
 
+        DB::beginTransaction();
 
-        $group = Group::where('id', $request->group_id)->first();
+        try {
+            $user = User::create([
+                'name'         => $request->name,
+                'password'     => Hash::make($request->phone),
+                'passport'     => $request->passport,
+                'phone'        => '998' . preg_replace('/[^0-9]/', '', $request->phone),
+                'parents_name' => $request->parents_name,
+                'parents_tel'  => $request->parents_tel ? '998' . preg_replace('/[^0-9]/', '', $request->parents_tel) : null,
+                'location'     => $request->location,
+                'photo'        => $uploadedFilePath,
+                'should_pay'   => (int) str_replace(' ', '', $request->should_pay),
+                'description'  => $request->description,
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'password' => bcrypt($request->name),
-            'passport' => $request->passport,
-            'phone' => $request->phone,
-            'parents_name' => $request->parents_name,
-            'parents_tel' => $request->parents_tel,
-            'group_id' => $group->id,
-            'location' => $request->location,
-            'photo' => $path ?? null,
-            'should_pay' => $request->should_pay ?? $group->monthly_payment,
-            'description' => $request->description,
-        ])->assignRole('student');
+            $user->assignRole('student');
+            
+            $groupIds = $request->group_id; // This is now an array
+            $user->groups()->attach($groupIds);
 
+            $groups = Group::whereIn('id', $groupIds)->get();
+            foreach($groups as $group){
+                StudentInformation::create([
+                    'user_id'  => $user->id,
+                    'group_id' => $group->id,
+                    'group'    => $group->name,
+                ]);
+            }
 
-        StudentInformation::create([
-            'user_id' => $user->id,
-            'group_id' => $request->group_id,
-            'group' => $group->name,
-        ]);
+            DeptStudent::create([
+                'user_id'      => $user->id,
+                'payed'        => 0,
+                'dept'         => (int) str_replace(' ', '', $request->should_pay),
+                'status_month' => 0
+            ]);
 
+            DB::commit();
 
-        DeptStudent::create([
-            'user_id' => $user->id,
-            'payed' => 0,
-            'dept' => $request->should_pay,
-            'status_month' => 0
-        ]);
+            return redirect()->route('student.index')->with('success', 'Talaba muvaffaqiyatli qo\'shildi.');
 
-        return redirect()->route('student.index')->with('success', 'Information has been added');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($uploadedFilePath && Storage::disk('public')->exists($uploadedFilePath)) {
+                Storage::disk('public')->delete($uploadedFilePath);
+            }
+
+            Log::error('StudentController@store error: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
+        }
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * Talaba ma'lumotlarini ko'rsatish.
      */
     public function show($id)
     {
-        $attendances = Attendance::where('user_id', $id)->get();
-        $student = User::find($id);
-        $groups = Group::all();
-        $comments = CommentStudent::query()->where('student_id', $id)->get();
-        return view('user.student.show', compact('student', 'attendances', 'groups', 'comments'));
+        try {
+            $student = User::with('groups.room')->findOrFail($id);
+            $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
+            $groupHistory = StudentInformation::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+
+            return view('admin.student.show', compact('student', 'attendances', 'groupHistory'));
+        } catch (\Exception $e) {
+            Log::error('StudentController@show error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talaba ma\'lumotlarini yuklashda xatolik.');
+        }
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * Tahrirlash sahifasi.
      */
     public function edit($id)
     {
-
-        $student = User::find($id);
-        $groups = Group::all();
-
-
-        //        dd($id,$student);
-        if ($student !== null)
-            return view('user.student.edit', compact('student', 'groups'));
-        else
-            return abort('403');
+        try {
+            $student = User::with('groups')->findOrFail($id);
+            $groups = Group::orderBy('name')->get();
+            return view('admin.student.edit', compact('student', 'groups'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Talaba topilmadi.');
+        }
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * Talabani yangilash.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRequest $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'phone' => ['required', 'string'],
-        ]);
+        $newPhotoPath = null;
+        $oldPhotoPath = null;
 
-        $student = User::find($id);
+        DB::beginTransaction();
 
-        if ($request->hasFile('photo')) {
-            if (isset($student->photo)) {
-                Storage::delete($student->photo);
+        try {
+            $student = User::findOrFail($id);
+            $oldPhotoPath = $student->photo;
+
+            if ($request->hasFile('photo')) {
+                $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
+                $newPhotoPath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
+            } else {
+                $newPhotoPath = $oldPhotoPath;
             }
-            $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
 
-            $path = $request->file('photo')->storeAs('Photo', $fileName);
+            $updateData = [
+                'name'         => $request->name,
+                'phone'        => '998' . preg_replace('/[^0-9]/', '', $request->phone),
+                'passport'     => $request->passport,
+                'parents_name' => $request->parents_name,
+                'parents_tel'  => $request->parents_tel ? '998' . preg_replace('/[^0-9]/', '', $request->parents_tel) : null,
+                'location'     => $request->location,
+                'should_pay'   => (int) str_replace(' ', '', $request->should_pay),
+                'photo'        => $newPhotoPath,
+                'description'  => $request->description,
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $student->update($updateData);
+
+            $newGroupIds = $request->group_id; // Array of group IDs
+            $currentGroupIds = $student->groups->pluck('id')->toArray();
+            
+            $student->groups()->sync($newGroupIds);
+
+            $addedGroups = array_diff($newGroupIds, $currentGroupIds);
+            $groups = Group::whereIn('id', $addedGroups)->get();
+            foreach($groups as $group){
+                StudentInformation::create([
+                    'user_id'  => $student->id,
+                    'group_id' => $group->id,
+                    'group'    => $group->name
+                ]);
+            }
+
+            $student->deptStudent()->updateOrCreate(
+                ['user_id' => $student->id],
+                ['dept' => (int) str_replace(' ', '', $request->should_pay)]
+            );
+
+            DB::commit();
+
+            if ($request->hasFile('photo') && $oldPhotoPath && Storage::disk('public')->exists($oldPhotoPath)) {
+                Storage::disk('public')->delete($oldPhotoPath);
+            }
+
+            return redirect()->route('student.index')->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($request->hasFile('photo') && $newPhotoPath && Storage::disk('public')->exists($newPhotoPath)) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+
+            Log::error('StudentController@update error: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Yangilashda xatolik yuz berdi.');
         }
-
-        $group= Group::find($request->group_id);
-        if ( $student->group_id != $request->group_id ) {
-            StudentInformation::create([
-                'user_id' => $student->id,
-                'group_id' => $request->group_id,
-                'group'=>$group->name
-            ]);
-        }
-
-        $student->update([
-
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'password' => bcrypt($request->password),
-            'passport' => $request->passport,
-            'group_id' => $request->group_id,
-            'parents_name' => $request->parents_name,
-            'parents_tel' => $request->parents_tel,
-            'location' => $request->location,
-            'should_pay' => $request->should_pay,
-            'photo' => $path ?? $student->photo ?? null,
-            'description' => $request->description,
-
-        ]);
-
-        $dept=DeptStudent::where('user_id',$id)->first();
-
-        $dept->update([
-            'dept' => $request->should_pay ?? $student->should_pay,
-        ]);
-
-        $dd = Attendance::where('user_id', $student->id)
-            ->update(['group_id' => $request->group_id]);
-
-//        dd($dd);
-
-        return redirect()->route('student.index')->with('success', 'malumot yangilandi');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
+     * Talabani o'chirish.
      */
     public function destroy($id)
     {
+        DB::beginTransaction();
 
-        $student = User::find($id);
-        if (isset($student->photo)) {
-            Storage::delete($student->photo);
+        try {
+            $student = User::findOrFail($id);
+            $photoPath = $student->photo;
+
+            $student->groups()->detach();
+            StudentInformation::where('user_id', $student->id)->delete();
+            DeptStudent::where('user_id', $student->id)->delete();
+            Attendance::where('user_id', $student->id)->delete();
+            
+            $student->delete();
+
+            DB::commit();
+
+            if ($photoPath && Storage::disk('public')->exists($photoPath)) {
+                Storage::disk('public')->delete($photoPath);
+            }
+
+            return redirect()->back()->with('success', 'Talaba va unga tegishli barcha ma\'lumotlar o\'chirildi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('StudentController@destroy error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
         }
-        $student->delete();
-        return redirect()->back()->with('success', 'Information deleted');
     }
 }

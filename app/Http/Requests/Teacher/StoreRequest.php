@@ -31,7 +31,6 @@ class StoreRequest extends FormRequest
             'phone' => 'required|digits:9',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
             'percent' => 'nullable|integer|min:0|max:100',
-            'room_id' => 'nullable|exists:rooms,id',
         ];
     }
 
@@ -54,7 +53,6 @@ class StoreRequest extends FormRequest
             'percent.integer' => 'The percent must be an integer.',
             'percent.min' => 'The percent must be at least 0.',
             'percent.max' => 'The percent must not exceed 100.',
-            'room_id.exists' => 'The selected room does not exist.',
         ];
     }
 }

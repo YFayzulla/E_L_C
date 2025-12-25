@@ -118,8 +118,7 @@ class PdfController extends Controller
     {
         try {
             $groups = Group::where('id', '!=', 1)
-                ->select('id', 'name', 'start_time', 'finish_time', 'monthly_payment', 'room_id')
-                ->with('room:id,room') // Eager load room name
+                ->select('id', 'name', 'start_time', 'finish_time', 'monthly_payment')
                 ->orderBy('name')
                 ->get();
 

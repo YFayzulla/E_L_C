@@ -19,8 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesTableSeeder::class);
         $this->call(AdminTableSeeder::class);
         $this->call(GroupSeeder::class);
-        $this->call(RoomSeeder::class);
         // $this->call(FakeForSeeder::class);
     }
 }
-

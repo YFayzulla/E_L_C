@@ -1,4 +1,4 @@
-@extends('layouts.pdf')
+@extends('template.pdf')
 @section('pdf')
 
     <table class="table table-striped">

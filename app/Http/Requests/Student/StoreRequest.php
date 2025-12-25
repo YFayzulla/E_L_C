@@ -34,7 +34,6 @@ class StoreRequest extends FormRequest
             'location' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'percent' => 'nullable|integer|min:0|max:100',
-            'room_id' => 'nullable|exists:rooms,id',
             'group_id' => 'required|array',
             'group_id.*' => 'exists:groups,id',
         ];

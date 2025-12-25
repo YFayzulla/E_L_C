@@ -9,8 +9,6 @@
                   onsubmit="formatBeforeSubmit()">
                 @csrf
 
-                <input type="hidden" name="room" value="{{ $id }}">
-
                 <label for="name" class="text-dark">Name</label>
                 <input id="name" name="name" value="{{ old('name') }}" type="text" class="form-control" required>
                 @error('name')

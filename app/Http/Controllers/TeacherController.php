@@ -6,7 +6,6 @@ use App\Http\Requests\Teacher\StoreRequest;
 use App\Http\Requests\Teacher\UpdateRequest;
 use App\Models\Group;
 use App\Models\GroupTeacher;
-use App\Models\Room;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,11 +20,7 @@ class TeacherController extends Controller
     public function index()
     {
         try {
-            // OPTIMIZATSIYA:
-            // 1. with('room') - N+1 muammosini oldini olish (View da xona nomi kerak bo'lsa).
-            // 2. paginate(20) - Ro'yxat uzun bo'lsa sahifalash.
             $teachers = User::role('user') // Changed from 'user' to 'teacher'
-            ->with('room:id,room') // Faqat kerakli ustunlar
             ->orderBy('name')
                 ->paginate(20);
 
@@ -42,9 +37,7 @@ class TeacherController extends Controller
     public function create()
     {
         try {
-            // Xonalarni oddiy ro'yxat sifatida olish
-            $rooms = Room::orderBy('room')->get();
-            return view('admin.teacher.create', compact('rooms'));
+            return view('admin.teacher.create');
         } catch (\Exception $e) {
             Log::error('TeacherController@create error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Sahifani yuklashda xatolik.');
@@ -82,25 +75,9 @@ class TeacherController extends Controller
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'photo' => $uploadedFilePath,
                 'percent' => $request->percent,
-                'room_id' => $request->room_id
             ]);
 
             $teacher->assignRole('user'); // Changed from 'user' to 'teacher'
-
-            // 3. Xonaga tegishli guruhlarga biriktirish
-            // Agar o'qituvchi biror xonaga biriktirilsa, shu xonadagi mavjud guruhlarga avtomatik qo'shiladi.
-            $groups = Group::where('room_id', $request->room_id)->get();
-
-            if ($groups->isNotEmpty()) {
-                $groupTeachers = $groups->map(fn($group) => [
-                    'group_id' => $group->id,
-                    'teacher_id' => $teacher->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ])->toArray();
-
-                GroupTeacher::insert($groupTeachers);
-            }
 
             DB::commit();
 
@@ -126,8 +103,7 @@ class TeacherController extends Controller
     {
         try {
             $teacher = User::findOrFail($id);
-            $rooms = Room::orderBy('room')->get();
-            return view('admin.teacher.edit', compact('teacher', 'rooms'));
+            return view('admin.teacher.edit', compact('teacher'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'O\'qituvchi topilmadi.');
         }
@@ -164,7 +140,6 @@ class TeacherController extends Controller
                 'passport' => $request->passport,
                 'percent' => $request->percent,
                 'photo' => $newPhotoPath,
-                'room_id' => $request->room_id,
             ];
 
             if ($request->filled('password')) {
@@ -172,27 +147,6 @@ class TeacherController extends Controller
             }
 
             $teacher->update($updateData);
-
-            // 3. Guruh biriktirmalarini yangilash (Sync Logic)
-            // O'qituvchi xonasi o'zgarganda yoki shunchaki update bo'lganda,
-            // biz eski biriktirmalarni o'chirib, joriy xonadagi guruhlarga qayta biriktiramiz.
-
-            // Diqqat: Bu logika agar o'qituvchi qo'lda maxsus guruhlarga qo'shilgan bo'lsa, ularni o'chirib yuboradi.
-            // Lekin sizning kodingizda shunday yozilgan edi, men buni saqlab qoldim
-            GroupTeacher::where('teacher_id', $teacher->id)->delete();
-
-            $groups = Group::where('room_id', $request->room_id)->get();
-
-            if ($groups->isNotEmpty()) {
-                $groupTeachers = $groups->map(fn($group) => [
-                    'group_id' => $group->id,
-                    'teacher_id' => $teacher->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ])->toArray();
-
-                GroupTeacher::insert($groupTeachers);
-            }
 
             DB::commit();
 

@@ -8,7 +8,6 @@
             <th>opened date</th>
             <th>start time</th>
             <th>finish time</th>
-            <th>level</th>
             <th>cost</th>
         </TR>
 
@@ -19,12 +18,11 @@
                 <th>{{$item->created_at}}</th>
                 <th>{{$item->start_time}}</th>
                 <th>{{$item->finish_time}}</th>
-                <th>{{$item->level}}</th>
                 <th>{{$item->monthly_payment}}</th>
             </tr>
         @empty
             <tr>
-                <td colspan="7" class="text-center">No group data available.</td>
+                <td colspan="6" class="text-center">No group data available.</td>
             </tr>
         @endforelse
 

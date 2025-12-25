@@ -29,7 +29,6 @@ class User extends Authenticatable
         'status',
         'percent',
         'mark',
-        'room_id',
     ];
 
     public function teacherHasStudents()
@@ -106,11 +105,6 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function room()
-    {
-        return $this->hasOne(Room::class, 'id', 'room_id');
-    }
-
     public function studentsGroup()
     {
         $groups = $this->groups;
@@ -120,8 +114,7 @@ class User extends Authenticatable
         }
 
         return $groups->map(function ($group) {
-            $room = $group->room;
-            return ($room ? $room->room . '->' : '') . $group->name;
+            return $group->name;
         })->implode(', ');
     }
 }

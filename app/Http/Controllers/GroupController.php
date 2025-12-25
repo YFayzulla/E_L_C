@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\GroupTeacher;
-use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,18 +14,19 @@ class GroupController extends Controller
     public function index()
     {
         try {
-            $rooms = Room::orderBy('room')->get();
-            return view('admin.group.room', compact('rooms'));
+            $groups = Group::where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
+                ->orderBy('start_time')
+                ->get();
+            return view('admin.group.index', compact('groups'));
         } catch (\Exception $e) {
             Log::error('GroupController@index error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Xonalarni yuklashda xatolik yuz berdi.');
+            return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik yuz berdi.');
         }
     }
 
-    public function makeGroup($id)
+    public function create()
     {
-        // This method simply shows the form to create a group for a specific room.
-        return view('admin.group.create', ['id' => $id]);
+        return view('admin.group.create');
     }
 
     public function store(Request $request)
@@ -36,21 +36,16 @@ class GroupController extends Controller
             'start_time' => 'required|date_format:H:i',
             'finish_time' => 'required|date_format:H:i|after:start_time',
             'monthly_payment' => 'required|numeric|min:0',
-            'room' => 'required|exists:rooms,id',
         ]);
 
         try {
-            // The GroupObserver will automatically handle assigning the teacher
-            // after the group is created.
             $group = Group::create([
                 'name' => $request->name,
                 'start_time' => $request->start_time,
                 'finish_time' => $request->finish_time,
                 'monthly_payment' => (int)$request->monthly_payment,
-                'room_id' => $request->room,
             ]);
-             // Agar guruh modelida hasTeacher() metodi bo'lsa va u ID qaytarsa
-            // (Bu mantiq sizning modelingizda borligiga tayandim)
+            
             if (method_exists($group, 'hasTeacher')) {
                 $teacherId = $group->hasTeacher();
                 if ($teacherId) {
@@ -61,7 +56,7 @@ class GroupController extends Controller
                 }
             }
 
-            return redirect()->route('group.show', $group->room_id)
+            return redirect()->route('group.index')
                 ->with('success', 'Guruh muvaffaqiyatli qo\'shildi va o\'qituvchiga biriktirildi.');
 
         } catch (\Exception $e) {
@@ -72,24 +67,30 @@ class GroupController extends Controller
 
     public function show($id)
     {
+        // This method seems redundant if index shows all groups, but keeping it for compatibility if needed
+        // Or maybe it's used to show a specific group details?
+        // Based on previous code, it was showing groups for a room.
+        // Now we might want to show details of a single group or just redirect to index.
+        
+        // If the intention is to show details of a specific group:
         try {
-            $groups = Group::where('room_id', $id)
-                ->where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
-                ->orderBy('start_time')
-                ->get();
-
-            return view('admin.group.index', compact('groups', 'id'));
+             $group = Group::findOrFail($id);
+             // You might want a specific view for showing group details
+             // For now, let's just return the index view with all groups, or maybe filter?
+             // But usually show($id) is for a single resource.
+             
+             // Let's assume we want to list groups, similar to index.
+             // If the previous logic was listing groups in a room, now we list all groups.
+             return redirect()->route('group.index');
 
         } catch (\Exception $e) {
-            Log::error('GroupController@show error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik.');
+             return redirect()->route('group.index');
         }
     }
 
     public function edit(Group $group)
     {
-        $rooms = Room::orderBy('room')->get();
-        return view('admin.group.edit', compact('group', 'rooms'));
+        return view('admin.group.edit', compact('group'));
     }
 
     public function update(Request $request, Group $group)
@@ -99,13 +100,10 @@ class GroupController extends Controller
             'start_time' => 'required|date_format:H:i',
             'finish_time' => 'required|date_format:H:i|after:start_time',
             'monthly_payment' => 'required|numeric|min:0',
-            'room' => 'required|exists:rooms,id',
         ]);
 
         try {
             $group->update($request->all());
-            // Note: If the room_id changes, the teacher assignment should also be updated.
-            // This logic can be added to the GroupObserver's "updated" method.
 
             return redirect()->back()->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
 

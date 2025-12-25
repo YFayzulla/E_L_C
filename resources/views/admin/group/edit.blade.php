@@ -38,19 +38,6 @@
                 <div class="alert alert-danger" role="alert">{{ $message }}</div>
                 @enderror
 
-                <label for="room" class="text-dark">Rooms</label>
-                <select name="room" class="form-control">
-                    <option value="{{$group->room_id}}">{{$group->room->room}}</option>
-                    @forelse($rooms as $l)
-                        <option value="{{$l->id}}">{{$l->room}}</option>
-                    @empty
-                        <option value="">No rooms available</option>
-                    @endforelse
-                </select>
-                @error('room')
-                <div class="alert alert-danger" role="alert">{{ $message }}</div>
-                @enderror
-
                 <button class="btn btn-warning m-4">Submit</button>
 
             </form>

@@ -32,7 +32,7 @@
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="fas fa-door-open"></i>
                         </span>
-                        <span class="nav-link-title">Rooms</span>
+                        <span class="nav-link-title">Groups</span>
                     </a>
                 </li>
                 <li class="nav-item @if(request()->routeIs('student.index', 'student.create', 'student.edit', 'student.show')) active @endif">

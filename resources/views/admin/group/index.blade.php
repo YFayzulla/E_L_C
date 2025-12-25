@@ -3,7 +3,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-                <h5 class="mb-0">Groups in Room {{ $id }}</h5>
+                <h5 class="mb-0">Groups</h5>
                 <div class="dt-action-buttons text-end pt-3 pt-md-0">
                     <div class="dt-buttons btn-group flex-wrap">
                         @role('admin')
@@ -20,7 +20,7 @@
                             </ul>
                         </div>
                         @endrole
-                        <a href="{{ route('group.create.room', $id) }}" class="btn btn-secondary create-new btn-primary"
+                        <a href="{{ route('group.create') }}" class="btn btn-secondary create-new btn-primary"
                            tabindex="0"
                            aria-controls="DataTables_Table_0">
                             <span><i class="bx bx-plus me-sm-1"></i> <span
@@ -72,7 +72,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center">No groups found in this room.</td>
+                            <td colspan="6" class="text-center">No groups found.</td>
                         </tr>
                     @endforelse
                     </tbody>

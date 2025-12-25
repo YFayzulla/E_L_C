@@ -35,20 +35,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="room" class="form-label text-dark">Room</label>
-                        <select name="room_id" id="room" class="form-control" required>
-                            @foreach($rooms as $room)
-                                @if($room->roomTeacher($room->id))
-                                    <option value="{{ $room->id }}">{{ $room->room }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                        @error('room_id')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label for="percent" class="form-label text-dark">Percent</label>
                         <input id="percent" name="percent" value="{{ old('percent') }}" type="number" class="form-control" required>
                         @error('percent')

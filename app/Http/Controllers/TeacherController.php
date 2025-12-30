@@ -37,7 +37,7 @@ class TeacherController extends Controller
     public function create()
     {
         try {
-            $groups = Group::orderBy('name')->get();
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
             return view('admin.teacher.create', compact('groups'));
         } catch (\Exception $e) {
             Log::error('TeacherController@create error: ' . $e->getMessage());
@@ -104,7 +104,7 @@ class TeacherController extends Controller
     {
         try {
             $teacher = User::with('teacherGroups')->findOrFail($id);
-            $groups = Group::orderBy('name')->get();
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
             return view('admin.teacher.edit', compact('teacher', 'groups'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'O\'qituvchi topilmadi.');

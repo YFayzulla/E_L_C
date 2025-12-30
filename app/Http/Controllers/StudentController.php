@@ -41,7 +41,7 @@ class StudentController extends Controller
     public function create()
     {
         try {
-            $groups = Group::orderBy('name')->get();
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
             return view('admin.student.create', compact('groups'));
         } catch (\Exception $e) {
             Log::error('StudentController@create error: ' . $e->getMessage());
@@ -142,7 +142,7 @@ class StudentController extends Controller
     {
         try {
             $student = User::with('groups')->findOrFail($id);
-            $groups = Group::orderBy('name')->get();
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
             return view('admin.student.edit', compact('student', 'groups'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Talaba topilmadi.');

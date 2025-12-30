@@ -34,26 +34,29 @@ class User extends Authenticatable
     public function teacherHasStudents()
     {
         $groupIds = $this->teacherGroups()->pluck('groups.id');
-        return User::role('student')->whereHas('studentGroups', function ($q) use ($groupIds) {
+        return User::role('student')->whereHas('groups', function ($q) use ($groupIds) {
             $q->whereIn('groups.id', $groupIds);
         })->count();
     }
 
     public function teacherPayment()
     {
-        $groups = $this->teacherGroups()->withCount('students')->get();
+        // Get all groups assigned to this teacher
+        $groups = $this->teacherGroups()->with('students')->get();
 
-        $totalPayment = $groups->sum(function ($group) {
-            if ($group) {
-                return $group->monthly_payment * $group->students_count;
-            }
-            return 0;
-        });
+        $totalPayment = 0;
 
+        foreach ($groups as $group) {
+            // For each group, sum the 'should_pay' of all students in that group
+            $groupTotal = $group->students->sum('should_pay');
+            $totalPayment += $groupTotal;
+        }
+
+        // Calculate the teacher's share based on their percentage
         return $totalPayment * $this->percent / 100;
     }
 
-    public function studentGroups(): BelongsToMany
+    public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'group_user', 'user_id', 'group_id');
     }
@@ -112,7 +115,7 @@ class User extends Authenticatable
 
     public function studentsGroup()
     {
-        $groups = $this->studentGroups;
+        $groups = $this->groups;
 
         if ($groups->isEmpty()) {
             return 'students without a group';

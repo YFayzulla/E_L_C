@@ -44,6 +44,7 @@
                     <th>tel</th>
                     <th>Parents tel</th>
                     <th>group</th>
+                    <th>payment</th>
                     <th class="text-center">action</th>
                 </tr>
                 </thead>
@@ -55,6 +56,7 @@
                         <th>+998 {{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         <th>{{$student->studentsGroup()}}</th>
+                        <th>{{$student->should_pay}}</th>
                         <th class="d-flex">
                             <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
                                 <i class='bx bx-edit-alt'></i>

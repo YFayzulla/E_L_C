@@ -105,11 +105,11 @@ class GroupController extends Controller
         try {
             $group->update($request->all());
 
-            return redirect()->back()->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
+            return redirect()->route('group.index')->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
 
         } catch (\Exception $e) {
             Log::error('GroupController@update error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Yangilashda xatolik yuz berdi.');
+            return redirect()->route('group.index')->with('error', 'Yangilashda xatolik yuz berdi.');
         }
     }
 

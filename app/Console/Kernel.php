@@ -15,11 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Update student statuses at the beginning of each month.
+
         $schedule->command('user:status:update')->monthlyOn(3, '07:00');
 
-        // Other commands (example)
-        // $schedule->command('sms:send')->daily();
     }
 
     /**

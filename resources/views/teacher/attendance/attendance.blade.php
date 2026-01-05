@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @role('user|admin')
+    @role('user')
     <div class="card shadow-md rounded-lg mb-4">
         <form action="{{ route('attendance.submit', $id) }}" method="post">
             @csrf

@@ -58,12 +58,12 @@
                 <div data-i18n="Analytics">Waiting Room</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('finance.other')) active @endif">
-            <a href="{{ route('finance.other') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-coin-stack"></i>
-                <div data-i18n="Analytics">Finance</div>
-            </a>
-        </li>
+        {{--        <li class="menu-item @if(request()->routeIs('finance.other')) active @endif">--}}
+        {{--            <a href="{{ route('finance.other') }}" class="menu-link">--}}
+        {{--                <i class="menu-icon tf-icons bx bx-coin-stack"></i>--}}
+        {{--                <div data-i18n="Analytics">Finance</div>--}}
+        {{--            </a>--}}
+        {{--        </li>--}}
         @endrole
 
         @role('user')

@@ -1,14 +1,16 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <div class="app-brand demo">
-        <a href="{{ route('dashboard') }}" class="app-brand-link">
-            <img style="width: 200px" src="{{ asset('logos/main.svg') }}" alt="SpeakUp Logo">
+    <div class="app-brand demo"
+         style="height: auto; min-height: 120px; display: flex; align-items: center; justify-content: center;">
+        <a href="{{ route('dashboard') }}" class="app-brand-link" style="width: 100%; text-align: center;">
+            <img src="{{ asset('logos/main.png') }}"
+                 alt="Logo"
+                 style="width: 100%; max-width: 170px; height: auto; object-fit: contain;">
         </a>
+
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
             <i class="bx bx-chevron-left bx-sm align-middle"></i>
         </a>
     </div>
-
-    <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
 
@@ -29,7 +31,7 @@
         <li class="menu-item @if(request()->routeIs('group.index', 'group.create', 'group.edit', 'group.show', 'group.attendance', 'group.create.room')) active @endif">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-group"></i>
-                <div data-i18n="Analytics">Groups </div>
+                <div data-i18n="Analytics">Groups</div>
             </a>
         </li>
         <li class="menu-item @if(request()->routeIs('student.index', 'student.create', 'student.edit', 'student.show')) active @endif">

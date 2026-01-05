@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedSmallInteger('user_id');
             $table->string('name');
-            $table->unsignedSmallInteger('payment');
+            $table->integer('payment');
             $table->string('group');
             $table->date('date');
             $table->string('type_of_money')->nullable();

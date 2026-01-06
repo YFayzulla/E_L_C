@@ -92,23 +92,17 @@
         <div class="table-responsive">
             <table class="table table-bordered table-hover text-center">
                 @php
-                    use Carbon\Carbon;
-                    $currentMonthDays = Carbon::createFromDate($year, $month)->daysInMonth;
+                    // Only show columns for days where lessons were recorded
+                    $lessonDays = $lessonDays ?? [];
+                    $colspan = max(count($lessonDays), 1) + 1; // name + days
                 @endphp
 
                 <thead class="table-light">
                 <tr>
                     <th class="text-start">Name</th>
-                    @for ($i = 1; $i <= $currentMonthDays; $i++)
-                        @php
-                            $currentDate = Carbon::createFromDate($year, $month, $i);
-                            $isWeekend = $currentDate->isWeekend();
-                            $isToday = ($i == Carbon::now()->day && $month == Carbon::now()->month && $year == Carbon::now()->year);
-                        @endphp
-                        <th class="{{ $isToday ? 'bg-primary text-white' : ($isWeekend ? 'bg-secondary text-white' : '') }}">
-                            {{ $i }}
-                        </th>
-                    @endfor
+                    @foreach($lessonDays as $day)
+                        <th>{{ (int) $day }}</th>
+                    @endforeach
                 </tr>
                 </thead>
 
@@ -116,17 +110,14 @@
                 @forelse ($data as $userName => $days)
                     <tr>
                         <td class="text-start fw-bold">{{ $userName }}</td>
-                        @for ($i = 1; $i <= $currentMonthDays; $i++)
+                        @foreach($lessonDays as $day)
                             @php
-                                $day = str_pad($i, 2, '0', STR_PAD_LEFT);
                                 $status = $days[$day] ?? null;
                                 $isAbsent = ($status === '0' || $status === 0);
                                 $isPresent = ($status === '1' || $status === 1);
                                 $isLate = ($status === '2' || $status === 2);
-                                $currentDate = Carbon::createFromDate($year, $month, $i);
-                                $isWeekend = $currentDate->isWeekend();
                             @endphp
-                            <td class="{{ $isAbsent ? 'bg-danger-subtle text-danger' : ($isWeekend ? 'bg-secondary-subtle text-secondary' : ($isLate ? 'bg-warning-subtle text-warning' : ($isPresent ? 'text-success' : ''))) }}">
+                            <td class="{{ $isAbsent ? 'bg-danger-subtle text-danger' : ($isLate ? 'bg-warning-subtle text-warning' : ($isPresent ? 'text-success' : '')) }}">
                                 @if ($isPresent)
                                     <i class="bx bx-check-circle"></i>
                                 @elseif ($isAbsent)
@@ -137,11 +128,11 @@
                                     -
                                 @endif
                             </td>
-                        @endfor
+                        @endforeach
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $currentMonthDays + 1 }}" class="text-center py-4 text-muted">No attendance data available for this month.</td>
+                        <td colspan="{{ $colspan }}" class="text-center py-4 text-muted">No attendance data available for this month.</td>
                     </tr>
                 @endforelse
                 </tbody>

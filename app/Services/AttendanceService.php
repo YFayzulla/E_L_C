@@ -35,7 +35,9 @@ class AttendanceService
             ->map(function ($lesson) {
                 return $lesson->created_at->format('d');
             })
-            ->unique();
+            ->unique()
+            ->sort()
+            ->values();
 
         // 3. Get all ABSENT and LATE records for the month
         $absentLateRecords = Attendance::where('group_id', $id)
@@ -48,16 +50,9 @@ class AttendanceService
         $data = [];
         foreach ($students as $student) {
             $data[$student->name] = [];
-            for ($i = 1; $i <= 31; $i++) {
-                $day = str_pad($i, 2, '0', STR_PAD_LEFT);
-
-                if ($lessonDays->contains($day)) {
-                    // A lesson happened on this day, assume PRESENT by default
-                    $data[$student->name][$day] = 1; // 1 = Present
-                } else {
-                    // No lesson on this day
-                    $data[$student->name][$day] = ''; // No status
-                }
+            // Only create columns for days where lessons happened
+            foreach ($lessonDays as $day) {
+                $data[$student->name][$day] = 1; // default Present
             }
         }
 
@@ -82,6 +77,7 @@ class AttendanceService
             'data' => $data,
             'year' => $year,
             'month' => $month,
+            'lessonDays' => $lessonDays->toArray(),
             'attendances' => $recentAttendances,
             'group' => $group
         ];

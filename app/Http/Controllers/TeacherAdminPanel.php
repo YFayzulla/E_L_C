@@ -48,6 +48,7 @@ class TeacherAdminPanel extends Controller
                 'data' => $serviceData['data'] ?? [],
                 'year' => $serviceData['year'] ?? date('Y'),
                 'month' => $serviceData['month'] ?? date('m'),
+                'lessonDays' => $serviceData['lessonDays'] ?? [],
                 'attendances' => $serviceData['attendances'] ?? [],
                 'group' => $serviceData['group'] ?? null,
                 'students' => $serviceData['students'] ?? [],

@@ -54,29 +54,36 @@ class GroupExtraController extends Controller
      */
     public function change_group(Request $request, $id)
     {
-        $request->validate(['group_id' => 'required|exists:groups,id']);
+        $request->validate(['group_id' => 'required|array']);
 
         DB::beginTransaction();
 
         try {
             $user = User::findOrFail($id);
-            $group = Group::findOrFail($request->group_id);
+            $groupIds = $request->group_id;
 
             // 1. User guruhini yangilash (Eski guruhlardan chiqarib, yangisiga qo'shish)
             // Agar faqat qo'shish kerak bo'lsa attach() ishlatilardi, lekin "change" bo'lgani uchun sync()
-            $user->groups()->sync([$group->id]);
+            $user->groups()->sync($groupIds);
 
             // 2. Tarix (StudentInformation) yaratish
-            StudentInformation::create([
-                'user_id' => $user->id,
-                'group_id' => $group->id,
-                'group' => $group->name,
-            ]);
+            $groups = Group::whereIn('id', $groupIds)->get();
+            foreach($groups as $group){
+                StudentInformation::create([
+                    'user_id' => $user->id,
+                    'group_id' => $group->id,
+                    'group' => $group->name,
+                ]);
+            }
 
             // 3. Eski davomatlarni yangi guruhga o'tkazish
             // (Mantiqan to'g'riligini loyiha talabidan kelib chiqib tekshiring.
             // Odatda eski davomat eski guruhda qolishi kerak, lekin sizning kodingizda o'zgartirilmoqda)
-            Attendance::where('user_id', $user->id)->update(['group_id' => $group->id]);
+            // Agar ko'p guruh tanlansa, qaysi biriga o'tkazish noaniq bo'ladi.
+            // Shuning uchun birinchi tanlangan guruhga o'tkazamiz yoki bu qismni o'chirib tashlaymiz.
+            if (!empty($groupIds)) {
+                Attendance::where('user_id', $user->id)->update(['group_id' => $groupIds[0]]);
+            }
 
             DB::commit();
 
@@ -176,6 +183,7 @@ class GroupExtraController extends Controller
                 'data' => $serviceData['data'] ?? [],
                 'year' => $serviceData['year'] ?? date('Y'),
                 'month' => $serviceData['month'] ?? date('m'),
+                'lessonDays' => $serviceData['lessonDays'] ?? [],
                 'attendances' => $serviceData['attendances'] ?? [],
                 'group' => $serviceData['group'] ?? null,
                 'students' => $serviceData['students'] ?? [],

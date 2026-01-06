@@ -107,7 +107,7 @@
                                                 <div class="input-group">
                                                     <input type="date" class="form-control" name="date_paid"
                                                            value="{{ date('Y-m-d') }}">
-                                                    <button type="submit" class="btn btn-primary">Save</button>
+                                                    <button type="submit" class="btn btn-primary submit-btn">Save</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -148,6 +148,13 @@
                 form.addEventListener('submit', function (e) {
                     const input = this.querySelector('.payment-input');
                     input.value = input.value.replace(/\s+/g, '');
+                    
+                    // Disable submit button to prevent double submission
+                    const submitBtn = this.querySelector('.submit-btn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+                    }
                 });
             });
 

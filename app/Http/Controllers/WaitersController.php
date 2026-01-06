@@ -25,14 +25,19 @@ class WaitersController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            // 2. Kutish zalidagi talabalarni olish (group_id = 1)
+            // 2. Kutish zalidagi talabalarni olish (group_id = 1) yoki guruhsizlar
             // OPTIMIZATSIYA:
             // - paginate(20): Ro'yxat uzun bo'lsa, sayt qotmaydi.
             // - select(...): Faqat kerakli ma'lumotlarni olamiz.
             // - latest(): Eng oxirgi ro'yxatdan o'tganlar tepada turadi.
             $students = User::role('student')
-                ->where('group_id', 1)
-                ->select('id', 'name', 'phone', 'created_at', 'image') // Viewga kerakli ustunlarni yozing
+                ->where(function ($query) {
+                    $query->whereDoesntHave('groups')
+                          ->orWhereHas('groups', function ($q) {
+                              $q->where('groups.id', 1);
+                          });
+                })
+                ->select('id', 'name', 'phone', 'parents_tel', 'created_at', 'photo') // Viewga kerakli ustunlarni yozing
                 ->latest('created_at') // Yoki ->orderBy('name')
                 ->paginate(20);
 

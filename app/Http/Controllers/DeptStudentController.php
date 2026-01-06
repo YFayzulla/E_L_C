@@ -133,8 +133,8 @@ class DeptStudentController extends Controller
 
         // Redirect back with a success message and the ID of the payment history for the receipt
         return redirect()->back()
-            ->with('success', 'To\'lov muvaffaqiyatli amalga oshirildi.')
-            ->with('payment_receipt_id', $paymentHistoryId);
+            ->with('success', 'To\'lov muvaffaqiyatli amalga oshirildi.');
+//            ->with('payment_receipt_id', $paymentHistoryId);
     }
 
     /**

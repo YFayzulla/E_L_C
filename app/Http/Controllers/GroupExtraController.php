@@ -205,13 +205,18 @@ class GroupExtraController extends Controller
             // Sana formatini tekshirish uchun oddiy parsing
             $parts = explode('-', $date);
 
+
             if (count($parts) !== 2) {
                 return redirect()->back()->with('error', 'Noto\'g\'ri sana formati.');
             }
 
             list($year, $month) = $parts;
 
-            return Excel::download(new AttendanceExport($id, $year, $month), 'attendance.xlsx');
+
+            $group = Group::findOrFail($id);
+            $fileName = 'attendance_' . $group->name . '_' . $year . '_' . $month . '.xlsx';
+
+            return Excel::download(new AttendanceExport($id, $year, $month), $fileName);
 
         } catch (\Exception $e) {
             Log::error('GroupExtraController@export error: ' . $e->getMessage());

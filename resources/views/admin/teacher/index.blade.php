@@ -42,8 +42,8 @@
                     <th>action</th>
                 </tr>
                 </thead>
+                <tbody id="myTable" class="table-border-bottom-0">
                 @foreach($teachers as $teacher)
-                    <tbody id="myTable" class="table-border-bottom-0">
                     <tr>
                         <td>{{$loop->index+1}}</td>
                         <td>{{$teacher->name}}</td>
@@ -68,10 +68,17 @@
                             </form>
                         </td>
                     </tr>
-                    </tbody>
                 @endforeach
+                </tbody>
             </table>
         </div>
+        
+        {{-- Pagination Links --}}
+        @if ($teachers->hasPages())
+            <div class="card-footer">
+                {{ $teachers->links() }}
+            </div>
+        @endif
     </div>
 
 @endsection

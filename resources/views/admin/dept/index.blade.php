@@ -126,6 +126,13 @@
                 </tbody>
             </table>
         </div>
+        
+        {{-- Pagination Links --}}
+        @if ($students->hasPages())
+            <div class="card-footer">
+                {{ $students->links() }}
+            </div>
+        @endif
     </div>
 
     <script>

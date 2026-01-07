@@ -25,13 +25,13 @@ class AssessmentController extends Controller
 
             if ($user->hasRole('admin')) {
                 // Admin sees all groups
-                $groups = Group::orderBy('name')->get();
+                $groups = Group::orderBy('name')->paginate(20); // Added pagination
                 return view('admin.assessment.index', compact('groups'));
             } else {
                 // Teacher sees only their groups
                 $groups = GroupTeacher::where('teacher_id', $user->id)
                     ->with('group')
-                    ->get();
+                    ->paginate(20); // Added pagination
                 return view('teacher.assessment.index', compact('groups'));
             }
         } catch (\Exception $e) {

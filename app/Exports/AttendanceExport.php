@@ -57,6 +57,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             ->whereMonth('created_at', $this->month)
             ->get();
 
+
         // Davomatni qulay formatga o'tkazish: [user_id][kun] = status
         $attendanceMap = [];
         foreach ($attendances as $att) {

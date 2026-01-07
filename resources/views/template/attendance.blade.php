@@ -25,8 +25,8 @@
             </div>
 
             <div class="d-flex align-items-center">
-                <form method="GET"
-                      action="{{ route('export.attendances', ['id' => $group->id, 'date' => $year . '-' . $month]) }}">
+                <form id="exportFormTemplate" method="GET" action="{{ route('export.attendances', ['id' => $group->id]) }}">
+                    <input type="hidden" name="date" value="{{ request('date') ?? ($year . '-' . $month) }}">
                     <button type="submit" class="btn btn-danger">Export to Excel</button>
                 </form>
             </div>
@@ -97,6 +97,21 @@
         </table>
     </div>
 </div>
+
+<script>
+    (function(){
+        var exportForm = document.getElementById('exportFormTemplate');
+        var monthSelect = document.getElementById('month');
+        if (!exportForm || !monthSelect) return;
+        exportForm.addEventListener('submit', function(){
+            var selected = monthSelect.value;
+            if (selected) {
+                var input = exportForm.querySelector('input[name="date"]');
+                if (input) input.value = selected;
+            }
+        });
+    })();
+</script>
 
 <div class="card mt-4">
     <div class="table-responsive text-nowrap">

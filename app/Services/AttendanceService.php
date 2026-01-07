@@ -23,7 +23,6 @@ class AttendanceService
             })
             ->get();
             
-        $studentIds = $students->pluck('id');
         $studentNames = $students->pluck('name', 'id');
 
         // 2. Find all days in the month where a lesson was recorded for this group
@@ -79,7 +78,8 @@ class AttendanceService
             'month' => $month,
             'lessonDays' => $lessonDays->toArray(),
             'attendances' => $recentAttendances,
-            'group' => $group
+            'group' => $group,
+//            'selected_month' =>
         ];
     }
 }

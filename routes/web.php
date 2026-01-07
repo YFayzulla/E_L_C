@@ -50,10 +50,12 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     });
 
     // O'qituvchilar davomatni tekshirishi va yuborishi mumkin
-    Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])->name('attendance.delete');
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
     Route::get('attendance/{id}', [TeacherAdminPanel::class, 'attendance'])->name('attendance.check');
 });
+Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])
+    ->middleware('auth', 'role:user|admin')
+    ->name('attendance.delete');
 
 /*
 |--------------------------------------------------------------------------
@@ -84,7 +86,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // --- GROUPS & WAITERS ---
     Route::resource('group', GroupController::class);
-    Route::controller(GroupController::class)->prefix('group')->name('group.')->group(function(){
+    Route::controller(GroupController::class)->prefix('group')->name('group.')->group(function () {
         Route::get('{id}/room', 'makeGroup')->name('create.room');
     });
 

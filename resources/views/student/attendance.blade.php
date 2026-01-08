@@ -26,7 +26,7 @@
                             @if($attendance->status == 0)
                                 <span class="badge bg-danger">Absent</span>
                             @elseif($attendance->status == 2)
-                                <span class="badge bg-warning">Late</span>
+                                <span class="badge bg-warning">Reasonable</span>
                             @endif
                         </td>
                         <td>{{ $attendance->created_at->format('d M Y H:i') }}</td>

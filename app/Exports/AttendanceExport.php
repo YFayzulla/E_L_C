@@ -83,7 +83,7 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                     if ($status == 0) {
                         $statusText = 'NB';
                     } elseif ($status == 2) {
-                        $statusText = 'Kech';
+                        $statusText = 'Reasonable'; // Changed from 'Sababli' to 'Reasonable'
                     } elseif ($status == 1) {
                         $statusText = '+'; // Ehtimol bazada 1 qolib ketgan bo'lsa
                     }

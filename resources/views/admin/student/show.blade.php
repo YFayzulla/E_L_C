@@ -39,13 +39,14 @@
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 d-flex justify-content-center align-items-center p-3">
                             @if($student->photo)
-                                <img class="card-img card-img-right" src="{{asset( 'storage/'.$student->photo) }}" alt="Student Photo" />
+                                <img class="img-fluid rounded shadow-sm"
+                                     src="{{asset( 'storage/'.$student->photo) }}"
+                                     alt="Student Photo"
+                                     style="max-width: 180px; height: auto;">
                             @else
-                                <div class="d-flex justify-content-center align-items-center h-100">
-                                    <p class="text-muted">No Photo</p>
-                                </div>
+                                <p class="text-muted">No Photo</p>
                             @endif
                         </div>
                     </div>

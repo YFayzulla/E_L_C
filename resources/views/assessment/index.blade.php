@@ -25,7 +25,6 @@
                             <th>name</th>
                             <th>GOT MARK</th>
                             <th>information</th>
-                            <th>rec group</th>
                             <th>change group</th>
                         </tr>
                         </thead>
@@ -40,10 +39,10 @@
                                 <th>{{$assessment->student->name}}</th>
                                 <th>{{$assessment->get_mark}}</th>
                                 <th>{{$assessment->for_what}}</th>
-                                <th>{{$assessment->rec_group}}</th>
                                 <th>
                                     <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
-                                            data-bs-target="#exampleModal{{$assessment->user_id}}" data-bs-whatever="@mdo">
+                                            data-bs-target="#exampleModal{{$assessment->user_id}}"
+                                            data-bs-whatever="@mdo">
                                         submit
                                     </button>
                                 </th>
@@ -58,7 +57,8 @@
             <div class="text-center">
                 <h3>Ma'lumotlar topilmadi.</h3>
                 <p>Ushbu test uchun hali baholar kiritilmagan yoki barcha baholar o'chirilgan.</p>
-                <form action="{{ route('test.destroy.all', $historyId) }}" method="POST" onsubmit="return confirm('Haqiqatan ham ushbu test tarixini va unga bog\'liq barcha baholarni o\'chirmoqchimisiz? Bu amalni ortga qaytarib bo\'lmaydi!');">
+                <form action="{{ route('test.destroy.all', $historyId) }}" method="POST"
+                      onsubmit="return confirm('Haqiqatan ham ushbu test tarixini va unga bog\'liq barcha baholarni o\'chirmoqchimisiz? Bu amalni ortga qaytarib bo\'lmaydi!');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger mb-3 text-white">Test tarixini o'chirish</button>

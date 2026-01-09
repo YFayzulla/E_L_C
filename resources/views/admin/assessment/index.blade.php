@@ -26,7 +26,6 @@
                         <th>Name</th>
                         <th>Mark</th>
                         <th>Information</th>
-                        <th>Recommended Group</th>
                         <th>Change Group</th>
 
                     </TR>
@@ -46,7 +45,6 @@
                             <th>{{$assessment->student->name}}</th>
                             <th>{{$assessment->get_mark}}</th>
                             <th>{{$assessment->for_what}}</th>
-                            <th>{{$assessment->rec_group}}</th>
                             <th>
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
                                         data-bs-target="#exampleModal{{$assessment->user_id}}" data-bs-whatever="@mdo"

@@ -19,7 +19,6 @@
                         <th>Name</th>
                         <th>Mark</th>
                         <th>Desc</th>
-                        <th>Recommendation</th>
                     </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -32,24 +31,13 @@
                                        required>
                             </td>
                             <td>
-                                <input type="text" class="form-control" name="reason[]" required>
-                            </td>
-                            <td>
-                                <select class="form-select form-control" name="recommended[]" required>
-                                    @foreach($groups as $g)
-                                        <option value="{{ $g->name }}"
-                                                {{ $groupName == $g->name ? 'selected' : '' }}>
-                                            {{ $g->name }}
-                                        </option>
-
-                                    @endforeach
-                                </select>
+                                <input type="text" class="form-control" name="reason[]">
                             </td>
                         </tr>
                         <input type="hidden" name="student[]" value="{{ $student->id }}">
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">No students found in this group.</td>
+                            <td colspan="4" class="text-center">No students found in this group.</td>
                         </tr>
                     @endforelse
                     </tbody>

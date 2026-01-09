@@ -87,12 +87,10 @@ class AssessmentController extends Controller
             'student' => 'required|array',
             'reason' => 'required|array',
             'end_mark' => 'array',
-            'recommended' => 'array',
             'lesson' => 'nullable|string',
         ]);
 
         $end_marks = $request->input('end_mark', []);
-        $rec_groups = $request->input('recommended', []);
         $reasons = $request->input('reason', []);
         $users = $request->input('student', []);
 
@@ -128,7 +126,6 @@ class AssessmentController extends Controller
                         'get_mark' => $mark,
                         'user_id' => $userId,
                         'for_what' => $reason,
-                        'rec_group' => $rec_groups[$index] ?? null,
                         'group' => $group->name,
                         'history_id' => $history->id,
                         'created_at' => now(),

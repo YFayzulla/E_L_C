@@ -14,6 +14,7 @@
                     <th>#</th>
                     <th>Name</th>
                     <th>Group</th>
+                    <th>payment</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -24,6 +25,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td><strong>{{ $student->name }}</strong></td>
                         <td>{{ $student->groups->isNotEmpty() ? $student->groups->pluck('name')->implode(', ') : 'No group' }}</td>
+                        <th>{{$student->should_pay}}</th>
                         <td>
                             @if($student->deptStudent && $student->deptStudent->payed > 0)
                                 <span class="badge bg-label-warning">Partially Paid</span>
@@ -107,7 +109,8 @@
                                                 <div class="input-group">
                                                     <input type="date" class="form-control" name="date_paid"
                                                            value="{{ date('Y-m-d') }}">
-                                                    <button type="submit" class="btn btn-primary submit-btn">Save</button>
+                                                    <button type="submit" class="btn btn-primary submit-btn">Save
+                                                    </button>
                                                 </div>
                                             </form>
                                         </div>
@@ -126,7 +129,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         {{-- Pagination Links --}}
         @if ($students->hasPages())
             <div class="card-footer">
@@ -155,7 +158,7 @@
                 form.addEventListener('submit', function (e) {
                     const input = this.querySelector('.payment-input');
                     input.value = input.value.replace(/\s+/g, '');
-                    
+
                     // Disable submit button to prevent double submission
                     const submitBtn = this.querySelector('.submit-btn');
                     if (submitBtn) {
@@ -167,7 +170,7 @@
 
             // Session'da chek ID'si borligini tekshirish va yangi oynada ochish
             @if(session('payment_receipt_id'))
-            (function(){
+            (function () {
                 var baseUrl = "{{ route('payment.receipt', session('payment_receipt_id')) }}";
                 var receiptUrl = baseUrl + '?embed=1';
                 try {
@@ -177,12 +180,12 @@
                     iframe.style.height = '0';
                     iframe.style.border = '0';
                     iframe.style.opacity = '0';
-                    iframe.onload = function(){
+                    iframe.onload = function () {
                         try {
                             var cw = iframe.contentWindow || iframe;
-                            var cleanup = function(){
+                            var cleanup = function () {
                                 // Remove iframe shortly after printing finishes
-                                setTimeout(function(){
+                                setTimeout(function () {
                                     if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
                                 }, 50);
                             };

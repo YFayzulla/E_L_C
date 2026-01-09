@@ -44,19 +44,17 @@
                     <th>tel</th>
                     <th>Parents tel</th>
                     <th>group</th>
-                    <th>payment</th>
                     <th class="text-center">action</th>
                 </tr>
                 </thead>
                 <tbody id="myTable" class="table-border-bottom-0">
                 @forelse($students as $student)
                     <tr>
-                        <th>{{$loop->iteration + ($students->currentPage() - 1) * $students->perPage()}}</th>
+                        <th>{{$student->id}}</th>
                         <th>{{$student->name}}</th>
                         <th>+998 {{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         <th>{{$student->studentsGroup()}}</th>
-                        <th>{{$student->should_pay}}</th>
                         <th class="d-flex">
                             <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
                                 <i class='bx bx-edit-alt'></i>

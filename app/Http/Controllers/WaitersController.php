@@ -20,9 +20,9 @@ class WaitersController extends Controller
             // 1. Mavjud guruhlarni olish (Kutish zali ID=1 dan tashqari)
             // OPTIMIZATSIYA: Faqat kerakli ustunlarni (id, name) olish.
             // View faylida guruhni tanlash (select option) uchun shu yetarli.
-            $groups = Group::select('id', 'name')
+            $groups = Group::select('id', 'name', 'room_id')
                 ->where('id', '!=', 1)
-                ->orderBy('name')
+                ->orderBy('room_id')
                 ->get();
 
             // 2. Kutish zalidagi talabalarni olish (group_id = 1) yoki guruhsizlar

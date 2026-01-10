@@ -47,6 +47,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         Route::get('teacher/groups', 'groups')->name('teacher.groups');
         Route::get('teacher/attendance', 'attendanceGroups')->name('attendance');
         Route::get('teacher/assessment/groups', 'assessmentGroups')->name('assessment.teacher.groups');
+        Route::post('teacher/student/{id}/comment', 'studentComment')->name('teacher.student.comment');
     });
 
     // O'qituvchilar davomatni tekshirishi va yuborishi mumkin

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\GroupTeacher;
 use App\Models\LessonAndHistory;
+use App\Models\User;
 use App\Services\AttendanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -165,5 +166,29 @@ class TeacherAdminPanel extends Controller
         $teacherId = Auth::id();
         $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
         return view('teacher.assessment.index', compact('groups'));
+    }
+
+    public function studentComment(Request $request, $id)
+    {
+        $request->validate([
+            'comment' => 'required|string',
+            'group_name' => 'required|string',
+        ]);
+
+        try {
+            $student = User::findOrFail($id);
+            $teacherName = auth()->user()->name;
+            $groupName = $request->group_name;
+            
+            // Append new comment to existing description with teacher name and group name
+            $newComment = "\n" . now()->format('d M Y') . " ({$teacherName} - {$groupName}): " . $request->comment;
+            $student->description .= $newComment;
+            $student->save();
+
+            return redirect()->back()->with('success', 'Comment added successfully.');
+        } catch (\Exception $e) {
+            Log::error('TeacherAdminPanel@studentComment error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to add comment.');
+        }
     }
 }

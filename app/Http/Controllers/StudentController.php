@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\StoreRequest;
 use App\Http\Requests\Student\UpdateRequest;
+use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\DeptStudent;
 use App\Models\Group;
@@ -127,8 +128,16 @@ class StudentController extends Controller
             $student = User::with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
             $groupHistory = StudentInformation::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+            
+            // Fetch test results (Assessments)
+            // We need to join with LessonAndHistory to get the test name
+            $testResults = Assessment::where('user_id', $id)
+                ->join('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
+                ->select('assessments.*', 'lesson_and_histories.name as test_name')
+                ->latest('assessments.created_at')
+                ->get();
 
-            return view('admin.student.show', compact('student', 'attendances', 'groupHistory'));
+            return view('admin.student.show', compact('student', 'attendances', 'groupHistory', 'testResults'));
         } catch (\Exception $e) {
             Log::error('StudentController@show error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talaba ma\'lumotlarini yuklashda xatolik.');

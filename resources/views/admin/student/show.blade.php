@@ -120,4 +120,42 @@
         </div>
     </div>
 
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <h5 class="card-header">Test Results</h5>
+                <div class="table-responsive text-nowrap">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Test Name</th>
+                            <th>Group</th>
+                            <th>Mark</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                        @forelse($testResults as $result)
+                            <tr>
+                                <td>{{$loop->iteration}}</td>
+                                <td>{{$result->test_name}}</td>
+                                <td>{{$result->group}}</td>
+                                <td>
+                                    <span class="badge bg-label-primary">{{$result->get_mark}}</span>
+                                </td>
+                                <td>{{$result->created_at->format('d M Y')}}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No test results found.</td>
+                            </tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection

@@ -26,19 +26,19 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-//            'phone' => [
-//                'required', 'string', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('student')),
-//            ],
+            'phone' => [
+                'required', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('student')),
+            ],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-//            'passport' => [
-//                'nullable', 'string', 'regex:/^[A-Z]{2}\d{7}$/', Rule::unique('users', 'passport')->ignore($this->route('student'))
-//            ],
+            'passport' => [
+                'nullable', 'string', 'regex:/^[A-Z]{2}\d{7}$/', Rule::unique('users', 'passport')->ignore($this->route('student'))
+            ],
             'group_id' => 'required|array',
             'group_id.*' => 'exists:groups,id',
             'parents_name' => 'nullable|string|max:255',
-//            'parents_tel' => [
-//                'nullable', 'string', 'digits:9', Rule::unique('users', 'parents_tel')->ignore($this->route('student')),
-//            ],
+            'parents_tel' => [
+                'nullable', 'digits:9', Rule::unique('users', 'parents_tel')->ignore($this->route('student')),
+            ],
             'location' => 'nullable|string|max:255',
             'should_pay' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
@@ -55,7 +55,10 @@ class UpdateRequest extends FormRequest
         return [
             'name.required' => 'Please enter the name.',
             'phone.required' => 'Please enter the phone number.',
-            'phone.regex' => 'The phone number format is invalid.',
+            'phone.digits' => 'The phone number must be exactly 9 digits.',
+            'phone.unique' => 'The phone number has already been taken.',
+            'passport.regex' => 'The passport format is invalid.',
+            'passport.unique' => 'This passport number already exists.',
             'photo.image' => 'The file must be an image.',
             'photo.mimes' => 'The image must be in one of the following formats: jpeg, png, jpg, gif.',
             'photo.max' => 'The image size must not exceed 2048KB.',

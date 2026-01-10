@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Teacher;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
@@ -28,7 +29,7 @@ class StoreRequest extends FormRequest
             'passport' => 'nullable|string|regex:/^[A-Z]{2}\d{7}$/|unique:users,passport|max:9',
             'date_born' => 'nullable|date',
             'location' => 'nullable|string|max:255',
-            'phone' => 'required|digits:9',
+            'phone' => ['required', 'digits:9', Rule::unique('users', 'phone')],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
             'percent' => 'nullable|integer|min:0|max:100',
         ];
@@ -47,6 +48,7 @@ class StoreRequest extends FormRequest
             'passport.unique' => 'This passport number already exists.',
             'phone.required' => 'The phone number is required.',
             'phone.digits' => 'The phone number must be exactly 9 digits.',
+            'phone.unique' => 'The phone number has already been taken.',
             'photo.image' => 'The uploaded file must be an image.',
             'photo.mimes' => 'The image must be in one of the following formats: jpeg, png, jpg, gif, or svg.',
             'photo.max' => 'The image size must not exceed 20MB.',

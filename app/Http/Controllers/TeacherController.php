@@ -93,6 +93,12 @@ class TeacherController extends Controller
             }
 
             Log::error('TeacherController@store error: ' . $e->getMessage());
+            
+            // Check for unique constraint violation (SQLSTATE 23000)
+            if ($e->getCode() == 23000) {
+                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki pasport allaqachon mavjud.');
+            }
+
             return redirect()->back()->withInput()->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
         }
     }
@@ -166,6 +172,12 @@ class TeacherController extends Controller
             }
 
             Log::error('TeacherController@update error: ' . $e->getMessage());
+            
+            // Check for unique constraint violation (SQLSTATE 23000)
+            if ($e->getCode() == 23000) {
+                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki pasport allaqachon mavjud.');
+            }
+            
             return redirect()->back()->withInput()->with('error', 'Yangilashda xatolik yuz berdi.');
         }
     }

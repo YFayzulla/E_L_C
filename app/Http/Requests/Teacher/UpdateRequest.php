@@ -32,7 +32,7 @@ class UpdateRequest extends FormRequest
             'date_born' => 'nullable|date',
             'location' => 'nullable|string|max:255',
             'phone' => [
-                'required', 'string', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('teacher')),
+                'required', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('teacher')),
             ],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
             'percent' => 'nullable|integer|min:0|max:100',

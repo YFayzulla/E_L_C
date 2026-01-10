@@ -141,6 +141,7 @@
                 </tr>
             @endforeach
         </table>
+        {{-- Pagination Links for Student List --}}
         <div class="card-body">
             {{ $students->links('pagination::bootstrap-5') }}
         </div>

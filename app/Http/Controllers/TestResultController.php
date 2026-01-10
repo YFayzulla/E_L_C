@@ -55,7 +55,7 @@ class TestResultController extends Controller
             // 2. Baholarni olish
             // OPTIMIZATSIYA: with('student') - N+1 muammosini yechish uchun
             $assessments = Assessment::where('history_id', $historyId)
-                ->with('student:id,name,code') // Talaba ma'lumotlarini oldindan yuklash
+                ->with('student:id,name') // Talaba ma'lumotlarini oldindan yuklash
                 ->get();
 
             // 3. Guruh ma'lumotlarini aniqlash

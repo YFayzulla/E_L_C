@@ -72,13 +72,7 @@
                 </tbody>
             </table>
         </div>
-        
-        {{-- Pagination Links --}}
-        @if ($teachers->hasPages())
-            <div class="card-footer">
-                {{ $teachers->links() }}
-            </div>
-        @endif
+     
     </div>
 
 @endsection

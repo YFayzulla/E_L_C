@@ -11,6 +11,7 @@
         <div class="collapse navbar-collapse" id="sidebar-menu">
             <ul class="navbar-nav pt-lg-3">
                 @role('admin')
+                {{-- Dashboard --}}
                 <li class="nav-item @if(request()->routeIs('dashboard')) active @endif">
                     <a class="nav-link" href="{{ route('dashboard') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -19,6 +20,7 @@
                         <span class="nav-link-title">Dashboard</span>
                     </a>
                 </li>
+                {{-- 1) Teachers --}}
                 <li class="nav-item @if(request()->routeIs('teacher.index', 'teacher.create', 'teacher.edit', 'teacher.show')) active @endif">
                     <a class="nav-link" href="{{ route('teacher.index') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -27,6 +29,7 @@
                         <span class="nav-link-title">Teachers</span>
                     </a>
                 </li>
+                {{-- 2) Groups --}}
                 <li class="nav-item @if(request()->routeIs('group.index', 'group.create', 'group.edit', 'group.show', 'group.attendance', 'group.create.room')) active @endif">
                     <a class="nav-link" href="{{ route('group.index') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -35,6 +38,7 @@
                         <span class="nav-link-title">Groups</span>
                     </a>
                 </li>
+                {{-- 3) Students --}}
                 <li class="nav-item @if(request()->routeIs('student.index', 'student.create', 'student.edit', 'student.show')) active @endif">
                     <a class="nav-link" href="{{ route('student.index') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -43,6 +47,7 @@
                         <span class="nav-link-title">Students</span>
                     </a>
                 </li>
+                {{-- 4) Department/Payments --}}
                 <li class="nav-item @if(request()->routeIs('dept.index')) active @endif">
                     <a class="nav-link" href="{{ route('dept.index') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -59,6 +64,7 @@
                         <span class="nav-link-title">Assessment</span>
                     </a>
                 </li>
+                {{-- 5) Waiting Room --}}
                 <li class="nav-item @if(request()->routeIs('waiters.index')) active @endif">
                     <a class="nav-link" href="{{ route('waiters.index') }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">

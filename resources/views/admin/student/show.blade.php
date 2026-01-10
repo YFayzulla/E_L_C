@@ -5,6 +5,7 @@
 
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <h5 class="mb-0">Student's Data</h5>
+           @role('admin')
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
                 <div class="dt-buttons btn-group flex-wrap">
                     <div class="btn-group">
@@ -21,6 +22,7 @@
                     </div>
                 </div>
             </div>
+            @endrole
         </div>
 
         <div class="row mb-5">
@@ -30,15 +32,17 @@
                         <div class="col-md-8">
                             <div class="card-body">
                                 <h4><b>Full Name: </b>{{$student->name}}</h4>
-                                <h4><b>Location:</b> {{$student->location}}</h4>
                                 <h4><b>Tel: </b>{{$student->phone}}</h4>
+                                @role ('admin')
+                                <h4><b>Location:</b> {{$student->location}}</h4>
                                 <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
                                 <h4><b>Parents tel: </b> {{$student->parents_tel}}</h4>
                                 <h4><b>Last Test Result: </b>{{$student->mark}}</h4>
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
-                                
+                                @endrole
                                 <div class="mt-4">
-                                    <h5 class="text-primary mb-3"><i class="bx bx-note me-2"></i>Comments & Description</h5>
+                                    <h5 class="text-primary mb-3"><i class="bx bx-note me-2"></i>Comments & Description
+                                    </h5>
                                     <div class="bg-light p-3 rounded border">
                                         @if($student->description)
                                             @php
@@ -61,6 +65,7 @@
                                 </div>
                             </div>
                         </div>
+                        @role('admin')
                         <div class="col-md-4 d-flex justify-content-center align-items-center p-3">
                             @if($student->photo)
                                 <img class="img-fluid rounded shadow-sm"
@@ -71,6 +76,7 @@
                                 <p class="text-muted">No Photo</p>
                             @endif
                         </div>
+                        @endrole
                     </div>
                 </div>
             </div>
@@ -78,7 +84,7 @@
     </div>
 
     <div class="row">
-
+        @role('admin')
         <div class="col-md-6 mt-4">
             <div class="card">
                 <h5 class="card-header">Payment History</h5>
@@ -112,6 +118,7 @@
                 </div>
             </div>
         </div>
+        @endrole
 
         <div class="col-md-6 mt-4">
             <div class="card">

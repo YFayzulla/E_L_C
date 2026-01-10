@@ -100,7 +100,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');
 
     // --- STUDENTS & DEPT ---
-    Route::resource('student', StudentController::class);
+    // Removed 'show' from resource to define it separately for shared access
+    Route::resource('student', StudentController::class)->except(['show']);
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
 
     Route::resource('dept', DeptStudentController::class);
@@ -130,6 +131,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 */
 Route::middleware(['auth', 'role:admin|user'])->group(function () {
     Route::get('group/attendance/{id}', [GroupExtraController::class, 'attendance'])->name('group.attendance');
+    // Allow both admin and teacher (user) to view student details
+    Route::get('student/{student}', [StudentController::class, 'show'])->name('student.show');
 });
 
 

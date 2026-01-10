@@ -82,6 +82,10 @@
                                                         partially: {{ number_format($student->deptStudent->payed, 0, '.', ' ') }}
                                                         <br>
                                                         Last date: {{ $student->deptStudent->date }}
+                                                        @if($student->studenthistory->isNotEmpty())
+                                                            <br>
+                                                            Desc: {{ $student->studenthistory->last()->description ?? 'N/A' }}
+                                                        @endif
                                                     </div>
                                                 @endif
 
@@ -103,6 +107,11 @@
                                                         <option value="cash">Cash</option>
                                                         <option value="electronic">Card</option>
                                                     </select>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Description (Optional)</label>
+                                                    <textarea name="description" class="form-control" rows="2" placeholder="Enter payment details..."></textarea>
                                                 </div>
 
                                                 <label class="form-label">Date (Optional)</label>

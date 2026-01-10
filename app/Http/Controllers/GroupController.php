@@ -117,11 +117,13 @@ class GroupController extends Controller
     {
         DB::beginTransaction();
         try {
-            // 1. O'qituvchi bog'lanishini o'chirish
+            // 1. O'qituvchi bog'lanishini o'chirish (Pivot jadvaldan)
+            // This removes the relationship but keeps the teacher user
             GroupTeacher::where('group_id', $group->id)->delete();
             
             // 2. Talabalar bog'lanishini o'chirish (Pivot jadvaldan)
             // detach() metodi pivot jadvaldan (group_user) yozuvlarni o'chiradi
+            // This removes the relationship but keeps the student user
             $group->students()->detach();
 
             // 3. Guruhni o'chirish

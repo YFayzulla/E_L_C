@@ -34,9 +34,31 @@
                                 <h4><b>Tel: </b>{{$student->phone}}</h4>
                                 <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
                                 <h4><b>Parents tel: </b> {{$student->parents_tel}}</h4>
-                                <h4><b>Description: </b> {{($student->description)}}</h4>
                                 <h4><b>Last Test Result: </b>{{$student->mark}}</h4>
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
+                                
+                                <div class="mt-4">
+                                    <h5 class="text-primary mb-3"><i class="bx bx-note me-2"></i>Comments & Description</h5>
+                                    <div class="bg-light p-3 rounded border">
+                                        @if($student->description)
+                                            @php
+                                                // Split description by newline to separate comments
+                                                $comments = explode("\n", $student->description);
+                                            @endphp
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach($comments as $comment)
+                                                    @if(trim($comment) !== '')
+                                                        <li class="mb-2 pb-2 border-bottom border-light-subtle last:border-0">
+                                                            <i class="bx bx-chevron-right text-muted me-1"></i> {{ trim($comment) }}
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="text-muted mb-0">No description or comments available.</p>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4 d-flex justify-content-center align-items-center p-3">
@@ -67,6 +89,7 @@
                             <th>No</th>
                             <th>Paid</th>
                             <th>Type</th>
+                            <th>Desc</th>
                             <th>Date</th>
                         </tr>
                         </thead>
@@ -76,11 +99,12 @@
                                 <td>{{$loop->iteration}}</td>
                                 <td>{{number_format($item->payment,0,'',' ')}}</td>
                                 <td>{{$item->type_of_money}}</td>
+                                <td>{{$item->description ?? '-'}}</td>
                                 <td>{{ \Carbon\Carbon::parse($item->date ?? $item->created_at)->format('d M Y') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">No payment history found.</td>
+                                <td colspan="5" class="text-center">No payment history found.</td>
                             </tr>
                         @endforelse
                         </tbody>

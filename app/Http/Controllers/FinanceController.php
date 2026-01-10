@@ -21,7 +21,7 @@ class FinanceController extends Controller
             // OPTIMIZATSIYA:
             // 1. paginate() ishlatildi (sahifalash). Agar ma'lumot ko'payib ketsa, sayt qotmaydi.
             // 2. latest() qo'shildi, eng yangi xarajatlar tepada turadi.
-            $finances = Finance::latest()->paginate(20);
+            $finances = Finance::latest()->get();
 
             // PHP da hisoblash o'rniga SQL da hisoblaymiz (bu tezroq va xotirani tejaydi)
             $totalConsumption = Finance::sum('payment');

@@ -27,7 +27,7 @@ class StudentController extends Controller
             $students = User::role('student')
                 ->with('groups')
                 ->orderBy("name")
-                ->paginate(20);
+                ->get();
 
             return view('admin.student.index', compact('students'));
         } catch (\Exception $e) {

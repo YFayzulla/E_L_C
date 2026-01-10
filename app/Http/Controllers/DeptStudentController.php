@@ -33,7 +33,7 @@ class DeptStudentController extends Controller
             // Inside groups, sort by status then by name
             ->orderBy('users.status')
             ->orderBy('users.name')
-            ->paginate(20); // Added pagination
+            ->get(); // Added pagination
 
         return view('admin.dept.index', compact('students'));
     }

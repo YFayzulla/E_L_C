@@ -79,12 +79,7 @@
                 </table>
             </div>
             
-            {{-- Pagination Links --}}
-            @if ($groups->hasPages())
-                <div class="card-footer">
-                    {{ $groups->links() }}
-                </div>
-            @endif
+         
         </div>
     </div>
 @endsection

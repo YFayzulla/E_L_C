@@ -64,6 +64,7 @@ class DeptStudentController extends Controller
             'payment' => 'required|string',
             'date_paid' => 'nullable|date',
             'money_type' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $cleanPayment = (float) str_replace([' ', ','], '', $request->payment);
@@ -126,6 +127,7 @@ class DeptStudentController extends Controller
                 'group' => $groupName,
                 'date' => $paidDate->format('Y-m-d'),
                 'type_of_money' => $request->money_type,
+                'description' => $request->description,
             ]);
             
             $paymentHistoryId = $paymentHistory->id;

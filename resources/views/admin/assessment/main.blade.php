@@ -58,9 +58,7 @@
                         @endforeach
                         </tbody>
                     </table>
-                    <div class="card-footer">
-                        {{ $data->links('pagination::bootstrap-5') }}
-                    </div>
+                    {{-- Pagination Links for Assessment Data --}}
                 </div>
             </div>
         </div>

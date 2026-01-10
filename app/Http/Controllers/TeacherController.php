@@ -181,6 +181,7 @@ class TeacherController extends Controller
             $teacher = User::findOrFail($id);
             $photoPath = $teacher->photo;
 
+            // Remove teacher from groups (pivot table)
             $teacher->teacherGroups()->detach();
             
             $teacher->delete();

@@ -19,7 +19,7 @@ class TestResultController extends Controller
             // 1. Test tarixlarini olish (data = 2 bu test ekanligini bildiradi)
             $testHistories = LessonAndHistory::where('data', 2)
                 ->latest() // Eng oxirgi testlar tepada turishi uchun
-                ->paginate(10);
+                ->get();
 
             // 2. Top 5 talaba
             // OPTIMIZATSIYA: with('student') qo'shildi.

@@ -22,7 +22,7 @@ class TeacherController extends Controller
             $teachers = User::role('user')
                 ->with('teacherGroups')
                 ->orderBy('name')
-                ->paginate(20);
+                ->get();
 
             return view('admin.teacher.index', compact('teachers'));
         } catch (\Exception $e) {

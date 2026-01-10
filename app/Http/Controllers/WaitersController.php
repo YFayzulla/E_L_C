@@ -39,7 +39,7 @@ class WaitersController extends Controller
                 })
                 ->select('id', 'name', 'phone', 'parents_tel', 'created_at', 'photo') // Viewga kerakli ustunlarni yozing
                 ->latest('created_at') // Yoki ->orderBy('name')
-                ->paginate(20);
+                ->get();
 
             return view('admin.waiters.index', compact('students', 'groups'));
 

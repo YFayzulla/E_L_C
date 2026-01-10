@@ -132,7 +132,7 @@ class TeacherAdminPanel extends Controller
                     ->whereIn('status', [0, 2]) // Absent or Late
                     ->with(['lesson', 'group'])
                     ->orderByDesc('created_at')
-                    ->paginate(20);
+                    ->get();
                 return view('student.attendance', compact('attendances'));
             }
 

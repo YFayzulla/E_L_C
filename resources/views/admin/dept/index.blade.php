@@ -133,7 +133,7 @@
         {{-- Pagination Links --}}
         @if ($students->hasPages())
             <div class="card-footer">
-                {{ $students->links() }}
+                {{ $students->links('pagination::bootstrap-5') }}
             </div>
         @endif
     </div>

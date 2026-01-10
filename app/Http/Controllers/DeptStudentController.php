@@ -13,27 +13,23 @@ class DeptStudentController extends Controller
 {
     public function index()
     {
-        $students = User::role('student')
+        $query = User::role('student')
             ->with('deptStudent', 'groups')
             ->leftJoin('dept_students', 'users.id', '=', 'dept_students.user_id')
-            ->select('users.*') // Select only user columns to avoid conflicts, dept_students data is loaded via with() or we can select specific columns if needed for sorting
-            // Order groups explicitly:
-            // 0) Partially Paid (payed > 0)
-            // 1) Debtor (status <= 0)
-            // 2) Paid (status > 0)
-            // 3) Disabled (status IS NULL)
-            ->orderByRaw("
-                CASE 
-                    WHEN users.status IS NULL THEN 3 
-                    WHEN COALESCE(dept_students.payed, 0) > 0 THEN 0 
-                    WHEN users.status <= 0 THEN 1 
-                    ELSE 2 
+            ->select('users.*');
+
+        $students = $query->orderByRaw("
+                CASE
+                    WHEN dept_students.payed > 0 AND dept_students.dept > 0 THEN 0
+                    WHEN users.status IS NOT NULL AND users.status <= 0 THEN 1
+                    WHEN users.status IS NOT NULL AND users.status > 0 THEN 2
+                    WHEN dept_students.id IS NULL THEN 3
+                    ELSE 4
                 END
             ")
-            // Inside groups, sort by status then by name
-            ->orderBy('users.status')
             ->orderBy('users.name')
-            ->get(); // Added pagination
+            ->get();
+
 
         return view('admin.dept.index', compact('students'));
     }
@@ -67,7 +63,7 @@ class DeptStudentController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $cleanPayment = (float) str_replace([' ', ','], '', $request->payment);
+        $cleanPayment = (float)str_replace([' ', ','], '', $request->payment);
 
         if ($cleanPayment <= 0) {
             return redirect()->back()->with('error', 'To\'lov miqdori noto\'g\'ri kiritildi.');
@@ -82,7 +78,7 @@ class DeptStudentController extends Controller
 
         $monthlyDept = $deptStudent->dept;
         $paidDate = $request->date_paid ? Carbon::parse($request->date_paid) : Carbon::now();
-        
+
         $paymentHistoryId = null;
 
         DB::transaction(function () use ($deptStudent, $user, $cleanPayment, $monthlyDept, $paidDate, $request, &$paymentHistoryId) {
@@ -129,7 +125,7 @@ class DeptStudentController extends Controller
                 'type_of_money' => $request->money_type,
                 'description' => $request->description,
             ]);
-            
+
             $paymentHistoryId = $paymentHistory->id;
         });
 

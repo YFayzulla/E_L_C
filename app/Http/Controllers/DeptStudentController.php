@@ -24,7 +24,7 @@ class DeptStudentController extends Controller
                     WHEN users.status IS NOT NULL AND users.status <= 0 THEN 1
                     WHEN users.status IS NOT NULL AND users.status > 0 THEN 2
                     WHEN dept_students.id IS NULL THEN 3
-                    ELSE 4
+                    ELSE 4  
                 END
             ")
             ->orderBy('users.name')

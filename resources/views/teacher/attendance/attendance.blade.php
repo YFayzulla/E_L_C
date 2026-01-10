@@ -192,9 +192,6 @@
                 @endforelse
                 </tbody>
             </table>
-            <div class="card-footer">
-                {{ $attendances->links('pagination::bootstrap-5') }}
-            </div>
         </div>
     </div>
 

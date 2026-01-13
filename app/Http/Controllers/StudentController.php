@@ -70,36 +70,36 @@ class StudentController extends Controller
 
         try {
             $user = User::create([
-                'name'         => $request->name,
-                'password'     => Hash::make($request->phone),
-                'passport'     => $request->passport,
-                'phone'        => '998' . preg_replace('/[^0-9]/', '', $request->phone),
+                'name' => $request->name,
+                'password' => Hash::make($request->phone),
+                'passport' => $request->passport,
+                'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'parents_name' => $request->parents_name,
-                'parents_tel'  => $request->parents_tel ? '998' . preg_replace('/[^0-9]/', '', $request->parents_tel) : null,
-                'location'     => $request->location,
-                'photo'        => $uploadedFilePath,
-                'should_pay'   => (int) str_replace(' ', '', $request->should_pay),
-                'description'  => $request->description,
+                'parents_tel' => $request->parents_tel,
+                'location' => $request->location,
+                'photo' => $uploadedFilePath,
+                'should_pay' => (int)str_replace(' ', '', $request->should_pay),
+                'description' => $request->description,
             ]);
 
             $user->assignRole('student');
-            
+
             $groupIds = $request->group_id; // This is now an array
             $user->groups()->attach($groupIds);
 
             $groups = Group::whereIn('id', $groupIds)->get();
-            foreach($groups as $group){
+            foreach ($groups as $group) {
                 StudentInformation::create([
-                    'user_id'  => $user->id,
+                    'user_id' => $user->id,
                     'group_id' => $group->id,
-                    'group'    => $group->name,
+                    'group' => $group->name,
                 ]);
             }
 
             DeptStudent::create([
-                'user_id'      => $user->id,
-                'payed'        => 0,
-                'dept'         => (int) str_replace(' ', '', $request->should_pay),
+                'user_id' => $user->id,
+                'payed' => 0,
+                'dept' => (int)str_replace(' ', '', $request->should_pay),
                 'status_month' => 0
             ]);
 
@@ -128,7 +128,7 @@ class StudentController extends Controller
             $student = User::with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
             $groupHistory = StudentInformation::where('user_id', $id)->orderBy('created_at', 'desc')->get();
-            
+
             // Fetch test results (Assessments)
             // We need to join with LessonAndHistory to get the test name
             $testResults = Assessment::where('user_id', $id)
@@ -180,15 +180,15 @@ class StudentController extends Controller
             }
 
             $updateData = [
-                'name'         => $request->name,
-                'phone'        => '998' . preg_replace('/[^0-9]/', '', $request->phone),
-                'passport'     => $request->passport,
+                'name' => $request->name,
+                'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
+                'passport' => $request->passport,
                 'parents_name' => $request->parents_name,
-                'parents_tel'  => $request->parents_tel ? '998' . preg_replace('/[^0-9]/', '', $request->parents_tel) : null,
-                'location'     => $request->location,
-                'should_pay'   => (int) str_replace(' ', '', $request->should_pay),
-                'photo'        => $newPhotoPath,
-                'description'  => $request->description,
+                'parents_tel' => $request->parents_tel,
+                'location' => $request->location,
+                'should_pay' => (int)str_replace(' ', '', $request->should_pay),
+                'photo' => $newPhotoPath,
+                'description' => $request->description,
             ];
 
             if ($request->filled('password')) {
@@ -199,22 +199,22 @@ class StudentController extends Controller
 
             $newGroupIds = $request->group_id; // Array of group IDs
             $currentGroupIds = $student->groups->pluck('id')->toArray();
-            
+
             $student->groups()->sync($newGroupIds);
 
             $addedGroups = array_diff($newGroupIds, $currentGroupIds);
             $groups = Group::whereIn('id', $addedGroups)->get();
-            foreach($groups as $group){
+            foreach ($groups as $group) {
                 StudentInformation::create([
-                    'user_id'  => $student->id,
+                    'user_id' => $student->id,
                     'group_id' => $group->id,
-                    'group'    => $group->name
+                    'group' => $group->name
                 ]);
             }
 
             $student->deptStudent()->updateOrCreate(
                 ['user_id' => $student->id],
-                ['dept' => (int) str_replace(' ', '', $request->should_pay)]
+                ['dept' => (int)str_replace(' ', '', $request->should_pay)]
             );
 
             DB::commit();
@@ -252,7 +252,7 @@ class StudentController extends Controller
             StudentInformation::where('user_id', $student->id)->delete();
             DeptStudent::where('user_id', $student->id)->delete();
             Attendance::where('user_id', $student->id)->delete();
-            
+
             $student->delete();
 
             DB::commit();

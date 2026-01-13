@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\StudentExport;
 use App\Http\Requests\Student\StoreRequest;
 use App\Http\Requests\Student\UpdateRequest;
 use App\Models\Assessment;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -26,7 +28,7 @@ class StudentController extends Controller
         try {
             $students = User::role('student')
                 ->with('groups')
-                ->orderBy("name",'desc')
+                ->orderBy("name", 'desc')
                 ->get();
 
             return view('admin.student.index', compact('students'));
@@ -72,7 +74,7 @@ class StudentController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'password' => Hash::make($request->phone),
-                'passport' => $request->passport,
+                'date_born' => $request->birth_date,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'parents_name' => $request->parents_name,
                 'parents_tel' => $request->parents_tel,
@@ -182,7 +184,7 @@ class StudentController extends Controller
             $updateData = [
                 'name' => $request->name,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
-                'passport' => $request->passport,
+                'date_born' => $request->birth_date,
                 'parents_name' => $request->parents_name,
                 'parents_tel' => $request->parents_tel,
                 'location' => $request->location,
@@ -267,6 +269,37 @@ class StudentController extends Controller
             DB::rollBack();
             Log::error('StudentController@destroy error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
+        }
+    }
+
+    /**
+     * Export single student data to Excel with Comments & Description
+     */
+    public function exportStudent($id)
+    {
+        try {
+            $student = User::role('student')->findOrFail($id);
+            $fileName = 'Student_' . $student->name . '_' . now()->format('Y-m-d') . '.xlsx';
+
+            return Excel::download(new StudentExport($id), $fileName);
+        } catch (\Exception $e) {
+            Log::error('StudentController@exportStudent error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talaba ma\'lumotlarini eksport qilishda xatolik.');
+        }
+    }
+
+    /**
+     * Export all students data to Excel with Comments & Description
+     */
+    public function exportAllStudents()
+    {
+        try {
+            $fileName = 'All_Students_' . now()->format('Y-m-d') . '.xlsx';
+
+            return Excel::download(new StudentExport(), $fileName);
+        } catch (\Exception $e) {
+            Log::error('StudentController@exportAllStudents error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Talabalar ma\'lumotlarini eksport qilishda xatolik.');
         }
     }
 }

@@ -23,6 +23,8 @@
                             {{-- XATO TUZATILDI: URL to'g'irlandi --}}
                             <li><a class="dropdown-item" href="{{ URL::to('/student/pdf-list') }}"><i
                                             class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
+                            <li><a class="dropdown-item" href="{{ route('students.export.all') }}"><i
+                                            class="bx bxs-file-export me-1"></i> Excel</a></li>
                         </ul>
                     </div>
                     @endrole
@@ -52,7 +54,7 @@
                     <tr>
                         <th>{{$loop->index+1}}</th>
                         <th>{{$student->name}}</th>
-                        <th>+ {{$student->phone}}</th>
+                        <th>+{{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         <th>{{$student->studentsGroup()}}</th>
                         <th class="d-flex">

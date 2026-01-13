@@ -67,7 +67,7 @@ class TeacherController extends Controller
             $teacher = User::create([
                 'name' => $request->name,
                 'password' => Hash::make($request->phone),
-                'passport' => $request->passport,
+                'birth_date' => $request->birth_date,
                 'date_born' => $request->date_born,
                 'location' => $request->location,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
@@ -96,7 +96,7 @@ class TeacherController extends Controller
             
             // Check for unique constraint violation (SQLSTATE 23000)
             if ($e->getCode() == 23000) {
-                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki pasport allaqachon mavjud.');
+                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki tug\'ilgan sana allaqachon mavjud.');
             }
 
             return redirect()->back()->withInput()->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
@@ -142,8 +142,8 @@ class TeacherController extends Controller
                 'name' => $request->name,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'date_born' => $request->date_born,
+                'birth_date' => $request->birth_date,
                 'location' => $request->location,
-                'passport' => $request->passport,
                 'percent' => $request->percent,
                 'photo' => $newPhotoPath,
             ];
@@ -175,7 +175,7 @@ class TeacherController extends Controller
             
             // Check for unique constraint violation (SQLSTATE 23000)
             if ($e->getCode() == 23000) {
-                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki pasport allaqachon mavjud.');
+                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki tug\'ilgan sana allaqachon mavjud.');
             }
             
             return redirect()->back()->withInput()->with('error', 'Yangilashda xatolik yuz berdi.');

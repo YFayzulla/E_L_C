@@ -5,7 +5,7 @@
 
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <h5 class="mb-0">Student's Data</h5>
-           @role('admin')
+            @role('admin')
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
                 <div class="dt-buttons btn-group flex-wrap">
                     <div class="btn-group">
@@ -18,6 +18,8 @@
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <li><a class="dropdown-item" href="{{ URL::to('/student/pdf',$student->id) }}"><i
                                             class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
+                            <li><a class="dropdown-item" href="{{ route('student.export', $student->id) }}"><i
+                                            class="bx bxs-file-export me-1"></i> Excel</a></li>
                         </ul>
                     </div>
                 </div>
@@ -38,6 +40,7 @@
                                 <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
                                 <h4><b>Parents tel: </b> {{$student->parents_tel}}</h4>
                                 <h4><b>Last Test Result: </b>{{$student->mark}}</h4>
+                                <h4><b>Birth date </b>{{$student->date_born }}</h4>
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
                                 @endrole
                                 <div class="mt-4">

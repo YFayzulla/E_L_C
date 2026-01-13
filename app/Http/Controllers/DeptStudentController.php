@@ -27,7 +27,7 @@ class DeptStudentController extends Controller
                     ELSE 4  
                 END
             ")
-            ->orderBy('users.name')
+            ->orderBy('users.name','desc')
             ->get();
 
 

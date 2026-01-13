@@ -50,7 +50,7 @@
                 <tbody id="myTable" class="table-border-bottom-0">
                 @forelse($students as $student)
                     <tr>
-                        <th>{{$student->id}}</th>
+                        <th>{{$loop->index+1}}</th>
                         <th>{{$student->name}}</th>
                         <th>+ {{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>

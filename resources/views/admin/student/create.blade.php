@@ -55,7 +55,6 @@
                     <div class="mb-3">
                         <label for="should_pay" class="form-label text-dark">Monthly Payment</label>
                         <input id="should_pay" name="should_pay" type="text"
-                               value="{{ number_format(old('should_pay', 500000), 0, ' ', ' ') }}"
                                class="form-control" required>
                         @error('should_pay')
                         <div class="text-danger mt-1">{{ $message }}</div>
@@ -78,8 +77,8 @@
                     <div class="mb-3">
                         <label for="parents_tel" class="form-label text-dark">Parents Phone <span class="text-muted">(not necessary)</span></label>
                         <div class="input-group">
-                            <input type="text" id="parents_tel" name="parents_tel"
-                                   value="{{ old('parents_tel') }}" class="form-control">
+                            <input type="text" id="parents_tel" name="parents_tel" " placeholder="912345678"
+                            value="{{ old('parents_tel') }}" class="form-control">
                         </div>
                         @error('parents_tel')
                         <div class="text-danger mt-1">{{ $message }}</div>

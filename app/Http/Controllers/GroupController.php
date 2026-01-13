@@ -15,7 +15,7 @@ class GroupController extends Controller
     {
         try {
             $groups = Group::where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
-                ->orderBy('start_time')
+            ->orderBy('name', 'desc')
                 ->get(); // Added pagination
             return view('admin.group.index', compact('groups'));
         } catch (\Exception $e) {
@@ -45,7 +45,7 @@ class GroupController extends Controller
                 'finish_time' => $request->finish_time,
                 'monthly_payment' => (int)$request->monthly_payment,
             ]);
-            
+
             if (method_exists($group, 'hasTeacher')) {
                 $teacherId = $group->hasTeacher();
                 if ($teacherId) {
@@ -71,20 +71,20 @@ class GroupController extends Controller
         // Or maybe it's used to show a specific group details?
         // Based on previous code, it was showing groups for a room.
         // Now we might want to show details of a single group or just redirect to index.
-        
+
         // If the intention is to show details of a specific group:
         try {
-             $group = Group::findOrFail($id);
-             // You might want a specific view for showing group details
-             // For now, let's just return the index view with all groups, or maybe filter?
-             // But usually show($id) is for a single resource.
-             
-             // Let's assume we want to list groups, similar to index.
-             // If the previous logic was listing groups in a room, now we list all groups.
-             return redirect()->route('group.index');
+            $group = Group::findOrFail($id);
+            // You might want a specific view for showing group details
+            // For now, let's just return the index view with all groups, or maybe filter?
+            // But usually show($id) is for a single resource.
+
+            // Let's assume we want to list groups, similar to index.
+            // If the previous logic was listing groups in a room, now we list all groups.
+            return redirect()->route('group.index');
 
         } catch (\Exception $e) {
-             return redirect()->route('group.index');
+            return redirect()->route('group.index');
         }
     }
 
@@ -120,7 +120,7 @@ class GroupController extends Controller
             // 1. O'qituvchi bog'lanishini o'chirish (Pivot jadvaldan)
             // This removes the relationship but keeps the teacher user
             GroupTeacher::where('group_id', $group->id)->delete();
-            
+
             // 2. Talabalar bog'lanishini o'chirish (Pivot jadvaldan)
             // detach() metodi pivot jadvaldan (group_user) yozuvlarni o'chiradi
             // This removes the relationship but keeps the student user
@@ -128,7 +128,7 @@ class GroupController extends Controller
 
             // 3. Guruhni o'chirish
             $group->delete();
-            
+
             DB::commit();
             return redirect()->back()->with('success', 'Guruh muvaffaqiyatli o\'chirildi.');
         } catch (\Exception $e) {

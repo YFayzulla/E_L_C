@@ -52,7 +52,7 @@
                     <tr>
                         <th>{{$student->id}}</th>
                         <th>{{$student->name}}</th>
-                        <th>+998 {{$student->phone}}</th>
+                        <th>+ {{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         <th>{{$student->studentsGroup()}}</th>
                         <th class="d-flex">

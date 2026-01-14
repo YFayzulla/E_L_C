@@ -40,7 +40,7 @@ class UpdateRequest extends FormRequest
             'group_id.*' => 'exists:groups,id',
             'parents_name' => 'nullable|string|max:255',
             'parents_tel' => [
-                'nullable', 'digits:9', Rule::unique('users', 'parents_tel')->ignore($this->route('student')),
+                'nullable',
             ],
             'location' => 'nullable|string|max:255',
             'should_pay' => 'nullable|numeric|min:0',

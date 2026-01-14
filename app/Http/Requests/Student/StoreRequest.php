@@ -28,7 +28,7 @@ class StoreRequest extends FormRequest
             'name' => 'required|string|max:255',
             'password' => 'nullable|string|min:8|max:16',
             'phone' => ['required', 'digits:9', Rule::unique('users', 'phone')],
-            'parents_tel' => ['nullable', 'digits:9'],
+            'parents_tel' => ['nullable'],
             'birth_date' => 'nullable|date',
             'date_born' => 'nullable|date',
             'parents_name' => 'nullable|string|max:255',

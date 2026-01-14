@@ -15,7 +15,7 @@ class GroupController extends Controller
     {
         try {
             $groups = Group::where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
-            ->orderBy('name', 'desc')
+            ->orderBy('name')
                 ->get(); // Added pagination
             return view('admin.group.index', compact('groups'));
         } catch (\Exception $e) {

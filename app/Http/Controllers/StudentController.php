@@ -28,7 +28,7 @@ class StudentController extends Controller
         try {
             $students = User::role('student')
                 ->with('groups')
-                ->orderBy("name", 'desc')
+                ->orderBy("name")
                 ->get();
 
             return view('admin.student.index', compact('students'));

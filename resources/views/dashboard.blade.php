@@ -73,7 +73,7 @@
                                                         @endif
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $teacher->name }}</h6>
+                                                        <h6 class="mb-0 text-truncate">{{ $teacher->name }}</h6>
                                                         <small class="text-muted">{{ $teacher->percent }}%</small>
                                                     </div>
                                                 </div>

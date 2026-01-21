@@ -3,7 +3,7 @@
     <div class="mb-6 text-center m-2">
         <a href="/" class="flex justify-center mb-4">
             <!-- MUHIM: h-16 (64px) klassi logotipni ixcham qiladi -->
-            <img src="{{ asset('logos/main.png') }}" alt="Logo" style="width: 100px"/>
+            <img src="{{ asset('logos/main.png') }}" alt="Logo" style="width: 200px"/>
         </a>
     </div>
 

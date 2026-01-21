@@ -33,6 +33,8 @@ class GroupController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'start_time' => 'nullable|string|max:255',
+            'finish_time' => 'nullable|string|max:255',
             'monthly_payment' => 'required|numeric|min:0',
         ]);
 
@@ -95,8 +97,8 @@ class GroupController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'start_time' => 'required|date_format:H:i',
-            'finish_time' => 'required|date_format:H:i|after:start_time',
+            'start_time' => 'nullable|string|max:255',
+            'finish_time' => 'nullable|string|max:255',
             'monthly_payment' => 'required|numeric|min:0',
         ]);
 

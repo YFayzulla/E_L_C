@@ -18,14 +18,14 @@
                 @enderror
 
                 <label for="start_time" class="text-dark">Start Time</label>
-                <input id="start_time" name="start_time" value="{{$group->start_time}}" type="text" class="form-control" placeholder="HH:MM">
+                <input id="start_time" name="start_time" value="{{$group->start_time}}" type="text" class="form-control">
 
                 @error('start_time')
                 <div class="alert alert-danger" role="alert">{{ $message }}</div>
                 @enderror
 
                 <label for="finish_time" class="text-dark">Finish Time</label>
-                <input id="finish_time" name="finish_time" value="{{$group->finish_time}}" type="text" class="form-control" placeholder="HH:MM">
+                <input id="finish_time" name="finish_time" value="{{$group->finish_time}}" type="text" class="form-control" >
 
                 @error('finish_time')
                 <div class="alert alert-danger" role="alert">{{ $message }}</div>
@@ -81,13 +81,8 @@
 
             input.value = value;
 
-            // If the start_time input is full, move to the finish_time input
-            if (input.id === 'start_time' && value.length === 5) {
-                document.getElementById('finish_time').focus();
-            }
+       
         }
 
-        document.getElementById('start_time').addEventListener('input', timeInputHandler);
-        document.getElementById('finish_time').addEventListener('input', timeInputHandler);
     </script>
 @endsection

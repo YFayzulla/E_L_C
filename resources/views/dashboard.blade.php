@@ -73,7 +73,7 @@
                                                         @endif
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $teacher->name }}</h6>
+                                                        <h6 class="mb-0 text-truncate">{{ $teacher->name }}</h6>
                                                         <small class="text-muted">{{ $teacher->percent }}%</small>
                                                     </div>
                                                 </div>
@@ -97,21 +97,21 @@
 
             <!-- Side Cards -->
             <div class="col-lg-4 col-12">
-                <!-- Profit Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="m-0">Total Profit</h5>
-                    </div>
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <div class="avatar avatar-lg bg-label-info p-3 mb-3 rounded-circle">
-                            <span class="avatar-content text-info">
-                                <i class="bx bx-line-chart bx-lg"></i>
-                            </span>
-                        </div>
-                        <h4 class="mb-0">{{ number_format($profit, 0, '.', ' ') }} UZS</h4>
-                        <small class="text-muted">As of {{ today()->format('d M Y') }}</small>
-                    </div>
-                </div>
+{{--                <!-- Profit Card -->--}}
+{{--                <div class="card mb-4">--}}
+{{--                    <div class="card-header">--}}
+{{--                        <h5 class="m-0">Total Profit</h5>--}}
+{{--                    </div>--}}
+{{--                    <div class="card-body d-flex flex-column justify-content-center align-items-center">--}}
+{{--                        <div class="avatar avatar-lg bg-label-info p-3 mb-3 rounded-circle">--}}
+{{--                            <span class="avatar-content text-info">--}}
+{{--                                <i class="bx bx-line-chart bx-lg"></i>--}}
+{{--                            </span>--}}
+{{--                        </div>--}}
+{{--                        <h4 class="mb-0">{{ number_format($profit, 0, '.', ' ') }} UZS</h4>--}}
+{{--                        <small class="text-muted">As of {{ today()->format('d M Y') }}</small>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
 
                 <!-- Absences Card -->
                 <div class="card">

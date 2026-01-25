@@ -104,6 +104,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('student', StudentController::class)->except(['show']);
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
 
+    // --- STUDENT EXPORT ROUTES ---
+    Route::get('student/{id}/export', [StudentController::class, 'exportStudent'])->name('student.export');
+    Route::get('students/export/all', [StudentController::class, 'exportAllStudents'])->name('students.export.all');
+
     Route::resource('dept', DeptStudentController::class);
     Route::get('payment-receipt/{paymentId}', [DeptStudentController::class, 'showReceipt'])->name('payment.receipt');
     Route::get('refresh/{id}/update', [RefreshController::class, 'update'])->name('refresh.update');

@@ -16,7 +16,8 @@
 
                     <div class="mb-3">
                         <label for="name" class="form-label text-dark">Full Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}" class="form-control" required>
+                        <input id="name" name="name" type="text" value="{{ old('name') }}" class="form-control"
+                               required>
                         @error('name')
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
@@ -36,7 +37,8 @@
 
                     <div class="mb-3">
                         <label for="group_id" class="form-label text-dark">Group</label>
-                        <select id="group_id" name="group_id[]" class="form-select choices" multiple required data-placeholder="Select groups">
+                        <select id="group_id" name="group_id[]" class="form-select choices" multiple required
+                                data-placeholder="Select groups">
                             <option value="">-- Select Groups --</option>
                             @foreach($groups as $group)
                                 <option value="{{ $group->id }}"
@@ -53,7 +55,6 @@
                     <div class="mb-3">
                         <label for="should_pay" class="form-label text-dark">Monthly Payment</label>
                         <input id="should_pay" name="should_pay" type="text"
-                               value="{{ number_format(old('should_pay', 500000), 0, ' ', ' ') }}"
                                class="form-control" required>
                         @error('should_pay')
                         <div class="text-danger mt-1">{{ $message }}</div>
@@ -66,18 +67,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="parents_tel" class="form-label text-dark">Parents Phone <span class="text-muted">(not necessary)</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">+998</span>
-                            <input type="tel" id="parents_tel" name="parents_tel" maxlength="9" placeholder="912345678"
-                                   value="{{ old('parents_tel') }}" class="form-control">
-                        </div>
-                        @error('parents_tel')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
                         <label for="parents_name" class="form-label text-dark">Parents Name <span class="text-muted">(not necessary)</span></label>
                         <input id="parents_name" name="parents_name" type="text" value="{{ old('parents_name') }}"
                                class="form-control">
@@ -85,9 +74,21 @@
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
                     </div>
+                    <div class="mb-3">
+                        <label for="parents_tel" class="form-label text-dark">Parents Phone <span class="text-muted">(not necessary)</span></label>
+                        <div class="input-group">
+                            <input type="text" id="parents_tel" name="parents_tel" " placeholder="912345678"
+                            value="{{ old('parents_tel') }}" class="form-control">
+                        </div>
+                        @error('parents_tel')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
 
                     <div class="mb-3">
-                        <label for="photo" class="form-label text-dark">Photo <span class="text-muted">(not necessary)</span></label>
+                        <label for="photo" class="form-label text-dark">Photo <span
+                                    class="text-muted">(not necessary)</span></label>
                         <input id="photo" name="photo" type="file" class="form-control">
                         @error('photo')
                         <div class="text-danger mt-1">{{ $message }}</div>
@@ -95,16 +96,18 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="passport" class="form-label text-dark">Passport <span class="text-muted">(not necessary)</span></label>
-                        <input id="passport" name="passport" type="text" value="{{ old('passport') }}" class="form-control">
-                        @error('passport')
+                        <label for="birth_date" class="form-label text-dark">Birth Date <span class="text-muted">(not necessary)</span></label>
+                        <input id="birth_date" name="birth_date" type="date" value="{{ old('birth_date') }}"
+                               class="form-control">
+                        @error('birth_date')
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="mb-3 md:col-span-2">
                         <label for="location" class="form-label text-dark">Location <span class="text-muted">(not necessary)</span></label>
-                        <input id="location" name="location" type="text" value="{{ old('location') }}" class="form-control">
+                        <input id="location" name="location" type="text" value="{{ old('location') }}"
+                               class="form-control">
                         @error('location')
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
@@ -145,7 +148,7 @@
             shouldPayInput.form.addEventListener('submit', function () {
                 shouldPayInput.value = shouldPayInput.value.replace(/\s/g, '');
             });
-            
+
             // Note: Automatic payment update based on selection is tricky with multi-select.
             // We'll leave it manual or default for now, or you can implement logic to sum payments or pick the highest.
             // For simplicity and to avoid confusion with multiple groups, we won't auto-update payment here

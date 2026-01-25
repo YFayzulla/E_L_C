@@ -90,10 +90,10 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="passport" class="form-label text-dark">Passport <span class="text-muted">(not necessary)</span></label>
-                        <input id="passport" name="passport" value="{{ old('passport', $teacher->passport) }}" type="text"
+                        <label for="birth_date" class="form-label text-dark">Birth Date <span class="text-muted">(not necessary)</span></label>
+                        <input id="birth_date" name="birth_date" value="{{ old('birth_date', $teacher->birth_date) }}" type="date"
                                class="form-control">
-                        @error('passport')
+                        @error('birth_date')
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror
                     </div>

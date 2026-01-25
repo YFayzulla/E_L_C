@@ -30,14 +30,17 @@ class UpdateRequest extends FormRequest
                 'required', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('student')),
             ],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'passport' => [
-                'nullable', 'string', 'regex:/^[A-Z]{2}\d{7}$/', Rule::unique('users', 'passport')->ignore($this->route('student'))
+            'birth_date' => [
+                'nullable', 'date'
+            ],
+            'date_born' => [
+                'nullable', 'date'
             ],
             'group_id' => 'required|array',
             'group_id.*' => 'exists:groups,id',
             'parents_name' => 'nullable|string|max:255',
             'parents_tel' => [
-                'nullable', 'digits:9', Rule::unique('users', 'parents_tel')->ignore($this->route('student')),
+                'nullable',
             ],
             'location' => 'nullable|string|max:255',
             'should_pay' => 'nullable|numeric|min:0',

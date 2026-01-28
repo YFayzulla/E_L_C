@@ -46,6 +46,7 @@
                         @endforelse
                     </table>
                 </div>
+
             </div>
             <p>Sum in date: {{$sum}} </p>
         </div>

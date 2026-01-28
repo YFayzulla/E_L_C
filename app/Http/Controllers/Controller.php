@@ -134,6 +134,7 @@ class Controller extends BaseController
             $start = $request->start_date;
             $end = $request->end_date;
 
+
             if ($start && $end) {
                 // Case: Both dates selected -> Get the range
                 $query->whereBetween('date', [
@@ -150,7 +151,9 @@ class Controller extends BaseController
             }
 
             // Get results with pagination to avoid memory issues
-            $historyPayments = $query->latest('date')->get()->appends($request->all());
+            $historyPayments = $query
+                ->latest('date')
+                ->get();
 
             return view('admin.index', [
                 'historyPayments' => $historyPayments,

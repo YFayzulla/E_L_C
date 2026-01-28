@@ -83,9 +83,8 @@
                     <div class="mb-3">
                         <label for="parents_tel" class="form-label text-dark">Parents Phone <span class="text-muted">(not necessary)</span></label>
                         <div class="input-group">
-                            <span class="input-group-text">+998</span>
                             <input type="text" id="parents_tel" name="parents_tel"
-                                   value="{{ old('parents_tel', substr($student->parents_tel, -9)) }}"
+                                   value="{{ old('parents_tel', $student->parents_tel,) }}"
                                    class="form-control">
                         </div>
                         @error('parents_tel')

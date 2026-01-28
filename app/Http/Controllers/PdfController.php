@@ -40,7 +40,7 @@ class PdfController extends Controller
             if ($startDate && $endDate) {
                 $query->whereBetween('date', [$startDate->startOfDay(), $endDate->endOfDay()]);
             } elseif ($startDate) {
-                $query->whereDate('date', $startDate);
+                $query->where('date', '>=', $startDate->startOfDay());
             } elseif ($endDate) {
                 $query->whereDate('date', $endDate);
             }

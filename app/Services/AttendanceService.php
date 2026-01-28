@@ -17,7 +17,7 @@ class AttendanceService
         list($year, $month) = explode('-', $date);
 
         // 1. Get all students in the group (UPDATED for Many-to-Many)
-        $students = User::role('student')
+        $students = User::role('student')->orderby('name')
             ->whereHas('groups', function ($query) use ($group) {
                 $query->where('groups.id', $group->id);
             })

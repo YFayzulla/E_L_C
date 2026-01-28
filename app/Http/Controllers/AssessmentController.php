@@ -30,7 +30,7 @@ class AssessmentController extends Controller
             } else {
                 // Teacher sees only their groups
                 $groups = GroupTeacher::where('teacher_id', $user->id)
-                    ->with('group')
+                    ->with('group')->orderby('name')
                     ->get(); // Added pagination
                 return view('teacher.assessment.index', compact('groups'));
             }

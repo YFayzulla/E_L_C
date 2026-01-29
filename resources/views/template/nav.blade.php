@@ -23,7 +23,35 @@
             </div>
         </div>
         <!-- /Search -->
+        <!-- Search by date -->
+        <div class="d-none d-md-block">
+            <form action="{{route('student.search')}}" method="post">
+                @csrf
+                <div class="navbar-nav align-items-center">
+                    <div class="nav-item d-flex align-items-center">
+                        <input
+                                type="date"
+                                class="form-control border-0 shadow-none"
+                                placeholder="Start Date"
+                                name="start_date"
+                                aria-label="Start Date"
+                        />
+                    </div>
 
+                    <div class="nav-item d-flex align-items-center">
+                        <input
+                                type="date"
+                                class="form-control border-0 shadow-none"
+                                placeholder="End Date"
+                                name="end_date"
+                                aria-label="End Date"
+                        />
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-dark">Search</button>
+                </div>
+            </form>
+        </div>
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             <!-- Place this tag where you want the button to render. -->
             <!-- User -->

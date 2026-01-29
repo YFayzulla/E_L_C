@@ -26,7 +26,7 @@
                             <th>type</th>
                             <th>date</th>
                         </tr>
-                        @forelse($users as $student)
+                        @forelse($historyPayments as $student)
                             <tr>
                                 <th>{{$loop->index+1}}</th>
                                 <th>{{$student->name}}</th>

@@ -42,7 +42,7 @@ class Controller extends BaseController
                 // Optimallashtirilgan so'rovlar:
                 // Select() orqali faqat kerakli ustunlarni olamiz (xotirani tejash uchun)
                 $teachers = User::role('user') // Changed from 'user' to 'teacher'
-                    ->get();
+                ->get();
 
                 // get()->count() emas, to'g'ridan-to'g'ri count() ishlatamiz
                 $numberOfStudents = User::role('student')->count();
@@ -123,38 +123,44 @@ class Controller extends BaseController
      */
     public function search(Request $request)
     {
-        // Validatsiya: Sanalar to'g'ri formatda ekanligini tekshiramiz
         $request->validate([
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
         ]);
 
         try {
-            $startDate = $request->start_date ? Carbon::parse($request->start_date)->startOfDay() : null;
-            $endDate = $request->end_date ? Carbon::parse($request->end_date)->endOfDay() : null;
-
             $query = HistoryPayments::query();
 
-            if ($startDate && $endDate) {
-                $query->whereBetween('date', [$startDate, $endDate]); // Yoki created_at bo'lsa o'sha ustun
-            } elseif ($startDate) {
-                $query->whereDate('date', '>=', $startDate);
-            } elseif ($endDate) {
-                $query->whereDate('date', '<=', $endDate);
+            $start = $request->start_date;
+            $end = $request->end_date;
+
+            if ($start && $end) {
+                // Case: Both dates selected -> Get the range
+                $query->whereBetween('date', [
+                    Carbon::parse($start)->startOfDay(),
+                    Carbon::parse($end)->endOfDay()
+                ]);
+            } elseif ($start) {
+                // Case: Only start_date -> From that day until now
+                $query->where('date', '>=', Carbon::parse($start)->startOfDay());
+            } elseif ($end) {
+                // Case: Only end_date -> Exactly that one day only
+                // whereDate ignores the time and matches only the Y-m-d
+                $query->whereDate('date', Carbon::parse($end)->toDateString());
             }
 
-            // Natijalarni olish (Pagination qo'shish tavsiya etiladi agar ma'lumot ko'p bo'lsa)
-            $historyPayments = $query->latest()->get();
+            // Get results with pagination to avoid memory issues
+            $historyPayments = $query->latest('date')->paginate(50)->appends($request->all());
 
             return view('admin.index', [
                 'historyPayments' => $historyPayments,
-                'start_date' => $startDate ? $startDate->toDateString() : null,
-                'end_date' => $endDate ? $endDate->toDateString() : null,
+                'start_date' => $start,
+                'end_date' => $end,
             ]);
 
         } catch (\Exception $e) {
             Log::error('Search error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Qidiruv vaqtida xatolik yuz berdi.');
+            return redirect()->back()->with('error', 'Xatolik: ' . $e->getMessage());
         }
     }
 }

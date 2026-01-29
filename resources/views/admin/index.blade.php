@@ -11,7 +11,7 @@
                 <input type="hidden" name="startDate" value="{{$start_date}}">
                 <input type="hidden" name="endDate" value="{{$end_date}}">
 
-                <button class="btn btn-danger float-right m-2" > Report </button>
+                <button class="btn btn-danger float-right m-2"> Report</button>
                 @endrole
             </form>
 
@@ -40,7 +40,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">No payment records found for the selected period.</td>
+                                <td colspan="6" class="text-center">No payment records found for the selected period.
+                                </td>
                             </tr>
                         @endforelse
                     </table>

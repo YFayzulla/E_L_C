@@ -150,7 +150,7 @@ class Controller extends BaseController
             }
 
             // Get results with pagination to avoid memory issues
-            $historyPayments = $query->latest('date')->paginate(50)->appends($request->all());
+            $historyPayments = $query->latest('date')->get()->appends($request->all());
 
             return view('admin.index', [
                 'historyPayments' => $historyPayments,

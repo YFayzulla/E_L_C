@@ -13,6 +13,7 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Phone</th>
                     <th>Group</th>
                     <th>payment</th>
                     <th>Status</th>
@@ -24,6 +25,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td><strong>{{ $student->name }}</strong></td>
+                        <td><strong>{{ $student->phone }}</strong></td>
                         <td>{{ $student->groups->isNotEmpty() ? $student->groups->pluck('name')->implode(', ') : 'No group' }}</td>
                         <th>{{$student->should_pay}}</th>
                         <td>

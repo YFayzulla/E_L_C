@@ -82,6 +82,8 @@ class DeptStudentController extends Controller
         $paymentHistoryId = null;
 
         DB::transaction(function () use ($deptStudent, $user, $cleanPayment, $monthlyDept, $paidDate, $request, &$paymentHistoryId) {
+            $deptStudent->status_month = $deptStudent->status_month ?? 0;
+            $user->status = $user->status ?? 0;
             $remainingPayment = $cleanPayment;
 
             if ($deptStudent->payed > 0) {

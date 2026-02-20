@@ -80,17 +80,24 @@ class StudentController extends Controller
                 'parents_tel' => $request->parents_tel,
                 'location' => $request->location,
                 'photo' => $uploadedFilePath,
-                'should_pay' => (int)str_replace(' ', '', $request->should_pay),
                 'description' => $request->description,
             ]);
 
             $user->assignRole('student');
 
             $groupIds = $request->group_id; // This is now an array
-            $user->groups()->attach($groupIds);
 
+            // Build attach array with per-group payments (pivot `payment`).
+            $submittedPayments = $request->input('group_payment', []);
             $groups = Group::whereIn('id', $groupIds)->get();
+            $attachData = [];
+            $sumPayments = 0;
             foreach ($groups as $group) {
+                $raw = $submittedPayments[$group->id] ?? $group->monthly_payment;
+                $paymentValue = (int)str_replace([' ', ','], '', $raw);
+                $attachData[$group->id] = ['payment' => $paymentValue];
+                $sumPayments += $paymentValue;
+
                 StudentInformation::create([
                     'user_id' => $user->id,
                     'group_id' => $group->id,
@@ -98,10 +105,16 @@ class StudentController extends Controller
                 ]);
             }
 
+            $user->groups()->attach($attachData);
+
+            // Set user's should_pay to the sum of group payments (role preserved but no UI input).
+            $user->should_pay = $sumPayments;
+            $user->save();
+
             DeptStudent::create([
                 'user_id' => $user->id,
                 'payed' => 0,
-                'dept' => (int)str_replace(' ', '', $request->should_pay),
+                'dept' => $sumPayments,
                 'status_month' => 0
             ]);
 
@@ -188,7 +201,6 @@ class StudentController extends Controller
                 'parents_name' => $request->parents_name,
                 'parents_tel' => $request->parents_tel,
                 'location' => $request->location,
-                'should_pay' => (int)str_replace(' ', '', $request->should_pay),
                 'photo' => $newPhotoPath,
                 'description' => $request->description,
             ];
@@ -202,7 +214,20 @@ class StudentController extends Controller
             $newGroupIds = $request->group_id; // Array of group IDs
             $currentGroupIds = $student->groups->pluck('id')->toArray();
 
-            $student->groups()->sync($newGroupIds);
+            // Prepare sync data including pivot payments
+            $submittedPayments = $request->input('group_payment', []);
+            $groupsForSync = Group::whereIn('id', $newGroupIds)->get();
+            $syncData = [];
+            $sumPayments = 0;
+            foreach ($groupsForSync as $group) {
+                $raw = $submittedPayments[$group->id] ?? $group->monthly_payment;
+                $paymentValue = (int)str_replace([' ', ','], '', $raw);
+                $syncData[$group->id] = ['payment' => $paymentValue];
+                $sumPayments += $paymentValue;
+            }
+
+
+            $student->groups()->sync($syncData);
 
             $addedGroups = array_diff($newGroupIds, $currentGroupIds);
             $groups = Group::whereIn('id', $addedGroups)->get();
@@ -214,9 +239,15 @@ class StudentController extends Controller
                 ]);
             }
 
+            // Update user's should_pay to the sum of group payments
+            $student->update([
+                'should_pay' => $sumPayments,
+            ]);
+
+            // Update or create DeptStudent record with new dept sum
             $student->deptStudent()->updateOrCreate(
                 ['user_id' => $student->id],
-                ['dept' => (int)str_replace(' ', '', $request->should_pay)]
+                ['dept' => $sumPayments]
             );
 
             DB::commit();

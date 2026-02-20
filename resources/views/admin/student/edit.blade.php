@@ -54,15 +54,11 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label for="should_pay" class="form-label text-dark">Monthly Payment</label>
-                        <input id="should_pay" name="should_pay" type="text"
-                               value="{{ number_format(old('should_pay', $student->should_pay), 0, ' ', ' ') }}"
-                               class="form-control" required>
-                        @error('should_pay')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
+                    <div id="group_payments_container" class="mb-3 md:col-span-2" style="display:block">
+                        {{-- Per-group payment inputs will be injected here by JS --}}
                     </div>
+
+                    {{-- should_pay removed: per-group payments are used instead --}}
 
                     {{-- Additional Information --}}
                     <div class="md:col-span-2">
@@ -143,21 +139,63 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const shouldPayInput = document.getElementById('should_pay');
+            const groupSelect = document.getElementById('group_id');
+            const paymentsContainer = document.getElementById('group_payments_container');
 
             function formatNumberWithSpaces(value) {
                 if (!value) return '';
                 return value.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
             }
 
-            shouldPayInput.addEventListener('input', function () {
-                const rawValue = this.value.replace(/\s/g, '');
-                this.value = formatNumberWithSpaces(rawValue);
-            });
+            // Strip spaces from group_payment inputs before submit
+            const formEl = document.querySelector('form[action="{{ route('student.update', $student->id) }}"]');
+            if (formEl) {
+                formEl.addEventListener('submit', function () {
+                    const gpInputs = paymentsContainer.querySelectorAll('input[name^="group_payment"]');
+                    gpInputs.forEach(i => i.value = i.value.replace(/\s/g, ''));
+                });
+            }
 
-            shouldPayInput.form.addEventListener('submit', function () {
-                shouldPayInput.value = shouldPayInput.value.replace(/\s/g, '');
-            });
+            // Build per-group payment inputs when groups are selected.
+            function renderGroupPayments() {
+                const selected = Array.from(groupSelect.selectedOptions).filter(o => o.value);
+                paymentsContainer.innerHTML = '';
+
+                selected.forEach(opt => {
+                    const gid = opt.value;
+                    const name = opt.textContent.trim();
+                    const defaultPayment = opt.dataset.payment || '';
+                    const inputName = `group_payment[${gid}]`;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'mb-2';
+
+                    const label = document.createElement('label');
+                    label.className = 'form-label text-dark';
+                    label.textContent = `${name} payment`;
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = inputName;
+                    // Prefill from old input, or pivot payment if available, or group's default
+                    const existingPayments = {!! json_encode(old('group_payment', $student->groups->pluck('pivot.payment', 'id')->toArray())) !!};
+                    input.value = (existingPayments && existingPayments[gid]) ? formatNumberWithSpaces(existingPayments[gid]) : formatNumberWithSpaces(defaultPayment);
+                    input.className = 'form-control group-payment-input';
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(input);
+                    paymentsContainer.appendChild(wrapper);
+
+                    input.addEventListener('input', function () {
+                        const rawVal = this.value.replace(/\s/g, '');
+                        this.value = formatNumberWithSpaces(rawVal);
+                    });
+                });
+            }
+
+            // Initial render
+            renderGroupPayments();
+            groupSelect.addEventListener('change', renderGroupPayments);
         });
     </script>
 

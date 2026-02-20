@@ -34,10 +34,12 @@ class StoreRequest extends FormRequest
             'parents_name' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'should_pay' => 'nullable|numeric|min:0',
+            
             'description' => 'nullable|string',
             'group_id' => 'required|array',
             'group_id.*' => 'exists:groups,id',
+            'group_payment' => 'nullable|array',
+            'group_payment.*' => 'nullable|numeric|min:0',
         ];
     }
 

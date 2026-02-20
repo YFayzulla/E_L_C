@@ -38,12 +38,14 @@ class UpdateRequest extends FormRequest
             ],
             'group_id' => 'required|array',
             'group_id.*' => 'exists:groups,id',
+            'group_payment' => 'nullable|array',
+            'group_payment.*' => 'nullable|numeric|min:0',
             'parents_name' => 'nullable|string|max:255',
             'parents_tel' => [
                 'nullable',
             ],
             'location' => 'nullable|string|max:255',
-            'should_pay' => 'nullable|numeric|min:0',
+            
             'description' => 'nullable|string',
         ];
     }

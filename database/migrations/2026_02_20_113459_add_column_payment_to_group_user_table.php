@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('group_user', function (Blueprint $table) {
-                $table->st('payment')->nullable()->after('user_id');
+                $table->integer('payment')->nullable()->after('user_id');
         });
     }
 

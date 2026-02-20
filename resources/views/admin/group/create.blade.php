@@ -53,31 +53,5 @@
             let input = document.getElementById('monthly_payment');
             input.value = input.value.replace(/\s+/g, '');
         }
-
-        // function timeInputHandler(e) {
-        //     let input = e.target;
-        //     let value = input.value;
-        //
-        //     // Basic formatting: allow only numbers, add colon, limit length
-        //     value = value.replace(/[^0-9:]/g, '').replace(/(\d{2})(\d)/, '$1:$2').slice(0, 5);
-        //
-        //     // Validate hour part
-        //     if (value.length >= 2) {
-        //         let hour = value.slice(0, 2);
-        //         if (parseInt(hour, 10) > 23) {
-        //             value = '23' + value.slice(2);
-        //         }
-        //     }
-        //     // Validate minute part
-        //     if (value.length === 5) {
-        //         let minute = value.slice(3, 5);
-        //         if (parseInt(minute, 10) > 59) {
-        //             value = value.slice(0, 3) + '59';
-        //         }
-        //     }
-        //
-        //     input.value = value;
-        //
-        // }
     </script>
 @endsection

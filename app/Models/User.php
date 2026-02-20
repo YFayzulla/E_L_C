@@ -41,19 +41,19 @@ class User extends Authenticatable
 
     public function teacherPayment()
     {
-        // Get all groups assigned to this teacher
-        $groups = $this->teacherGroups()->with('students')->get();
+        // Sum payments from the pivot `group_user.payment` for each group this teacher teaches.
+        $groupIds = $this->teacherGroups()->pluck('groups.id')->toArray();
 
-        $totalPayment = 0;
-
-        foreach ($groups as $group) {
-            // For each group, sum the 'should_pay' of all students in that group
-            $groupTotal = $group->students->sum('should_pay');
-            $totalPayment += $groupTotal;
+        if (empty($groupIds)) {
+            return 0;
         }
 
-        // Calculate the teacher's share based on their percentage
-        return $totalPayment * $this->percent / 100;
+        // Use DB to sum payments from pivot table for these groups
+        $groupTotal = \Illuminate\Support\Facades\DB::table('group_user')
+            ->whereIn('group_id', $groupIds)
+            ->sum('payment');
+
+        return ($groupTotal ?: 0) * ($this->percent / 100);
     }
 
     public function groups(): BelongsToMany

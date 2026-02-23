@@ -100,7 +100,7 @@
                     <div class="mb-3">
                         <label for="birth_date" class="form-label text-dark">Birth Date <span class="text-muted">(not necessary)</span></label>
                         <input id="birth_date" name="birth_date" type="date"
-                               value="{{ old('birth_date', $student->birth_date) }}" class="form-control">
+                               value="{{ old('birth_date', $student->date_born) }}" class="form-control">
                         @error('birth_date')
                         <div class="text-danger mt-1">{{ $message }}</div>
                         @enderror

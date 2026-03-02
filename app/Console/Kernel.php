@@ -1,4 +1,4 @@
-<?php
+`<?php
 
 namespace App\Console;
 
@@ -15,8 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-
-        $schedule->command('user:status:update')->monthlyOn(3, '07:00');
+        $schedule->command('user:status:update')
+             ->monthlyOn(1, '07:00')
+             ->timezone('Asia/Tashkent');
 
     }
 
@@ -33,3 +34,4 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
+`

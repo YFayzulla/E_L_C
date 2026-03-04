@@ -15,8 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-
-        $schedule->command('user:status:update')->monthlyOn(3, '07:00');
+        $schedule->command('user:status:update')
+             ->monthlyOn(1, '07:00')
+             ->timezone('Asia/Tashkent');
 
     }
 

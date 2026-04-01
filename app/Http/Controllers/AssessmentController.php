@@ -180,11 +180,18 @@ class AssessmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack(); // Xatolik bo'lsa, barcha o'zgarishlarni bekor qilamiz
-            Log::error('AssessmentController@update error: ' . $e->getMessage());
+            
+            // Xatolik haqida batafsil ma'lumotni logga yozish
+            Log::error('AssessmentController@update error: ' . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'group_id' => $id,
+                'input' => $request->all(),
+                'exception' => $e
+            ]);
 
             return redirect()->back()
                 ->withInput() // Kiritilgan ma'lumotlar o'chib ketmasligi uchun
-                ->with('error', 'Tizimda xatolik yuz berdi. Iltimos qaytadan urining.');
+                ->with('error', 'Tizimda xatolik yuz berdi: ' . $e->getMessage());
         }
     }
 }

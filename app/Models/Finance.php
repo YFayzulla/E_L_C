@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Finance extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = [

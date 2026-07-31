@@ -22,11 +22,12 @@ class GroupSeeder extends Seeder
             ['description' => 'This is the waiting room for new members.']
         );
 
-        if ($group->wasRecentlyCreated && ! $group->isWaitingRoom()) {
-            $this->command?->warn(
-                "Diqqat: Kutish zali id = {$group->id}, kutilgani "
-                . Group::waitingRoomId() . '. Group::waitingRoomId() ni moslang.'
-            );
+        // The centre points at its own waiting room; there is no magic id any
+        // more, so the group just has to be registered once.
+        $centre = \App\Models\Centre::current();
+
+        if ($centre !== null && $centre->waiting_room_group_id !== $group->id) {
+            $centre->forceFill(['waiting_room_group_id' => $group->id])->save();
         }
 
         $this->command?->info(

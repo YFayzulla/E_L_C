@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DeptStudent extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
     protected $fillable=['user_id','payed','should_pay','dept','status_month','date'];
 

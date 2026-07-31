@@ -13,21 +13,24 @@ use Throwable;
 
 class Group extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     /**
      * Kutish zali — the bucket for students not yet in a real group.
      *
-     * Historically this was the literal id 1, hardcoded in a dozen places. It
-     * is a lookup now because each centre needs its own waiting room, and a
-     * single installation-wide id cannot express that. Today it still answers
-     * 1; the per-centre resolution lands with the tenancy work.
+     * Historically this was the literal id 1, hardcoded in a dozen places.
+     * Each centre needs its own, so it is a lookup — and a foreign key on
+     * `centres` rather than a flag on `groups`, because "exactly one per
+     * centre" is unique by construction that way and cannot be expressed as a
+     * portable unique index on a boolean.
      *
      * Never compare against a bare 1 — always go through here.
      */
     public static function waitingRoomId(): ?int
     {
-        return 1;
+        return Centre::current()?->waiting_room_group_id;
     }
 
     public const STATUS_ACTIVE   = 0;   // faol
@@ -50,7 +53,8 @@ class Group extends Model
 
     public function students(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'group_user', 'group_id', 'user_id');
+        return $this->belongsToMany(User::class, 'group_user', 'group_id', 'user_id')
+            ->withPivotValue('centre_id', Centre::currentId());
     }
 
     public function room(): BelongsTo
@@ -60,7 +64,8 @@ class Group extends Model
 
     public function teachers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'group_teachers', 'group_id', 'teacher_id');
+        return $this->belongsToMany(User::class, 'group_teachers', 'group_id', 'teacher_id')
+            ->withPivotValue('centre_id', Centre::currentId());
     }
 
     public function scopeActive(Builder $query): Builder

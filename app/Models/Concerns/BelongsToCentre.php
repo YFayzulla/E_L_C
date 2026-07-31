@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Centre;
+use App\Tenancy\CentreBuilder;
 use App\Tenancy\CentreContext;
 use App\Tenancy\CentreReassignmentException;
 use App\Tenancy\CentreScope;
@@ -41,6 +42,15 @@ trait BelongsToCentre
                 throw new CentreReassignmentException(static::class, $model->getKey());
             }
         });
+    }
+
+    /**
+     * upsert() / insert() never fire model events, so the `creating` hook above
+     * cannot help them. This builder stamps those writes instead.
+     */
+    public function newEloquentBuilder($query): CentreBuilder
+    {
+        return new CentreBuilder($query);
     }
 
     public function getCentreKeyName(): string

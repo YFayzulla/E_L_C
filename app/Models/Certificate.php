@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
  */
 class Certificate extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = [

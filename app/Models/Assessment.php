@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assessment extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
 
     use HasFactory;
     protected $fillable=['user_id','get_mark','group','overall_result','for_what','rec_group','history_id'];

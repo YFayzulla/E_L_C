@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class LessonSkillGrade extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = [

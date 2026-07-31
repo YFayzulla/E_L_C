@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class StudentInformation extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = ['user_id', 'group_id', 'group', 'action'];

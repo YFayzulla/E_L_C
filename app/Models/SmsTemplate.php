@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
  */
 class SmsTemplate extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     public const EVENTS = [

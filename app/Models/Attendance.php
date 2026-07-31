@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = ['user_id', 'group_id', 'who_checked', 'status', 'lesson_id'];

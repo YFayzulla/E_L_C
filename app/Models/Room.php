@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class Room extends Model
 {
+    use \App\Models\Concerns\BelongsToCentre;
+
     use HasFactory;
 
     protected $fillable = ['room', 'teacher_id'];

@@ -30,6 +30,21 @@ return [
 
     'certificate_prefix' => env('CERTIFICATE_PREFIX', 'ALP'),
 
+    /*
+    |------------------------------------------------------------------
+    | Platform domain
+    |------------------------------------------------------------------
+    |
+    | Each centre lives on its own subdomain of this: alpha.domen.uz. The
+    | apex itself carries login, the centre picker and the super-admin area,
+    | and has no centre of its own.
+    |
+    */
+
+    'domain' => env('APP_DOMAIN', 'localhost'),
+
+    'scheme' => env('APP_SCHEME', 'http'),
+
     'sms_email'=> env('SMS_SERVICE_EMAIL'),
 
     'sms_password' => env('SMS_SERVICE_PASSWORD'),

@@ -72,7 +72,72 @@ class User extends Authenticatable implements MustVerifyEmail
             ->whereIn('group_id', $groupIds)
             ->sum('payment');
 
-        return ($groupTotal ?: 0) * ($this->percent / 100);
+        return ($groupTotal ?: 0) * ($this->percentHere() / 100);
+    }
+
+    /* ================================================== centre membership */
+
+    public function centres(): BelongsToMany
+    {
+        return $this->belongsToMany(Centre::class, 'centre_user')
+            ->withPivot(['status', 'percent', 'is_default', 'joined_at', 'left_at'])
+            ->withTimestamps();
+    }
+
+    public function activeCentres(): BelongsToMany
+    {
+        return $this->centres()->wherePivot('status', Centre::MEMBER_ACTIVE);
+    }
+
+    public function belongsToCentre(?int $centreId): bool
+    {
+        return $centreId !== null
+            && $this->centres()
+                ->whereKey($centreId)
+                ->wherePivot('status', Centre::MEMBER_ACTIVE)
+                ->exists();
+    }
+
+    /**
+     * This teacher's payout share AT THE CURRENT CENTRE.
+     *
+     * A teacher can work at two centres on different terms, so the share is a
+     * fact about the membership, not about the person. `users.percent` remains
+     * as the fallback for rows not yet migrated.
+     */
+    public function percentHere(): int
+    {
+        $centreId = Centre::currentId();
+
+        if ($centreId !== null) {
+            $pivot = $this->centres()->whereKey($centreId)->first()?->pivot;
+
+            if ($pivot?->percent !== null) {
+                return (int) $pivot->percent;
+            }
+        }
+
+        return (int) $this->percent;
+    }
+
+    /**
+     * Users of the current centre.
+     *
+     * `users` carries no centre_id — membership is many-to-many — so no global
+     * scope protects a bare User::find(). Anywhere an id arrives from a URL,
+     * go through here.
+     */
+    public function scopeInCurrentCentre(Builder $query): Builder
+    {
+        $centreId = Centre::currentId();
+
+        if ($centreId === null) {
+            return $query;
+        }
+
+        return $query->whereHas('centres', fn(Builder $q) => $q
+            ->whereKey($centreId)
+            ->where('centre_user.status', Centre::MEMBER_ACTIVE));
     }
 
     public function groups(): BelongsToMany
@@ -136,6 +201,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'study_status'      => 'integer',
         'graduated_at'      => 'date',
+        'is_super_admin'    => 'boolean',
     ];
 
     /*

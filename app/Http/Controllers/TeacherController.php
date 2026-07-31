@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Teacher\StoreRequest;
 use App\Http\Requests\Teacher\UpdateRequest;
+use App\Models\Centre;
 use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\LessonAndHistory;
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -143,7 +145,11 @@ class TeacherController extends Controller
             );
 
             $teacher = User::create($payload);
-            $teacher->assignRole('user');
+
+            // Membership and role go through the one writer that knows about
+            // Spatie teams; a bare assignRole() here would stamp whatever
+            // centre happened to be current, or none at all.
+            $this->attachToCurrentCentre($teacher, $request->input('percent'));
 
             if ($this->groupsWereSubmitted($request)) {
                 $teacher->teacherGroups()->sync($this->cleanGroupIds($request));
@@ -238,6 +244,8 @@ class TeacherController extends Controller
 
             $teacher->update($updateData);
 
+            $this->syncPercent($teacher, $request->input('percent'));
+
             // Multi-select hech narsa yubormasa, sync([]) BARCHA guruhni uzib yuboradi.
             if ($this->groupsWereSubmitted($request)) {
                 $teacher->teacherGroups()->sync($this->cleanGroupIds($request));
@@ -328,6 +336,46 @@ class TeacherController extends Controller
      *
      * @return array<string, mixed>
      */
+    /**
+     * Attach a freshly created teacher to the centre they were created in.
+     *
+     * Falls back to a bare assignRole() while no centre is resolved, which is
+     * the case until the tenant middleware is wired up.
+     */
+    private function attachToCurrentCentre(User $teacher, $percent): void
+    {
+        $centre = Centre::current();
+
+        if ($centre === null) {
+            $teacher->assignRole('user');
+
+            return;
+        }
+
+        app(CentreMembershipService::class)->attach($centre, $teacher, 'user', [
+            'percent' => $percent === null || $percent === '' ? null : (int) $percent,
+        ]);
+    }
+
+    /**
+     * The payout share belongs to the membership, not the person: the same
+     * teacher may work at another centre on different terms.
+     */
+    private function syncPercent(User $teacher, $percent): void
+    {
+        $centre = Centre::current();
+
+        if ($centre === null) {
+            return;   // users.percent already updated by the payload
+        }
+
+        app(CentreMembershipService::class)->setPercent(
+            $centre,
+            $teacher,
+            $percent === null || $percent === '' ? null : (int) $percent
+        );
+    }
+
     private function commonPayload(Request $request): array
     {
         $payload = [

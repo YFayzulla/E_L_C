@@ -18,6 +18,18 @@ return [
 
     'name' => env('APP_NAME', 'Speak Up'),
 
+    /*
+    |------------------------------------------------------------------
+    | Certificate serial prefix
+    |------------------------------------------------------------------
+    |
+    | Serials read ALP-2026-0001. The prefix identifies the issuing centre,
+    | so it must not be baked into the model.
+    |
+    */
+
+    'certificate_prefix' => env('CERTIFICATE_PREFIX', 'ALP'),
+
     'sms_email'=> env('SMS_SERVICE_EMAIL'),
 
     'sms_password' => env('SMS_SERVICE_PASSWORD'),

@@ -24,9 +24,6 @@ class StudentTransferController extends Controller
 {
     use AuthorizesGroupAccess;
 
-    /** Kutish zali — teachers must not park students there. */
-    private const WAITING_ROOM_ID = 1;
-
     public function __construct(private StudentGroupService $membership)
     {
     }
@@ -41,15 +38,17 @@ class StudentTransferController extends Controller
 
         try {
             $isAdmin = auth()->user()->hasRole('admin');
+            $waitingRoomId = Group::waitingRoomId();
 
             $targets = Group::query()
                 ->with('teachers:id,name')
                 ->withCount(['students as members_count'])
-                ->when(! $isAdmin, function ($query) {
+                ->when(! $isAdmin, function ($query) use ($waitingRoomId) {
                     $query->whereIn('id', $this->accessibleGroupIds())
-                        ->where('id', '!=', self::WAITING_ROOM_ID);
+                        ->where('id', '!=', $waitingRoomId);
                 })
-                ->orderByRaw("CASE WHEN id = " . self::WAITING_ROOM_ID . " THEN 1 ELSE 0 END, name")
+                // Kutish zali sorts last: it is a holding pen, not a destination.
+                ->orderByRaw('CASE WHEN id = ? THEN 1 ELSE 0 END, name', [$waitingRoomId])
                 ->get();
 
             $selectableIds = $targets->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -60,7 +59,7 @@ class StudentTransferController extends Controller
             // of being assigned to a real group.
             $lockedGroups = $model->groups->reject(
                 fn ($group) => in_array((int) $group->id, $selectableIds, true)
-                    || (int) $group->id === self::WAITING_ROOM_ID
+                    || (int) $group->id === $waitingRoomId
             );
 
             $currentIds = $model->groups->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -73,7 +72,7 @@ class StudentTransferController extends Controller
                 'lockedIds' => $lockedGroups->pluck('id')->map(fn ($id) => (int) $id)->all(),
                 'lockedGroups' => $lockedGroups,
                 'isAdmin' => $isAdmin,
-                'waitingRoomId' => self::WAITING_ROOM_ID,
+                'waitingRoomId' => $waitingRoomId,
             ]);
         } catch (\Exception $e) {
             Log::error('StudentTransferController@create error: ' . $e->getMessage());
@@ -95,7 +94,7 @@ class StudentTransferController extends Controller
 
         if (! $isAdmin) {
             abort_if(
-                in_array(self::WAITING_ROOM_ID, $targets, true),
+                in_array(Group::waitingRoomId(), $targets, true),
                 403,
                 'Kutish zaliga faqat administrator ko‘chira oladi.'
             );
@@ -111,7 +110,7 @@ class StudentTransferController extends Controller
             $preserved = array_diff(
                 $model->groups()->pluck('groups.id')->map(fn ($id) => (int) $id)->all(),
                 $accessible,
-                [self::WAITING_ROOM_ID]
+                [Group::waitingRoomId()]
             );
 
             $targets = array_values(array_unique(array_merge($targets, $preserved)));

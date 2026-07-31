@@ -21,7 +21,7 @@ class WaitersController extends Controller
             // OPTIMIZATSIYA: Faqat kerakli ustunlarni (id, name) olish.
             // View faylida guruhni tanlash (select option) uchun shu yetarli.
             $groups = Group::select('id', 'name', 'room_id')
-                ->where('id', '!=', 1)
+                ->teaching()
                 ->orderBy('room_id')
                 ->get();
 
@@ -34,7 +34,7 @@ class WaitersController extends Controller
                 ->where(function ($query) {
                     $query->whereDoesntHave('groups')
                           ->orWhereHas('groups', function ($q) {
-                              $q->where('groups.id', 1);
+                              $q->where('groups.id', \App\Models\Group::waitingRoomId());
                           });
                 })
                 ->select('id', 'name', 'phone', 'parents_tel', 'created_at', 'photo') // Viewga kerakli ustunlarni yozing

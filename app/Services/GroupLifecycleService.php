@@ -95,7 +95,7 @@ class GroupLifecycleService
     {
         return $student->groups
             ->reject(fn(Group $g) => (int) $g->id === $excludingGroupId
-                || (int) $g->id === Group::WAITING_ROOM_ID
+                || $g->isWaitingRoom()
                 || $g->isFinished())
             ->isNotEmpty();
     }

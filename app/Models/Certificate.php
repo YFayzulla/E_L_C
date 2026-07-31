@@ -64,13 +64,22 @@ class Certificate extends Model
     {
         $year = $year ?: (int) now()->format('Y');
 
-        $last = static::where('serial', 'like', "ALP-{$year}-%")
+        // The prefix is a per-centre identifier, not a constant of the product —
+        // two centres must not share a serial register.
+        $prefix = static::serialPrefix();
+
+        $last = static::where('serial', 'like', "{$prefix}-{$year}-%")
             ->orderByDesc('id')
             ->value('serial');
 
         $counter = $last ? ((int) Str::afterLast($last, '-')) + 1 : 1;
 
-        return sprintf('ALP-%d-%04d', $year, $counter);
+        return sprintf('%s-%d-%04d', $prefix, $year, $counter);
+    }
+
+    public static function serialPrefix(): string
+    {
+        return (string) config('app.certificate_prefix', 'ALP');
     }
 
     /** Filename offered to the browser on download. */

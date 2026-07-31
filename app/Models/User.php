@@ -179,7 +179,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isWaitingOnly(): bool
     {
         return ! $this->groups()
-            ->where('groups.id', '!=', Group::WAITING_ROOM_ID)
+            ->where('groups.id', '!=', Group::waitingRoomId())
             ->exists();
     }
 
@@ -191,7 +191,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 $q->whereNull('users.study_status')
                     ->orWhere('users.study_status', self::STUDY_ACTIVE);
             })
-            ->whereHas('groups', fn(Builder $g) => $g->where('groups.id', '!=', Group::WAITING_ROOM_ID));
+            ->whereHas('groups', fn(Builder $g) => $g->where('groups.id', '!=', Group::waitingRoomId()));
     }
 
     public function studentsGroup()

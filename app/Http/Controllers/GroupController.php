@@ -33,7 +33,7 @@ class GroupController extends Controller
                 ->all();
 
             $groups = Group::query()
-                ->where('id', '!=', 1) // 1 = Kutish zali (Waiting Room)
+                ->teaching()
                 ->with(['teachers:id,name', 'room:id,room'])
                 // Group::getStudentsCountAttribute() shadows `students_count`,
                 // so the count MUST be aliased or the view silently re-queries.

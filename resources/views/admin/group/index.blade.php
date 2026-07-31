@@ -113,7 +113,7 @@
                                     {{-- Yakunlash: guruh "tugagan" bo'ladi va boshqa faol
                                          guruhda o'qimayotgan talabalari "bitirgan" holatiga
                                          o'tadi (to'lovlar ro'yxatidan chiqadi). --}}
-                                    @if($group->id !== \App\Models\Group::WAITING_ROOM_ID)
+                                    @if(! $group->isWaitingRoom())
                                         @if($group->isFinished())
                                             <form action="{{ route('group.reopen', $group->id) }}" method="post"
                                                   onsubmit="return confirm('«{{ $group->name }}» qayta ochilsinmi? Shu guruh bilan bitirgan deb belgilangan talabalar yana faol bo‘ladi.');">

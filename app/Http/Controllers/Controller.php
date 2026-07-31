@@ -244,7 +244,7 @@ class Controller extends BaseController
             'week_max_income' => collect($week)->max('income') ?: 0,
             'week_max_marks'  => collect($week)->max(fn($d) => $d['absent'] + $d['late']) ?: 0,
             'teacher_panel'   => $teacherPanel,
-            'active_groups'   => Group::active()->where('id', '!=', Group::WAITING_ROOM_ID)->count(),
+            'active_groups'   => Group::active()->teaching()->count(),
             'finished_groups' => Group::finished()->count(),
             'graduates'       => User::role('student')->where('study_status', User::STUDY_GRADUATED)->count(),
         ];

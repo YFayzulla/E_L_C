@@ -8,14 +8,15 @@ use Tests\TestCase;
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * `/` is the dashboard, not a public landing page — a guest is sent to
+     * the login screen.
      *
      * @return void
      */
-    public function test_the_application_returns_a_successful_response()
+    public function test_the_root_url_redirects_a_guest_to_login()
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response->assertRedirect('/login');
     }
 }

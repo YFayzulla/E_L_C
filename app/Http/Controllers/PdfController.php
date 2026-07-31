@@ -120,7 +120,7 @@ class PdfController extends Controller
     public function group()
     {
         try {
-            $groups = Group::where('id', '!=', 1)
+            $groups = Group::teaching()
                 ->select('id', 'name', 'start_time', 'finish_time', 'monthly_payment')
                 ->orderBy('name')
                 ->get();

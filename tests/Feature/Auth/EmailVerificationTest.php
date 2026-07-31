@@ -43,7 +43,11 @@ class EmailVerificationTest extends TestCase
 
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(RouteServiceProvider::HOME.'?verified=1');
+
+        // The controller sends people to the dashboard with a flash message
+        // rather than Breeze's ?verified=1 query flag.
+        $response->assertRedirect(route('dashboard'));
+        $response->assertSessionHas('success');
     }
 
     public function test_email_is_not_verified_with_invalid_hash(): void

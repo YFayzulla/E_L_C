@@ -16,3 +16,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+# Test database (recreated by the suite)
+/database/testing.sqlite

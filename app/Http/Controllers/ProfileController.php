@@ -86,7 +86,14 @@ class ProfileController extends Controller
         DB::beginTransaction();
 
         try {
-            // Avval foydalanuvchini bazadan o'chiramiz
+            // Quyidagi Auth::logout() remember-token'ni yangilaydi, buni esa
+            // EloquentUserProvider::updateRememberToken() save() orqali qiladi.
+            // delete() dan keyin modelning `exists` bayrog'i false bo'ladi, ya'ni
+            // o'sha save() INSERT ga aylanadi va o'chirilgan hisobni eski id
+            // bilan qaytarib qo'yadi. Tokenni qator hali turganda tozalasak,
+            // logout() uni umuman yangilamaydi.
+            $user->forceFill(['remember_token' => null])->saveQuietly();
+
             // Agar User modelida "Cascading Delete" sozlanmagan bo'lsa,
             // unga bog'liq ma'lumotlarni shu yerda qo'lda o'chirish kerak bo'lishi mumkin.
             $user->delete();

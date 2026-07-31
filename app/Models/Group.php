@@ -15,8 +15,20 @@ class Group extends Model
 {
     use HasFactory;
 
-    /** Kutish zali — the magic bucket for students not yet in a real group. */
-    public const WAITING_ROOM_ID = 1;
+    /**
+     * Kutish zali — the bucket for students not yet in a real group.
+     *
+     * Historically this was the literal id 1, hardcoded in a dozen places. It
+     * is a lookup now because each centre needs its own waiting room, and a
+     * single installation-wide id cannot express that. Today it still answers
+     * 1; the per-centre resolution lands with the tenancy work.
+     *
+     * Never compare against a bare 1 — always go through here.
+     */
+    public static function waitingRoomId(): ?int
+    {
+        return 1;
+    }
 
     public const STATUS_ACTIVE   = 0;   // faol
     public const STATUS_FINISHED = 1;   // tugagan
@@ -68,7 +80,17 @@ class Group extends Model
 
     public function isWaitingRoom(): bool
     {
-        return (int) $this->id === self::WAITING_ROOM_ID;
+        $id = self::waitingRoomId();
+
+        return $id !== null && (int) $this->id === $id;
+    }
+
+    /** Everything except the waiting room — the real teaching groups. */
+    public function scopeTeaching(Builder $query): Builder
+    {
+        $id = self::waitingRoomId();
+
+        return $id === null ? $query : $query->where($query->getModel()->getTable() . '.id', '!=', $id);
     }
 
     public function statusLabel(): string

@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 /**
  * Kutish zali — guruhga hali biriktirilmagan talabalar shu yerda turadi.
  *
- * Uning id = 1 bo'lishi muhim: Group::WAITING_ROOM_ID shunga tayanadi, va
+ * Uning id = 1 bo'lishi muhim: Group::waitingRoomId() shunga tayanadi, va
  * to'lovlar ro'yxati hamda ko'chirish mantiqi shu id bo'yicha filtrlaydi.
  */
 class GroupSeeder extends Seeder
@@ -22,10 +22,10 @@ class GroupSeeder extends Seeder
             ['description' => 'This is the waiting room for new members.']
         );
 
-        if ($group->wasRecentlyCreated && (int) $group->id !== Group::WAITING_ROOM_ID) {
+        if ($group->wasRecentlyCreated && ! $group->isWaitingRoom()) {
             $this->command?->warn(
                 "Diqqat: Kutish zali id = {$group->id}, kutilgani "
-                . Group::WAITING_ROOM_ID . '. Group::WAITING_ROOM_ID ni moslang.'
+                . Group::waitingRoomId() . '. Group::waitingRoomId() ni moslang.'
             );
         }
 

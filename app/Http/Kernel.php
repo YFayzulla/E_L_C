@@ -30,16 +30,26 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            // FIRST, and before SubstituteBindings: route-model binding must
+            // resolve inside the centre context or `edit(Group $group)` would
+            // happily load another centre's group. Also before the `role:`
+            // middleware, which needs Spatie's team id already set.
+            \App\Http\Middleware\ResolveCentre::class,
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // LAST, because it needs the session guard. Applied to the whole
+            // group rather than to each route group in web.php so that a route
+            // added later cannot quietly miss it. It is a no-op for guests.
+            \App\Http\Middleware\EnsureCentreMember::class,
         ],
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \App\Http\Middleware\ResolveCentre::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -67,6 +77,13 @@ class Kernel extends HttpKernel
         // account that has no e-mail address, and it is inert until
         // REQUIRE_EMAIL_VERIFICATION=true. See config/grading.php.
         'verified.role' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+        // Tenancy. `centre.member` runs after `auth` and is what the shared
+        // session cookie is gated on: the cookie proves who you are on every
+        // subdomain, this decides whether you may be on this one.
+        'centre'        => \App\Http\Middleware\EnsureCentreResolved::class,
+        'centre.member' => \App\Http\Middleware\EnsureCentreMember::class,
+        'super-admin'   => \App\Http\Middleware\EnsureSuperAdmin::class,
+
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,

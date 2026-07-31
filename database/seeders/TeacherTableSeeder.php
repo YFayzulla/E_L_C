@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Centre;
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -34,9 +36,12 @@ class TeacherTableSeeder extends Seeder
                 ]
             );
 
-            if (! $teacher->hasRole('user')) {
-                $teacher->assignRole('user');
-            }
+            app(CentreMembershipService::class)->attach(
+                Centre::withoutGlobalScopes()->orderBy('id')->firstOrFail(),
+                $teacher,
+                $teacher->hasRole('user') ? null : 'user',
+                ['percent' => 40]   // busiz teacherPayment() doim 0 qaytaradi
+            );
 
             $this->command?->info(
                 ($teacher->wasRecentlyCreated ? "O'qituvchi yaratildi" : "O'qituvchi allaqachon bor")

@@ -34,7 +34,10 @@ Route::prefix('v1')->group(function () {
     ]))->name('api.ping');
 
     // ------------------------------------------------------------- protected
-    Route::middleware('auth:sanctum')->group(function () {
+    // `centre.member` cannot live in the `api` middleware group: Sanctum
+    // resolves the user in `auth:sanctum`, which is route middleware and
+    // therefore runs after the group.
+    Route::middleware(['auth:sanctum', 'centre.member'])->group(function () {
 
         Route::post('logout', [AuthController::class, 'logout'])->name('api.logout');
         Route::get('me', [AuthController::class, 'me'])->name('api.me');

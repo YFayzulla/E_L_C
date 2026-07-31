@@ -35,6 +35,45 @@ class UserFactory extends Factory
         ];
     }
 
+    /**
+     * A user made by the factory belongs to the installation, so attach them
+     * to a centre — otherwise EnsureCentreMember rejects them with a 403 and
+     * every feature test fails for a reason that has nothing to do with what
+     * it is testing.
+     *
+     * Membership only. Roles stay the test's business.
+     */
+    public function configure()
+    {
+        return $this->afterCreating(function (User $user) {
+            if ($this->skipCentre) {
+                return;
+            }
+
+            $centre = \App\Models\Centre::current()
+                ?? \App\Models\Centre::withoutGlobalScopes()->orderBy('id')->first();
+
+            if ($centre !== null && ! $user->centres()->whereKey($centre->id)->exists()) {
+                $user->centres()->attach($centre->id, [
+                    'status'     => \App\Models\Centre::MEMBER_ACTIVE,
+                    'joined_at'  => now(),
+                    'is_default' => true,
+                ]);
+            }
+        });
+    }
+
+    private bool $skipCentre = false;
+
+    /** For tests that need somebody who belongs to no centre at all. */
+    public function withoutCentre()
+    {
+        $clone = clone $this;
+        $clone->skipCentre = true;
+
+        return $clone;
+    }
+
     public function unverified()
     {
         return $this->state(fn(array $attributes) => [

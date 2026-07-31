@@ -45,6 +45,14 @@ return [
 
     'scheme' => env('APP_SCHEME', 'http'),
 
+    /*
+    | The centre to assume when the host names none. Set this to the first
+    | centre's slug during the rollout so the installation keeps working on
+    | the address it already had; clear it once real subdomains are in use.
+    */
+
+    'default_centre' => env('APP_DEFAULT_CENTRE'),
+
     'sms_email'=> env('SMS_SERVICE_EMAIL'),
 
     'sms_password' => env('SMS_SERVICE_PASSWORD'),

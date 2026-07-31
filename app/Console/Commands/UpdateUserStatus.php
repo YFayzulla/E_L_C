@@ -2,35 +2,34 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\RunsPerCentre;
+use App\Models\Centre;
 use App\Models\User;
 use Illuminate\Console\Command;
 
+/**
+ * Advances every student's paid-months counter by one month.
+ *
+ * `users.status` is a counter, not a state: a negative value means "owes N
+ * months", and every debt screen reads it. Scheduled monthly.
+ */
 class UpdateUserStatus extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'user:status:update';
+    use RunsPerCentre;
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Update user status';
+    protected $signature = 'user:status:update
+                            {--centre= : faqat shu markaz (slug)}';
 
-    /**
-     * Execute the console command.
-     *
-     * @return
-     */
+    protected $description = 'Har bir talabaning to‘langan oylar hisoblagichini bir oyga kamaytiradi';
+
     public function handle()
     {
-        // Decrement the status column for all users
-        User::role('student')->decrement('status');
-        $this->info('User status updated successfully.');
-//        return Command::SUCCESS;
+        return $this->eachCentre(function (Centre $centre) {
+            // Centre-scoped for free: with Spatie teams on, role() only matches
+            // assignments belonging to the current centre.
+            $affected = User::role('student')->decrement('status');
+
+            $this->info("  {$affected} ta talaba yangilandi.");
+        });
     }
 }

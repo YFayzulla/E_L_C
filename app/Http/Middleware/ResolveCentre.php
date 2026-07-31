@@ -54,12 +54,14 @@ class ResolveCentre
         $root = Str::lower((string) config('app.domain'));
 
         if ($host === $root || $host === 'www.' . $root) {
-            return null;
+            return $this->default();
         }
 
         if (! Str::endsWith($host, '.' . $root)) {
-            // A host we do not serve at all. Say nothing about why.
-            abort(404);
+            // Not a host we serve. On a single-centre installation this is the
+            // normal case — it is still running on whatever address it always
+            // had — so fall back before refusing.
+            return $this->default() ?? abort(404);
         }
 
         $slug = Str::beforeLast($host, '.' . $root);
@@ -91,5 +93,29 @@ class ResolveCentre
         );
 
         return $centre;
+    }
+
+    /**
+     * The centre to assume when the host names none.
+     *
+     * This is what makes the conversion invisible to an existing installation:
+     * it keeps running on the address it always had, and that address means
+     * centre #1. Set APP_DEFAULT_CENTRE to its slug for the rollout, then clear
+     * it once real subdomains are in use — with it empty, the apex becomes the
+     * login and centre-picker page it is meant to be.
+     */
+    private function default(): ?Centre
+    {
+        $slug = config('app.default_centre');
+
+        if (blank($slug)) {
+            return null;
+        }
+
+        return Cache::remember(
+            "centre.slug.{$slug}",
+            now()->addSeconds(60),
+            fn() => Centre::where('slug', $slug)->first()
+        );
     }
 }

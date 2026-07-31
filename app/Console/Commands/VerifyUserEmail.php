@@ -19,6 +19,8 @@ use Spatie\Permission\Exceptions\RoleDoesNotExist;
  */
 class VerifyUserEmail extends Command
 {
+    use \App\Console\Commands\Concerns\RunsPerCentre;
+
     /**
      * The name and signature of the console command.
      *
@@ -27,7 +29,8 @@ class VerifyUserEmail extends Command
     protected $signature = 'users:verify-email
                             {user? : Foydalanuvchi ID raqami yoki telefon raqami}
                             {--all : Pochta manzili bor barcha hisoblarni tasdiqlash}
-                            {--role= : Faqat shu rolga ega hisoblar (admin|user|student|parent)}';
+                            {--role= : Faqat shu rolga ega hisoblar (admin|user|student|parent)}
+                            {--centre= : faqat shu markaz (slug)}';
 
     /**
      * The console command description.
@@ -40,6 +43,12 @@ class VerifyUserEmail extends Command
      * Execute the console command.
      */
     public function handle(): int
+    {
+        // --role filters through Spatie, which needs a centre context.
+        return $this->eachCentre(fn() => $this->runForCentre());
+    }
+
+    private function runForCentre()
     {
         $identifier = $this->argument('user');
         $role = $this->option('role');

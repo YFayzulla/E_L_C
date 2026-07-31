@@ -14,13 +14,23 @@ use Illuminate\Console\Command;
  */
 class SmsCheck extends Command
 {
+    use \App\Console\Commands\Concerns\RunsPerCentre;
+
     protected $signature = 'sms:check
                             {--to= : Send a real test SMS to this number}
-                            {--message= : Text for the test SMS}';
+                            {--message= : Text for the test SMS}
+                            {--centre= : faqat shu markaz (slug)}';
 
     protected $description = 'Eskiz SMS sozlamalarini tekshirish';
 
     public function handle(MessageService $sms): int
+    {
+        // Credentials are per-centre, so "is SMS working?" has one answer per
+        // centre, not one for the installation.
+        return $this->eachCentre(fn() => $this->runForCentre($sms));
+    }
+
+    private function runForCentre(MessageService $sms): int
     {
         $this->newLine();
         $this->line('  <options=bold>Eskiz SMS — tekshiruv</>');

@@ -20,11 +20,14 @@ use Illuminate\Support\Str;
  */
 class SendSms extends Command
 {
+    use \App\Console\Commands\Concerns\RunsPerCentre;
+
     protected $signature = 'sms:debtors
                             {--template=payment-reminder : Slug of the SMS template to use}
                             {--to=ota,ona : Who receives it — ota, ona, vasiy, student}
                             {--dry : Show the recipients and the text, send nothing}
-                            {--force : Do not ask for confirmation}';
+                            {--force : Do not ask for confirmation}
+                            {--centre= : faqat shu markaz (slug)}';
 
     protected $description = "Qarzdor talabalarning ota-onasiga to'lov eslatmasi yuborish";
 
@@ -34,6 +37,14 @@ class SendSms extends Command
     }
 
     public function handle(): int
+    {
+        // Without a centre context Spatie answers "no roles", so the debtor
+        // query below would quietly find nobody and the command would report
+        // success having sent nothing.
+        return $this->eachCentre(fn() => $this->runForCentre());
+    }
+
+    private function runForCentre(): int
     {
         $status = $this->sms->status();
         $this->newLine();

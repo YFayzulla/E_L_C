@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Centre;
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -70,8 +72,15 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Without a role the account reaches the dashboard with no permissions.
-            $user->assignRole('student');
+            // The centre comes from the subdomain the form was served on.
+            // Without one there is nothing to be a student OF, and Spatie
+            // cannot record the role either: model_has_roles.centre_id is
+            // NOT NULL and part of the primary key.
+            $centre = Centre::current();
+
+            abort_if($centre === null, 404);
+
+            app(CentreMembershipService::class)->attach($centre, $user, 'student');
 
             DB::commit();
         } catch (\Exception $e) {

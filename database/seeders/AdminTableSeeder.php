@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Centre;
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -29,9 +31,13 @@ class AdminTableSeeder extends Seeder
                 ]
             );
 
-            if (! $admin->hasRole('admin')) {
-                $admin->assignRole('admin');
-            }
+            // Membership and role together, through the one writer that knows
+            // about Spatie teams.
+            app(CentreMembershipService::class)->attach(
+                Centre::withoutGlobalScopes()->orderBy('id')->firstOrFail(),
+                $admin,
+                $admin->hasRole('admin') ? null : 'admin'
+            );
 
             $this->command?->info(
                 ($admin->wasRecentlyCreated ? 'Admin yaratildi' : 'Admin allaqachon bor')

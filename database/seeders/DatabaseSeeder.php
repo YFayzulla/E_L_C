@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Centre;
+use App\Tenancy\CentreContext;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -21,9 +23,22 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolesTableSeeder::class,
-            AdminTableSeeder::class,
-            TeacherTableSeeder::class,
-            GroupSeeder::class,
+            CentreSeeder::class,
         ]);
+
+        // Everything below assigns roles, and with Spatie teams on an
+        // assignment must belong to a centre: `model_has_roles.centre_id` is
+        // NOT NULL and part of the primary key. Seeding without a context does
+        // not fail quietly — it fails with a constraint violation — but it is
+        // still the wrong shape, so establish the centre first.
+        $centre = Centre::withoutGlobalScopes()->orderBy('id')->firstOrFail();
+
+        app(CentreContext::class)->for($centre, function () {
+            $this->call([
+                AdminTableSeeder::class,
+                TeacherTableSeeder::class,
+                GroupSeeder::class,
+            ]);
+        });
     }
 }

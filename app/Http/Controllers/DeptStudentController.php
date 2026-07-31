@@ -13,10 +13,20 @@ class DeptStudentController extends Controller
 {
     public function index()
     {
+        // Kutish zalidagilar va bitirganlar hisob-kitobga kirmaydi: ular dars
+        // olmayapti, shuning uchun ularni qarzdor ko'rsatish noto'g'ri.
+        // ?all=1 bilan hammasini ko'rish mumkin.
+        $showAll = request()->boolean('all');
+
         $query = User::role('student')
             ->with('deptStudent', 'groups')
+            ->when(! $showAll, fn($q) => $q->billable())
             ->leftJoin('dept_students', 'users.id', '=', 'dept_students.user_id')
             ->select('users.*');
+
+        $hidden = $showAll
+            ? 0
+            : User::role('student')->count() - (clone $query)->count();
 
         $students = $query->orderByRaw("
                 CASE
@@ -31,7 +41,7 @@ class DeptStudentController extends Controller
             ->get();
 
 
-        return view('admin.dept.index', compact('students'));
+        return view('admin.dept.index', compact('students', 'showAll', 'hidden'));
     }
 
     public function create()

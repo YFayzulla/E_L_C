@@ -3,22 +3,40 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
+/**
+ * Boshlang'ich administrator hisobi.
+ *
+ * Ilgari `User::create()` ishlatilgani uchun `db:seed` ni ikkinchi marta
+ * ishga tushirish `UNIQUE constraint failed: users.phone` bilan yiqilar va
+ * butun seed zanjirini to'xtatib qo'yardi.
+ */
 class AdminTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        User::create([
-            'name' => 'admin',
-            'phone' => '930430959',
-            'password' => bcrypt('a'),
-        ])->assignRole('admin');
+        $phone = User::normalizePhone('930430959');
+
+        DB::transaction(function () use ($phone) {
+            $admin = User::firstOrCreate(
+                ['phone' => $phone],
+                [
+                    'name'     => 'admin',
+                    'password' => Hash::make('a'),
+                ]
+            );
+
+            if (! $admin->hasRole('admin')) {
+                $admin->assignRole('admin');
+            }
+
+            $this->command?->info(
+                ($admin->wasRecentlyCreated ? 'Admin yaratildi' : 'Admin allaqachon bor')
+                . ": {$admin->name} (+{$admin->phone})"
+            );
+        });
     }
 }

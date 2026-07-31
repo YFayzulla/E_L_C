@@ -1,161 +1,116 @@
 <!DOCTYPE html>
-<html
-        lang="en"
-        class="light-style layout-menu-fixed"
-        dir="ltr"
-        data-theme="theme-default"
-        data-assets-path="../assets/"
-        data-template="vertical-menu-template-free"
->
+<html lang="uz" class="light-style layout-menu-fixed layout-navbar-fixed" dir="ltr" data-theme="light"
+      data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8"/>
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}"/>
+    <meta name="description" content="ALPHA o'quv markazi boshqaruv tizimi"/>
 
-    <title>Dashboard - Analytics | Sneat - Bootstrap 5 HTML user Template - Pro</title>
+    @php
+        // Heading used by both <title> and the top bar. Views set it with
+        // @section('title'); config/navigation.php covers the older screens.
+        // Indexed directly, not via config() dot-notation — route names
+        // contain dots and would be read as nested keys.
+        $titleMap = config('navigation.titles', []);
+        [$fallbackTitle, $fallbackSubtitle] = $titleMap[request()->route()?->getName()] ?? [null, null];
+    @endphp
 
-    <meta name="description" content=""/>
+    <title>@hasSection('title')@yield('title') · @elseif($fallbackTitle){{ $fallbackTitle }} · @endif{{ config('app.name', 'ALPHA') }}</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('logos/SymbolRed.svg') }}"/>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{--
+        Applied before any paint so the page never flashes the wrong theme.
+        Must stay inline and must stay first.
+    --}}
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('alpha-theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var el = document.documentElement;
+                el.setAttribute('data-theme', theme);
+                el.setAttribute('data-bs-theme', theme);
+                el.classList.toggle('dark-style', theme === 'dark');
+                el.classList.toggle('light-style', theme !== 'dark');
+            } catch (e) {
+            }
+        })();
+    </script>
 
-    <link rel="stylesheet" href="{{ asset('assets/css/index.css')}}">
-    <!-- Fonts -->
+    <link rel="icon" type="image/png" href="{{ asset('logos/main.png') }}"/>
+
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-    <link
-            href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-            rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+          rel="stylesheet"/>
 
-    <!-- Icons. Uncomment required icon fonts -->
+    <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}"/>
 
-    <!-- Core CSS -->
+    <!-- Sneat base -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css"/>
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"
-          class="template-customizer-theme-css"/>
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}" class="template-customizer-theme-css"/>
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}"/>
-
-    <!-- Vendors CSS -->
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}"/>
-
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}"/>
-
-    <!-- Choices.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
 
-    <!-- Page CSS -->
+    <!-- App theme — must come last so it wins over the vendor sheets -->
+    <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}?v={{ filemtime(public_path('assets/css/theme.css')) }}"/>
 
-    <!-- Helpers -->
+    @stack('styles')
+
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('assets/js/config.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-<!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
-        <!-- Menu -->
-        @include("template.sidebar")
 
-        <!-- / Menu -->
+        @include('template.sidebar')
 
-        <!-- Layout container -->
         <div class="layout-page">
-            <!-- Navbar -->
 
-            @include("template.nav")
+            @include('template.nav')
 
-            <!-- / Navbar -->
-
-            <!-- Content wrapper -->
             <div class="content-wrapper">
-                <!-- Content -->
                 <div class="container-xxl flex-grow-1 container-p-y">
 
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible" role="alert">
-                            <strong>Success!</strong> {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @elseif(session('error'))
-                        <div class="alert alert-danger alert-dismissible" role="alert">
-                            <strong>Error!</strong> {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
+                    @include('template.partials.impersonation-banner')
+                    @include('template.partials.flash')
+                    @include('template.partials.verify-email-banner')
 
-                    @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible" role="alert">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    @yield("content")
+                    @yield('content')
 
                 </div>
-                <!-- / Content -->
-
-                <!-- Footer -->
-                {{--                @include("user.footer")--}}
-                <!-- / Footer -->
 
                 <div class="content-backdrop fade"></div>
             </div>
-            <!-- Content wrapper -->
         </div>
-        <!-- / Layout page -->
     </div>
 
-    <!-- Overlay -->
     <div class="layout-overlay layout-menu-toggle"></div>
 </div>
-<!-- / Layout wrapper -->
 
-
-<!-- build:js assets/vendor/js/core.js -->
 <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
 <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
 <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
 <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-
 <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
-<!-- endbuild -->
-
-<!-- Vendors JS -->
 <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-
-<!-- Main JS -->
 <script src="{{ asset('assets/js/main.js') }}"></script>
-
-<!-- Page JS -->
-<script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
-
-<!-- Place this tag in your head or just before your close body tag. -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-
-<!-- Choices.js JS -->
+<script src="{{ asset('assets/js/theme.js') }}?v={{ filemtime(public_path('assets/js/theme.js')) }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // --- Choices.js on every .choices select -------------------------------
         function initializeChoices(selects) {
-            selects.forEach(select => {
+            selects.forEach(function (select) {
                 if (select.choicesInstance) {
                     select.choicesInstance.destroy();
                 }
@@ -164,42 +119,87 @@
                     searchEnabled: true,
                     placeholder: true,
                     placeholderValue: select.dataset.placeholder || '',
-                    noResultsText: 'No results found',
+                    noResultsText: 'Natija topilmadi',
                     itemSelectText: '',
                     shouldSort: false,
                     callbackOnInit: function () {
-                        const selectedValues = Array.from(select.querySelectorAll('option[selected]')).map(opt => opt.value);
-                        if (selectedValues.length > 0) {
-                            this.setChoiceByValue(selectedValues);
+                        var selected = Array.from(select.querySelectorAll('option[selected]')).map(function (o) {
+                            return o.value;
+                        });
+                        if (selected.length) {
+                            this.setChoiceByValue(selected);
                         }
                     }
                 });
             });
         }
 
-        initializeChoices(document.querySelectorAll('.choices:not(.modal .choices)'));
+        initializeChoices(Array.from(document.querySelectorAll('.choices:not(.modal .choices)')));
 
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('shown.coreui.modal', function () { // Adjust event name if not using CoreUI
-                initializeChoices(modal.querySelectorAll('.choices'));
-            });
-            // Fallback for standard Bootstrap modal
+        document.querySelectorAll('.modal').forEach(function (modal) {
             modal.addEventListener('shown.bs.modal', function () {
-                initializeChoices(modal.querySelectorAll('.choices'));
+                initializeChoices(Array.from(modal.querySelectorAll('.choices')));
             });
         });
-    });
 
-    $(document).ready(function () {
-        $("#myInput").on("keyup", function () {
-            var value = $(this).val().toLowerCase();
-            $("#myTable tr").filter(function () {
-                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-            });
+        // --- Quick table filter -------------------------------------------------
+        // Filters the rows of #myTable as you type. This is a WITHIN-PAGE filter,
+        // not a global search — so on a page with no filterable table the box is
+        // removed rather than left sitting there doing nothing, which reads as a
+        // broken control.
+        var quickSearch = document.getElementById('myInput');
+        var quickTable = document.getElementById('myTable');
+
+        if (quickSearch && !quickTable) {
+            var box = quickSearch.closest('.nav-item') || quickSearch.parentElement;
+            if (box) {
+                box.style.display = 'none';
+            }
+        } else if (quickSearch && quickTable) {
+            var rows = quickTable.querySelectorAll('tr');
+
+            var run = function () {
+                var needle = quickSearch.value.trim().toLowerCase();
+                var shown = 0;
+
+                rows.forEach(function (row) {
+                    var hit = !needle || row.textContent.toLowerCase().indexOf(needle) > -1;
+                    row.style.display = hit ? '' : 'none';
+                    if (hit) shown++;
+                });
+
+                // Tell the user when a filter hides everything, instead of
+                // leaving them staring at an empty table.
+                var empty = document.getElementById('quick-filter-empty');
+                if (!empty) {
+                    empty = document.createElement('div');
+                    empty.id = 'quick-filter-empty';
+                    empty.className = 'empty-state';
+                    empty.innerHTML = '<i class="bx bx-search-alt"></i><h6>Hech narsa topilmadi</h6>' +
+                        '<p class="mb-0">Qidiruvni o‘zgartiring yoki tozalang.</p>';
+                    empty.style.display = 'none';
+                    quickTable.closest('table').parentElement.appendChild(empty);
+                }
+                empty.style.display = (needle && shown === 0) ? '' : 'none';
+                quickTable.closest('table').style.display = (needle && shown === 0) ? 'none' : '';
+            };
+
+            quickSearch.addEventListener('keyup', run);
+            quickSearch.addEventListener('search', run);
+        }
+
+        // --- Keyboard shortcuts -------------------------------------------------
+        document.addEventListener('keydown', function (e) {
+            // "/" focuses search, unless already typing
+            var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+            if (e.key === '/' && !typing && quickSearch) {
+                e.preventDefault();
+                quickSearch.focus();
+            }
         });
     });
 </script>
 
+@stack('scripts')
 </body>
-
 </html>

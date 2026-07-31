@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Teacher\StoreRequest;
 use App\Http\Requests\Teacher\UpdateRequest;
 use App\Models\Group;
+use App\Models\GroupTeacher;
+use App\Models\LessonAndHistory;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -15,19 +19,82 @@ class TeacherController extends Controller
 {
     /**
      * O'qituvchilar ro'yxati.
+     *
+     * DIQQAT: bazaviy Controller index() ni parametrsiz e'lon qilgan,
+     * shuning uchun bu yerda ham parametr bo'lishi mumkin emas.
      */
     public function index()
     {
         try {
             $teachers = User::role('user')
-                ->with('teacherGroups')
+                ->with('teacherGroups:id,name')
+                ->withCount(['teacherGroups as groups_count'])
                 ->orderBy('name')
                 ->get();
 
-            return view('admin.teacher.index', compact('teachers'));
+            // Bitta guruhlangan so'rov - qator boshiga teacherHasStudents() chaqirmaymiz.
+            $studentCounts = $this->studentCountsByTeacher($teachers->pluck('id')->all());
+
+            return view('admin.teacher.index', compact('teachers', 'studentCounts'));
         } catch (\Exception $e) {
             Log::error('TeacherController@index error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'qituvchilar ro\'yxatini yuklashda xatolik.');
+        }
+    }
+
+    /**
+     * O'qituvchi kartochkasi: guruhlar, statistika, so'nggi darslar.
+     */
+    public function show($id)
+    {
+        try {
+            $teacher = User::role('user')->findOrFail($id);
+
+            // group_teachers QATOR id kerak - biriktirishni uzish shu id bo'yicha ketadi.
+            $groupLinks = GroupTeacher::with([
+                'group' => fn($q) => $q->withCount(['students as members_count']),
+            ])
+                ->where('teacher_id', $teacher->id)
+                ->get()
+                ->filter(fn($link) => $link->group !== null)
+                ->sortBy(fn($link) => $link->group->name)
+                ->values();
+
+            $groupIds = $groupLinks->pluck('group_id')->map(fn($v) => (int) $v)->all();
+
+            $availableGroups = Group::whereNotIn('id', $groupIds ?: [0])
+                ->where('name', '!=', 'Waiting Room')
+                ->orderBy('name')
+                ->get(['id', 'name', 'start_time', 'finish_time']);
+
+            $recentLessons = collect();
+            if (! empty($groupIds)) {
+                $recentLessons = LessonAndHistory::whereIn('group', $groupIds)
+                    ->where('data', 1)
+                    ->orderByDesc('created_at')
+                    ->limit(10)
+                    ->get();
+            }
+
+            // Dars qatorlarida guruh nomini ko'rsatish uchun xarita.
+            $groupNames = $groupLinks->mapWithKeys(
+                fn($link) => [(int) $link->group_id => $link->group->name]
+            );
+
+            return view('admin.teacher.show', [
+                'teacher' => $teacher,
+                'groupLinks' => $groupLinks,
+                'availableGroups' => $availableGroups,
+                'recentLessons' => $recentLessons,
+                'groupNames' => $groupNames,
+                'studentCount' => $teacher->teacherHasStudents(),
+                'salary' => $teacher->teacherPayment(),
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('teacher.index')->with('error', 'O\'qituvchi topilmadi.');
+        } catch (\Exception $e) {
+            Log::error('TeacherController@show error: ' . $e->getMessage());
+            return redirect()->route('teacher.index')->with('error', 'O\'qituvchi ma\'lumotlarini yuklashda xatolik.');
         }
     }
 
@@ -37,7 +104,10 @@ class TeacherController extends Controller
     public function create()
     {
         try {
-            $groups = Group::where('name', '!=', 'Waiting Room')->get();
+            $groups = Group::where('name', '!=', 'Waiting Room')
+                ->orderBy('name')
+                ->get(['id', 'name']);
+
             return view('admin.teacher.create', compact('groups'));
         } catch (\Exception $e) {
             Log::error('TeacherController@create error: ' . $e->getMessage());
@@ -57,6 +127,7 @@ class TeacherController extends Controller
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
                 $uploadedFilePath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
             } catch (\Exception $e) {
+                Log::error('TeacherController@store photo error: ' . $e->getMessage());
                 return redirect()->back()->withInput()->with('error', 'Rasmni yuklashda xatolik.');
             }
         }
@@ -64,24 +135,26 @@ class TeacherController extends Controller
         DB::beginTransaction();
 
         try {
-            $teacher = User::create([
-                'name' => $request->name,
-                'password' => Hash::make($request->phone),
-                'birth_date' => $request->birth_date,
-                'date_born' => $request->date_born,
-                'location' => $request->location,
-                'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
-                'photo' => $uploadedFilePath,
-                'percent' => $request->percent,
-            ]);
+            $payload = $this->commonPayload($request);
+            $payload['photo'] = $uploadedFilePath;
+            // Parol berilmasa - eski xulq: telefon raqami parol bo'ladi.
+            $payload['password'] = Hash::make(
+                $request->filled('password') ? $request->input('password') : $request->input('phone')
+            );
 
+            $teacher = User::create($payload);
             $teacher->assignRole('user');
 
-            if ($request->has('group_id')) {
-                $teacher->teacherGroups()->attach($request->group_id);
+            if ($this->groupsWereSubmitted($request)) {
+                $teacher->teacherGroups()->sync($this->cleanGroupIds($request));
             }
 
             DB::commit();
+
+            // Strictly after the commit: the mailer is synchronous
+            // (QUEUE_CONNECTION=sync) and an unreachable SMTP host would
+            // otherwise roll the whole teacher back.
+            $this->sendVerificationMail($teacher, 'store');
 
             return redirect()->route('teacher.index')->with('success', 'O\'qituvchi muvaffaqiyatli qo\'shildi.');
 
@@ -93,13 +166,16 @@ class TeacherController extends Controller
             }
 
             Log::error('TeacherController@store error: ' . $e->getMessage());
-            
-            // Check for unique constraint violation (SQLSTATE 23000)
+
+            // withInput() parametrsiz chaqirilsa OCHIQ parolni sessiyaga yozadi.
+            $old = $request->except(['password', 'photo', '_token']);
+
             if ($e->getCode() == 23000) {
-                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki tug\'ilgan sana allaqachon mavjud.');
+                return redirect()->back()->withInput($old)
+                    ->with('error', 'Bu telefon raqami yoki passport allaqachon ro\'yxatdan o\'tgan.');
             }
 
-            return redirect()->back()->withInput()->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
+            return redirect()->back()->withInput($old)->with('error', 'Saqlashda tizim xatoligi yuz berdi.');
         }
     }
 
@@ -109,11 +185,17 @@ class TeacherController extends Controller
     public function edit($id)
     {
         try {
-            $teacher = User::with('teacherGroups')->findOrFail($id);
-            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
+            // role('user') SHART: usiz /teacher/{talaba_id}/edit talaba ustida
+            // o'qituvchi formasini ochib yuboradi (show() allaqachon shu filtrni qo'llaydi).
+            $teacher = User::role('user')->with('teacherGroups:id,name')->findOrFail($id);
+
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")
+                ->get(['id', 'name']);
+
             return view('admin.teacher.edit', compact('teacher', 'groups'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'O\'qituvchi topilmadi.');
+            Log::error('TeacherController@edit error: ' . $e->getMessage());
+            return redirect()->route('teacher.index')->with('error', 'O\'qituvchi topilmadi.');
         }
     }
 
@@ -128,7 +210,9 @@ class TeacherController extends Controller
         DB::beginTransaction();
 
         try {
-            $teacher = User::findOrFail($id);
+            // role('user') SHART: usiz PUT /teacher/{talaba_id} talabaning
+            // telefon/parol/foizini o'qituvchi formasi bilan qayta yozadi.
+            $teacher = User::role('user')->findOrFail($id);
             $oldPhotoPath = $teacher->photo;
 
             if ($request->hasFile('photo')) {
@@ -138,23 +222,26 @@ class TeacherController extends Controller
                 $newPhotoPath = $oldPhotoPath;
             }
 
-            $updateData = [
-                'name' => $request->name,
-                'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
-                'date_born' => $request->date_born,
-                'birth_date' => $request->birth_date,
-                'location' => $request->location,
-                'percent' => $request->percent,
-                'photo' => $newPhotoPath,
-            ];
+            $updateData = $this->commonPayload($request);
+            $updateData['photo'] = $newPhotoPath;
 
             if ($request->filled('password')) {
-                $updateData['password'] = Hash::make($request->password);
+                $updateData['password'] = Hash::make($request->input('password'));
+            }
+
+            // E-pochta o'zgarsa - tasdiqni bekor qilamiz (email_verified_at fillable emas).
+            $emailChanged = array_key_exists('email', $updateData) && $updateData['email'] !== $teacher->email;
+
+            if ($emailChanged) {
+                $teacher->email_verified_at = null;
             }
 
             $teacher->update($updateData);
 
-            $teacher->teacherGroups()->sync($request->group_id);
+            // Multi-select hech narsa yubormasa, sync([]) BARCHA guruhni uzib yuboradi.
+            if ($this->groupsWereSubmitted($request)) {
+                $teacher->teacherGroups()->sync($this->cleanGroupIds($request));
+            }
 
             DB::commit();
 
@@ -162,7 +249,18 @@ class TeacherController extends Controller
                 Storage::disk('public')->delete($oldPhotoPath);
             }
 
+            // Only on a real change, so saving an unrelated field does not
+            // re-mail the teacher every time.
+            if ($emailChanged) {
+                $this->sendVerificationMail($teacher, 'update');
+            }
+
             return redirect()->route('teacher.index')->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+
+            return redirect()->route('teacher.index')->with('error', 'O\'qituvchi topilmadi.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -172,13 +270,16 @@ class TeacherController extends Controller
             }
 
             Log::error('TeacherController@update error: ' . $e->getMessage());
-            
-            // Check for unique constraint violation (SQLSTATE 23000)
+
+            // withInput() parametrsiz chaqirilsa OCHIQ parolni sessiyaga yozadi.
+            $old = $request->except(['password', 'photo', '_token', '_method']);
+
             if ($e->getCode() == 23000) {
-                 return redirect()->back()->withInput()->with('error', 'Bu telefon raqami yoki tug\'ilgan sana allaqachon mavjud.');
+                return redirect()->back()->withInput($old)
+                    ->with('error', 'Bu telefon raqami yoki passport allaqachon ro\'yxatdan o\'tgan.');
             }
-            
-            return redirect()->back()->withInput()->with('error', 'Yangilashda xatolik yuz berdi.');
+
+            return redirect()->back()->withInput($old)->with('error', 'Yangilashda xatolik yuz berdi.');
         }
     }
 
@@ -190,12 +291,12 @@ class TeacherController extends Controller
         DB::beginTransaction();
 
         try {
-            $teacher = User::findOrFail($id);
+            // role('user') SHART: usiz DELETE /teacher/{talaba_id} talabani
+            // "o'qituvchi o'chirildi" degan yashil flash bilan o'chirib yuboradi.
+            $teacher = User::role('user')->findOrFail($id);
             $photoPath = $teacher->photo;
 
-            // Remove teacher from groups (pivot table)
             $teacher->teacherGroups()->detach();
-            
             $teacher->delete();
 
             DB::commit();
@@ -204,12 +305,119 @@ class TeacherController extends Controller
                 Storage::disk('public')->delete($photoPath);
             }
 
-            return redirect()->back()->with('success', 'O\'qituvchi va unga tegishli barcha ma\'lumotlar o\'chirildi.');
+            return redirect()->route('teacher.index')
+                ->with('success', 'O\'qituvchi va unga tegishli barcha ma\'lumotlar o\'chirildi.');
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+
+            return redirect()->route('teacher.index')->with('error', 'O\'qituvchi topilmadi.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('TeacherController@destroy error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
         }
+    }
+
+    /**
+     * Store va update uchun umumiy ustunlar.
+     *
+     * `birth_date` ATAYIN yo'q: bunday ustun ham, fillable ham mavjud emas edi,
+     * shuning uchun tug'ilgan sana hech qachon saqlanmasdi. Endi bitta maydon - `date_born`.
+     *
+     * @return array<string, mixed>
+     */
+    private function commonPayload(Request $request): array
+    {
+        $payload = [
+            'name' => $request->input('name'),
+            'phone' => '998' . preg_replace('/[^0-9]/', '', (string) $request->input('phone')),
+            'date_born' => $request->input('date_born') ?: null,
+            'passport' => $request->filled('passport') ? trim((string) $request->input('passport')) : null,
+            'location' => $request->input('location') ?: null,
+            'description' => $request->input('description') ?: null,
+            'percent' => $request->input('percent'),
+        ];
+
+        // E-pochta maydoni (partials.email-field) mavjud bo'lsagina tegamiz.
+        if ($request->has('email')) {
+            $payload['email'] = $request->input('email') ?: null;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Guruhlar ro'yxatini sinxronlash kerakmi?
+     *
+     * Forma har doim `groups_submitted` bayrog'ini yuboradi - shu sababli
+     * tanlovni butunlay bo'shatish ham ishlaydi. Bayroq ham, `group_id` ham
+     * bo'lmasa (masalan boshqa manbadan kelgan so'rov), guruhlarga tegilmaydi:
+     * aks holda null -> [] ga aylanib, sync() barcha biriktirishni o'chirib
+     * yuborar va flash "muvaffaqiyatli" deb turar edi.
+     */
+    private function groupsWereSubmitted(Request $request): bool
+    {
+        return $request->boolean('groups_submitted') || $request->has('group_id');
+    }
+
+    /**
+     * Send the account-confirmation e-mail, if there is an address to send to.
+     *
+     * MUST be called after DB::commit(). The mailer is synchronous
+     * (QUEUE_CONNECTION=sync), so an unreachable SMTP host throws inside the
+     * request; inside a transaction that would silently roll the teacher back.
+     * A failed send is logged and never surfaces to the admin — the account is
+     * saved either way, and the user can resend from the layout banner.
+     */
+    private function sendVerificationMail(User $teacher, string $context): void
+    {
+        if (blank($teacher->email)) {
+            return;
+        }
+
+        try {
+            $teacher->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            Log::error("TeacherController@{$context} mail error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Multi-select'dan kelgan guruh id larini tozalash (bo'sh qiymatlarsiz, takrorsiz).
+     *
+     * @return array<int, int>
+     */
+    private function cleanGroupIds(Request $request): array
+    {
+        $ids = (array) $request->input('group_id', []);
+
+        return array_values(array_unique(array_map(
+            'intval',
+            array_filter($ids, fn($id) => $id !== null && $id !== '')
+        )));
+    }
+
+    /**
+     * Har bir o'qituvchi uchun takrorlanmas talabalar soni - BITTA so'rov.
+     *
+     * @param  array<int, int>  $teacherIds
+     * @return array<int, int>
+     */
+    private function studentCountsByTeacher(array $teacherIds): array
+    {
+        if (empty($teacherIds)) {
+            return [];
+        }
+
+        return DB::table('group_teachers')
+            ->join('group_user', 'group_user.group_id', '=', 'group_teachers.group_id')
+            ->whereIn('group_teachers.teacher_id', $teacherIds)
+            ->whereIn('group_user.user_id', User::role('student')->select('users.id'))
+            ->groupBy('group_teachers.teacher_id')
+            ->selectRaw('group_teachers.teacher_id as teacher_id, COUNT(DISTINCT group_user.user_id) as students_total')
+            ->pluck('students_total', 'teacher_id')
+            ->all();
     }
 }

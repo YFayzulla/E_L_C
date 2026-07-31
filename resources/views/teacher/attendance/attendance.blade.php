@@ -1,211 +1,333 @@
 @extends('template.master')
 
+@section('title', $group->name)
+@section('subtitle', 'Guruh davomati')
+
 @section('content')
 
-    @role('user')
-    <div class="card shadow-md rounded-lg mb-4">
-        <form action="{{ route('attendance.submit', $id) }}" method="post">
-            @csrf
-            <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap py-3">
-                <h5 class="card-title mb-0 text-primary">Mark Attendance</h5>
-                <div class="d-flex align-items-center">
-                    {{-- Lesson input removed as per request --}}
+    @php
+        /** Har doim Y-m ko'rinishidagi tanlangan oy. */
+        $selectedMonth = $date ?? sprintf('%04d-%02d', $year, $month);
+        $monthLabel = \Carbon\Carbon::createFromDate($year, $month, 1)
+            ->locale('uz_Latn')->translatedFormat('F Y');
+
+        $lessonDays = $lessonDays ?? [];
+        $todayDay = (int) now()->day;
+        $currentMonth = now()->format('Y-m');
+        // Yo'qlama HAR DOIM bugungi darsga yoziladi. O'tgan oy ko'rilayotganda
+        // radiolar bugungi holatni ko'rsata olmaydi (jadval boshqa oyники), shuning
+        // uchun forma umuman chiqarilmaydi — aks holda "Saqlash" bosilsa bugungi
+        // yozuvlar sanoqsiz o'chib ketardi.
+        $isCurrentMonth = $selectedMonth === $currentMonth;
+        $markedToday = $isCurrentMonth && in_array($todayDay, $lessonDays, true);
+
+        $rateTone = $rate === null ? 'secondary' : ($rate >= 90 ? 'success' : ($rate >= 75 ? 'warning' : 'danger'));
+
+        // Oxirgi 24 oy. Bookmark qilingan eskiroq oy ham ro'yxatdan tushib qolmaydi.
+        $monthOptions = collect(range(0, 23))->map(fn($i) => now()->startOfMonth()->subMonths($i));
+        if (! $monthOptions->contains(fn($m) => $m->format('Y-m') === $selectedMonth)) {
+            $monthOptions->prepend(\Carbon\Carbon::createFromDate($year, $month, 1));
+        }
+    @endphp
+
+    <div class="page-head justify-content-end">
+        @role('admin')
+        <a href="{{ route('attendance.overview') }}" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Umumiy davomat
+        </a>
+        @endrole
+        @role('user')
+        <a href="{{ route('attendance') }}" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Guruhlarim
+        </a>
+        @endrole
+    </div>
+
+    {{-- Oy tanlash + Excel: o'qituvchi ham, admin ham ko'radi --}}
+    <div class="filter-card">
+        <form method="GET" action="{{ url()->current() }}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="month">Oy</label>
+                <select id="month" name="date" class="form-select">
+                    @foreach($monthOptions as $option)
+                        <option value="{{ $option->format('Y-m') }}"
+                                @selected($option->format('Y-m') === $selectedMonth)>
+                            {{ $option->locale('uz_Latn')->translatedFormat('F Y') }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-8">
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-search-alt me-1"></i> Ko‘rish
+                    </button>
+                    <a href="{{ route('export.attendances', ['id' => $group->id, 'date' => $selectedMonth]) }}"
+                       class="btn btn-outline-secondary">
+                        <i class="bx bx-export me-1"></i> Excelga yuklash
+                    </a>
                 </div>
             </div>
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead class="table-light">
+        </form>
+    </div>
+
+    {{-- Oylik xulosa --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="min-w-0">
+                        <div class="stat-label">O‘tilgan darslar</div>
+                        <div class="stat-value">{{ count($lessonDays) }}</div>
+                    </div>
+                    <span class="stat-icon is-info"><i class="bx bx-calendar"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="min-w-0">
+                        <div class="stat-label">Kelmagan</div>
+                        <div class="stat-value text-danger">{{ $absentCount }}</div>
+                    </div>
+                    <span class="stat-icon is-danger"><i class="bx bx-x-circle"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="min-w-0">
+                        <div class="stat-label">Kechikkan</div>
+                        <div class="stat-value text-warning">{{ $lateCount }}</div>
+                    </div>
+                    <span class="stat-icon is-warning"><i class="bx bx-time-five"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div class="min-w-0">
+                        <div class="stat-label">Davomat</div>
+                        <div class="stat-value text-{{ $rateTone }}">{{ $rate === null ? '—' : $rate . '%' }}</div>
+                    </div>
+                    <span class="stat-icon is-{{ $rateTone === 'secondary' ? 'info' : $rateTone }}">
+                        <i class="bx bx-calendar-check"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Yo'qlama qilish (faqat o'qituvchi, faqat joriy oyda) --}}
+    @role('user')
+    @if(! $isCurrentMonth)
+        <div class="card mb-4">
+            <div class="empty-state">
+                <i class="bx bx-info-circle"></i>
+                <h6>Arxiv ko‘rinishi</h6>
+                <p class="mb-0">
+                    Yo‘qlama faqat joriy oyda olinadi.
+                    <a href="{{ url()->current() }}?date={{ $currentMonth }}">Joriy oyga qaytish</a>
+                </p>
+            </div>
+        </div>
+    @else
+    <div class="card mb-4">
+        <form action="{{ route('attendance.submit', $id) }}" method="post">
+            @csrf
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="min-w-0">
+                    <span>Yo‘qlama — {{ now()->locale('uz_Latn')->translatedFormat('d F Y') }}</span>
+                    @if($markedToday)
+                        <span class="badge bg-label-success ms-2">Bugun belgilangan</span>
+                    @endif
+                </div>
+                <div style="min-width: 16rem;">
+                    <input type="text" name="lesson" class="form-control form-control-sm @error('lesson') is-invalid @enderror"
+                           value="{{ old('lesson') }}" maxlength="255" placeholder="Dars nomi (ixtiyoriy)">
+                    @error('lesson')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            @if($students->isEmpty())
+                <div class="empty-state">
+                    <i class="bx bx-user-x"></i>
+                    <h6>Talaba yo‘q</h6>
+                    <p class="mb-0">Bu guruhga hali talaba biriktirilmagan.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th style="width: 3rem;">#</th>
+                            <th>Talaba</th>
+                            <th class="text-end">Holat</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($students as $student)
+                            @php
+                                $current = $markedToday ? (int) ($data[$student->id][$todayDay] ?? 1) : 1;
+                            @endphp
+                            <tr>
+                                <td class="text-muted">{{ $loop->iteration }}</td>
+                                <td class="fw-semibold">{{ $student->name }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="{{ $student->name }} holati">
+                                        <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
+                                               id="st-1-{{ $student->id }}" value="1" @checked($current === 1)>
+                                        <label class="btn btn-outline-secondary" for="st-1-{{ $student->id }}">Keldi</label>
+
+                                        <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
+                                               id="st-0-{{ $student->id }}" value="0" @checked($current === 0)>
+                                        <label class="btn btn-outline-danger" for="st-0-{{ $student->id }}">Kelmadi</label>
+
+                                        <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
+                                               id="st-2-{{ $student->id }}" value="2" @checked($current === 2)>
+                                        <label class="btn btn-outline-warning" for="st-2-{{ $student->id }}">Kechikdi</label>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="page-sub mb-0">
+                        Bir kunga bitta dars yoziladi — qayta yuborsangiz bugungi yo‘qlama yangilanadi.
+                    </span>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-save me-1"></i> Saqlash
+                    </button>
+                </div>
+            @endif
+        </form>
+    </div>
+    @endif
+    @endrole
+
+    {{-- Oylik jadval --}}
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span>{{ $monthLabel }} — davomat jadvali</span>
+            <div class="d-flex align-items-center flex-wrap gap-3" style="font-size: .78rem;">
+                <span><span class="badge bg-label-success"><i class="bx bx-check"></i></span> keldi</span>
+                <span><span class="badge bg-label-danger"><i class="bx bx-x"></i></span> kelmadi</span>
+                <span><span class="badge bg-label-warning"><i class="bx bx-time"></i></span> kechikdi</span>
+            </div>
+        </div>
+
+        @if(empty($lessonDays) || $students->isEmpty())
+            <div class="empty-state">
+                <i class="bx bx-calendar-x"></i>
+                <h6>Ma’lumot yo‘q</h6>
+                <p class="mb-0">{{ $monthLabel }} uchun bu guruhda dars qayd etilmagan.</p>
+            </div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover grade-table mb-0">
+                    <thead>
                     <tr>
-                        <th>No</th>
-                        <th>Name</th>
-                        <th class="text-center">Status</th>
+                        <th style="min-width: 12rem;">Talaba</th>
+                        @foreach($lessonDays as $day)
+                            <th>{{ $day }}</th>
+                        @endforeach
                     </tr>
                     </thead>
-                    <tbody class="table-border-bottom-0">
-                    @forelse($students as $index => $student)
+                    <tbody id="myTable">
+                    @foreach($students as $student)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td><b>{{ $student->name }}</b></td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group" aria-label="Attendance status">
-                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-present-{{ $student->id }}" value="1" checked>
-                                    <label class="btn btn-outline-success" for="status-present-{{ $student->id }}">Present</label>
-
-                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-absent-{{ $student->id }}" value="0">
-                                    <label class="btn btn-outline-danger" for="status-absent-{{ $student->id }}">Absent</label>
-
-                                    <input type="radio" class="btn-check" name="status[{{ $student->id }}]" id="status-late-{{ $student->id }}" value="2">
-                                    <label class="btn btn-outline-warning" for="status-late-{{ $student->id }}">Reasonable</label>
-                                </div>
-                            </td>
+                            <td class="fw-semibold">{{ $studentNames[$student->id] ?? $student->name }}</td>
+                            @foreach($lessonDays as $day)
+                                @php $status = $data[$student->id][$day] ?? null; @endphp
+                                <td>
+                                    @if($status === 0)
+                                        <span class="badge bg-label-danger" title="Kelmadi"><i class="bx bx-x"></i></span>
+                                    @elseif($status === 2)
+                                        <span class="badge bg-label-warning" title="Kechikdi"><i class="bx bx-time"></i></span>
+                                    @elseif($status === 1)
+                                        <span class="badge bg-label-success" title="Keldi"><i class="bx bx-check"></i></span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            @endforeach
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center py-4 text-muted">No students found in this group.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                     </tbody>
                 </table>
             </div>
-
-            <div class="card-footer text-end py-3">
-                <button type="submit" class="btn btn-primary">Submit Attendance</button>
-            </div>
-
-        </form>
+        @endif
     </div>
-    @endrole
 
-
-    <div class="card shadow-md rounded-lg mt-4">
-        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap py-3">
-            <h5 class="card-title mb-0 text-primary">Attendance for {{ \Carbon\Carbon::createFromDate($year, $month)->format('F Y') }}</h5>
-
-            <div class="d-flex align-items-center">
-                @role('admin')
-                <form method="GET" action="{{ route('group.attendance', $group->id) }}" class="d-flex me-3">
-                    <select id="month" name="date" class="form-select me-2">
-                        <option value="">Select Month</option>
-                        @php
-                            $currentYear = date('Y');
-                            for ($monthOption = 1; $monthOption <= 12; $monthOption++) {
-                                $monthNum = str_pad($monthOption, 2, '0', STR_PAD_LEFT);
-                                $monthYear = $currentYear . '-' . $monthNum;
-                                $monthName = date('F', mktime(0, 0, 0, $monthOption, 1));
-                                $selected = ($year . '-' . $monthNum == $monthYear) ? 'selected' : '';
-                                echo "<option value=\"$monthYear\" $selected>$monthName $currentYear</option>";
-                            }
-                        @endphp
-                    </select>
-                    <button type="submit" class="btn btn-outline-primary">Show</button>
-                </form>
-
-                <form id="exportForm" method="GET" action="{{ route('export.attendances', ['id' => $group->id]) }}">
-                    <input type="hidden" id="export_date" name="date" value="{{ $year . '-' . $month }}">
-                    <button type="submit" class="btn btn-success d-flex align-items-center">
-                        <i class="bx bxs-file-export me-1"></i> Export to Excel
-                    </button>
-                </form>
-                @endrole
-            </div>
+    {{-- Qoldirilgan darslar ro'yxati --}}
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <span>{{ $monthLabel }} — qoldirilgan darslar</span>
+            <span class="badge bg-label-primary">{{ $attendances->total() }}</span>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover text-center">
-                @php
-                    // Only show columns for days where lessons were recorded
-                    $lessonDays = $lessonDays ?? [];
-                    $colspan = max(count($lessonDays), 1) + 1; // name + days
-                @endphp
-
-                <thead class="table-light">
-                <tr>
-                    <th class="text-start">Name</th>
-                    @foreach($lessonDays as $day)
-                        <th>{{ (int) $day }}</th>
-                    @endforeach
-                </tr>
-                </thead>
-
-                <tbody>
-                @forelse ($data as $userName => $days)
+        @if($attendances->isEmpty())
+            <div class="empty-state">
+                <i class="bx bx-check-circle"></i>
+                <h6>Qoldirish yo‘q</h6>
+                <p class="mb-0">Bu oyda kelmagan yoki kechikkan talaba qayd etilmagan.</p>
+            </div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
                     <tr>
-                        <td class="text-start fw-bold">{{ $userName }}</td>
-                        @foreach($lessonDays as $day)
-                            @php
-                                $status = $days[$day] ?? null;
-                                $isAbsent = ($status === '0' || $status === 0);
-                                $isPresent = ($status === '1' || $status === 1);
-                                $isLate = ($status === '2' || $status === 2);
-                            @endphp
-                            <td class="{{ $isAbsent ? 'bg-danger-subtle text-danger' : ($isLate ? 'bg-warning-subtle text-warning' : ($isPresent ? 'text-success' : '')) }}">
-                                @if ($isPresent)
-                                    <i class="bx bx-check-circle"></i>
-                                @elseif ($isAbsent)
-                                    <i class="bx bx-x-circle"></i>
-                                @elseif ($isLate)
-                                    <i class="bx bx-info-circle"></i>
+                        <th>Sana</th>
+                        <th>Talaba</th>
+                        <th>Dars</th>
+                        <th>Kim belgilagan</th>
+                        <th>Holat</th>
+                        <th class="text-end">Amal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($attendances as $attendance)
+                        <tr>
+                            <td class="text-muted">{{ $attendance->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
+                            <td class="fw-semibold">{{ $attendance->user?->name ?? '—' }}</td>
+                            <td class="text-muted">{{ $attendance->lesson?->name ?? '—' }}</td>
+                            <td class="text-muted">{{ $attendance->teacher?->name ?? '—' }}</td>
+                            <td>
+                                @if((int) $attendance->status === 2)
+                                    <span class="badge bg-label-warning">Kechikdi</span>
                                 @else
-                                    -
+                                    <span class="badge bg-label-danger">Kelmadi</span>
                                 @endif
                             </td>
-                        @endforeach
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="{{ $colspan }}" class="text-center py-4 text-muted">No attendance data available for this month.</td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
+                            <td class="text-end">
+                                <form action="{{ route('attendance.delete', $attendance->id) }}" method="post"
+                                      onsubmit="return confirm('Ushbu davomat yozuvi o‘chirilsinmi?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="O‘chirish">
+                                        <i class="bx bx-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @if($attendances->hasPages())
+                <div class="card-footer d-flex justify-content-end">
+                    {{ $attendances->links() }}
+                </div>
+            @endif
+        @endif
     </div>
-
-    <div class="card shadow-md rounded-lg mt-4">
-        <div class="card-header bg-light border-bottom">
-            <h5 class="card-title mb-0 text-primary">Recent Attendance Records</h5>
-        </div>
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Teacher</th>
-                        <th>Lesson</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse($attendances as $attendance)
-                    <tr>
-                        <td>{{ $loop->index + 1 }}</td>
-                        <td>{{ $attendance->user->name }}</td>
-                        <td>{{ $attendance->teacher->name ?? 'N/A' }}</td>
-                        <td>{{ $attendance->lesson->name ?? 'N/A' }}</td>
-                        <td>
-                            @if($attendance->status == 1)
-                                <span class="badge bg-success">Present</span>
-                            @elseif($attendance->status == 0)
-                                <span class="badge bg-danger">Absent</span>
-                            @elseif($attendance->status == 2)
-                                <span class="badge bg-warning">Reasonable</span>
-                            @endif
-                        </td>
-                        <td>{{ $attendance->created_at->format('d M Y H:i') }}</td>
-                        <td class="text-center">
-                            <form action="{{route('attendance.delete', $attendance->id)}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this attendance record?');">
-                                @csrf
-                                @method("DELETE")
-                                <button type="submit" class="btn btn-sm btn-danger d-inline-flex align-items-center">
-                                    <i class="bx bx-trash-alt me-1"></i> Delete
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No recent attendance records found.</td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const monthSelect = document.getElementById('month');
-            const exportDateInput = document.getElementById('export_date');
-
-            if (monthSelect && exportDateInput) {
-                monthSelect.addEventListener('change', function () {
-                    exportDateInput.value = this.value;
-                });
-            }
-        });
-    </script>
 
 @endsection

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -25,6 +27,9 @@ class NewPasswordController extends Controller
     /**
      * Handle an incoming new password request.
      *
+     * NOTE: reachable only for accounts that carry an e-mail address. Phone-only
+     * accounts cannot reset by e-mail and are handled by the administrator.
+     *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
@@ -33,29 +38,58 @@ class NewPasswordController extends Controller
             'token' => ['required'],
             'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'email.required' => 'Pochta manzilini kiriting.',
+            'email.email' => 'Pochta manzili noto‘g‘ri kiritilgan.',
+            'password.required' => 'Yangi parolni kiriting.',
+            'password.confirmed' => 'Parol tasdiqlanmadi — ikkala maydon bir xil bo‘lishi kerak.',
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        // Pre-check so a wrong address gets an Uzbek sentence rather than the
+        // broker's English "We can't find a user with that email address."
+        if (! User::where('email', $request->input('email'))->exists()) {
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'Bu manzil bo‘yicha hisob topilmadi.']);
+        }
 
-                event(new PasswordReset($user));
-            }
-        );
+        try {
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user) use ($request) {
+                    $user->forceFill([
+                        'password' => Hash::make($request->password),
+                        'remember_token' => Str::random(60),
+                    ])->save();
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+                    event(new PasswordReset($user));
+                }
+            );
+        } catch (\Throwable $e) {
+            Log::error('NewPasswordController@store error: ' . $e->getMessage());
+
+            return back()->withInput($request->only('email'))
+                ->with('error', 'Parolni yangilashda xatolik yuz berdi. Keyinroq qayta urinib ko‘ring.');
+        }
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')
+                ->with('status', 'Parol yangilandi. Endi yangi parol bilan kiring.');
+        }
+
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => $this->uzbekStatus($status)]);
+    }
+
+    /**
+     * Translate a broker status key into Uzbek.
+     */
+    private function uzbekStatus(string $status): string
+    {
+        return match ($status) {
+            Password::INVALID_TOKEN => 'Havola eskirgan yoki noto‘g‘ri. Yangi havola so‘rang.',
+            Password::INVALID_USER => 'Bu manzil bo‘yicha hisob topilmadi.',
+            Password::RESET_THROTTLED => 'Juda tez-tez so‘ralmoqda. Bir necha daqiqadan so‘ng urinib ko‘ring.',
+            default => 'Parolni yangilab bo‘lmadi. Keyinroq qayta urinib ko‘ring.',
+        };
     }
 }

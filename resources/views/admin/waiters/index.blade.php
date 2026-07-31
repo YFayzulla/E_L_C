@@ -1,86 +1,97 @@
 @extends('template.master')
+
+@section('title', 'Kutish zali')
+@section('subtitle', 'Hali guruhga biriktirilmagan talabalar')
+
 @section('content')
 
-    <div class="card">
-
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <h5 class="mb-0">Waiting Room</h5>
-        </div>
-
-        <div class="table-responsive text-nowrap">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Parents' Phone</th>
-                    <th>Current Status</th>
-                    <th class="text-center">Action</th>
-                </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                @forelse($students as $student)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td><strong>{{ $student->name }}</strong></td>
-                        <td>{{ $student->phone }}</td>
-                        <td>{{ $student->parents_tel }}</td>
-                        <td>
-                            {{-- Talaba guruhsiz bo'lgani uchun "Waiting" statusini ko'rsatamiz --}}
-                            <span class="badge bg-label-warning">Waiting</span>
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
-                                    data-bs-target="#assignGroupModal{{$student->id}}">
-                                Assign to Group
-                            </button>
-
-                            {{-- Modal --}}
-                            <div class="modal fade" id="assignGroupModal{{$student->id}}" tabindex="-1"
-                                 aria-labelledby="assignGroupModalLabel{{$student->id}}"
-                                 aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="assignGroupModalLabel{{$student->id}}">Assign {{ $student->name }} to a group</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form action="{{ route('student.change.group', $student->id) }}" method="post">
-                                                @csrf
-                                                <div class="mb-3">
-                                                    <label for="group-select-{{$student->id}}" class="col-form-label">Select Group:</label>
-                                                    <select name="group_id[]" id="group-select-{{$student->id}}" class="form-select choices" multiple data-placeholder="Select groups">
-                                                        @forelse($groups as $group)
-                                                            <option value="{{ $group->id }}">
-                                                                {{ $group->name }} (Room: {{ $group->room_id ?? 'N/A' }})
-                                                            </option>
-                                                        @empty
-                                                            <option value="" disabled>No groups available</option>
-                                                        @endforelse
-                                                    </select>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-primary">Save</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No students in the waiting room.</td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-
+    <div class="page-head justify-content-end">
+        <a href="{{ route('group.index') }}" class="btn btn-outline-secondary">
+            <i class="bx bx-group me-1"></i> Guruhlar
+        </a>
     </div>
+
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <span>Kutayotgan talabalar: <strong>{{ $students->count() }}</strong></span>
+            <span class="text-muted" style="font-size: .82rem;">Guruhga biriktirilgach ro‘yxatdan chiqadi</span>
+        </div>
+
+        @if($students->isEmpty())
+            <div class="empty-state">
+                <i class="bx bx-check-circle"></i>
+                <h6>Kutish zali bo‘sh</h6>
+                <p class="mb-0">Barcha talabalar guruhlarga biriktirilgan.</p>
+            </div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th style="width: 3rem;">#</th>
+                        <th>Talaba</th>
+                        <th>Telefon</th>
+                        <th>Ota-ona telefoni</th>
+                        <th>Holati</th>
+                        <th class="text-end">Amallar</th>
+                    </tr>
+                    </thead>
+                    <tbody id="myTable">
+                    @foreach($students as $student)
+                        <tr>
+                            <td class="text-muted">{{ $loop->iteration }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2 min-w-0">
+                                    <div class="avatar avatar-sm">
+                                        @if($student->photo)
+                                            <img src="{{ asset('storage/' . $student->photo) }}" alt=""
+                                                 class="rounded-circle w-100 h-100" style="object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($student->name, 0, 2)) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('student.show', $student->id) }}"
+                                       class="fw-semibold text-decoration-none">{{ $student->name }}</a>
+                                </div>
+                            </td>
+                            <td dir="ltr">{{ $student->phone ? '+' . $student->phone : '—' }}</td>
+                            <td dir="ltr">{{ $student->parents_tel ?: '—' }}</td>
+                            <td><span class="badge bg-label-warning">Kutmoqda</span></td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{{ route('student.show', $student->id) }}"
+                                       class="btn btn-sm btn-outline-secondary" title="Ma’lumotlari">
+                                        <i class="bx bx-show-alt"></i>
+                                    </a>
+                                    <a href="{{ route('student.transfer.form', $student->id) }}"
+                                       class="btn btn-sm btn-outline-primary" title="Guruhga biriktirish">
+                                        <i class="bx bx-user-plus me-1"></i> Guruhga biriktirish
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
+
+    {{--
+        The old inline "Assign to Group" modal posted to student.change.group
+        (GroupExtraController@change_group). That endpoint does a bare
+        groups()->sync($ids) — nulling group_user.payment and shrinking every
+        affected teacher's salary — and runs
+
+            Attendance::where('user_id', $user->id)->update(['group_id' => $ids[0]]);
+
+        unscoped by date or old group, rewriting the student's whole attendance
+        history into one group. It also never recomputes should_pay/dept.
+        Assignment now goes through student.transfer.form, which uses
+        StudentGroupService (pivot payment preserved, history recorded both
+        ways, attendances untouched).
+    --}}
 
 @endsection

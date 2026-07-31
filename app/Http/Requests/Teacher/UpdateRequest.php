@@ -34,6 +34,8 @@ class UpdateRequest extends FormRequest
             'phone' => [
                 'required', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('teacher')),
             ],
+            'email' => ['nullable', 'email', 'max:191',
+                Rule::unique('users', 'email')->ignore($this->route('student') ?? $this->route('teacher') ?? $this->user()?->id)],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
             'percent' => 'nullable|integer|min:0|max:100',
         ];
@@ -59,6 +61,21 @@ class UpdateRequest extends FormRequest
             'percent.integer' => 'The percent must be an integer.',
             'percent.min' => 'The percent must be at least 0.',
             'percent.max' => 'The percent must not exceed 100.',
+            'email.email' => 'Pochta manzili noto‘g‘ri kiritilgan.',
+            'email.max' => 'Pochta manzili 191 belgidan oshmasligi kerak.',
+            'email.unique' => 'Bu pochta manzili boshqa hisobga biriktirilgan.',
+        ];
+    }
+
+    /**
+     * Uzbek attribute names used in the default validation messages.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'email' => 'pochta manzili',
         ];
     }
 }

@@ -1,70 +1,84 @@
-@extends("template.master")
-@section("content")
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Account Settings /</span> Profile</h4>
+@extends('template.master')
 
-        <div class="row">
-            <div class="col-md-12">
-                <ul class="nav nav-pills flex-column flex-md-row mb-3">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="javascript:void(0);"><i class="bx bx-user me-1"></i> Account</a>
-                    </li>
-                    {{-- Add other profile tabs if needed --}}
-                </ul>
-                <div class="card mb-4">
-                    <h5 class="card-header">Profile Details</h5>
-                    <!-- Account -->
-                    <div class="card-body">
-                        <div class="d-flex align-items-start align-items-sm-center gap-4">
-                            <img
-                                src="{{ Auth::user()->photo ? asset('storage/' . Auth::user()->photo) : asset('assets/img/avatars/1.png') }}"
-                                alt="user-avatar"
-                                class="d-block rounded"
-                                height="100"
-                                width="100"
-                                id="uploadedAvatar"
-                            />
-                            <div class="button-wrapper">
-                                <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
-                                    <span class="d-none d-sm-block">Upload new photo</span>
-                                    <i class="bx bx-upload d-block d-sm-none"></i>
-                                    <input
-                                        type="file"
-                                        id="upload"
-                                        class="account-file-input"
-                                        hidden
-                                        accept="image/png, image/jpeg"
-                                    />
-                                </label>
-                                <button type="button" class="btn btn-outline-secondary account-image-reset mb-4">
-                                    <i class="bx bx-reset d-block d-sm-none"></i>
-                                    <span class="d-none d-sm-block">Reset</span>
-                                </button>
+@section('title', 'Profil')
+@section('subtitle', 'Hisob ma’lumotlari va xavfsizlik')
 
-                                <p class="text-muted mb-0">Allowed JPG, GIF or PNG. Max size of 800K</p>
-                            </div>
-                        </div>
+@section('content')
+
+    @php
+        $user = auth()->user();
+        $roleLabels = ['admin' => 'Administrator', 'user' => "O'qituvchi", 'student' => 'Talaba', 'parent' => 'Ota-ona'];
+        $roleLabel = $roleLabels[$user->getRoleNames()->first()] ?? 'Foydalanuvchi';
+    @endphp
+
+    <div class="row g-4">
+
+        {{-- Identity card --}}
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mx-auto mb-3" style="width: 88px; height: 88px;">
+                        @if($user->photo)
+                            <img src="{{ asset('storage/' . $user->photo) }}" alt=""
+                                 class="rounded-circle w-100 h-100" style="object-fit: cover;">
+                        @else
+                            <span class="avatar-initial rounded-circle bg-label-primary d-inline-flex align-items-center justify-content-center"
+                                  style="font-size: 1.75rem; width: 88px; height: 88px;">
+                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($user->name, 0, 2)) }}
+                            </span>
+                        @endif
                     </div>
-                    <hr class="my-0" />
-                    <div class="card-body">
-                        @include('profile.partials.update-profile-information-form')
-                    </div>
+
+                    <h5 class="mb-1">{{ $user->name }}</h5>
+                    <span class="badge bg-label-primary mb-3">{{ $roleLabel }}</span>
+
+                    <ul class="list-unstyled text-start mb-0 mt-3">
+                        <li class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Telefon</span>
+                            <span class="fw-semibold" dir="ltr">+{{ $user->phone }}</span>
+                        </li>
+                        @if($user->location)
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Manzil</span>
+                                <span class="fw-semibold">{{ $user->location }}</span>
+                            </li>
+                        @endif
+                        <li class="d-flex justify-content-between py-2">
+                            <span class="text-muted">Ro‘yxatdan o‘tgan</span>
+                            <span class="fw-semibold">{{ $user->created_at?->format('d.m.Y') }}</span>
+                        </li>
+                    </ul>
+
+                    <p class="text-muted mt-3 mb-0" style="font-size: .8rem;">
+                        Profil rasmini o‘quv markazi administratori yangilaydi.
+                    </p>
                 </div>
+            </div>
+        </div>
 
-                <div class="card mb-4">
-                    <h5 class="card-header">Update Password</h5>
-                    <div class="card-body">
-                        @include('profile.partials.update-password-form')
-                    </div>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">Shaxsiy ma’lumotlar</div>
+                <div class="card-body">
+                    @include('profile.partials.update-profile-information-form')
                 </div>
+            </div>
 
-                <div class="card mb-4">
-                    <h5 class="card-header">Delete Account</h5>
-                    <div class="card-body">
-                        @include('profile.partials.delete-user-form')
-                    </div>
+            <div class="card mb-4">
+                <div class="card-header">Parolni o‘zgartirish</div>
+                <div class="card-body">
+                    @include('profile.partials.update-password-form')
+                </div>
+            </div>
+
+            {{-- Visible to every role, matching the previous behaviour. --}}
+            <div class="card">
+                <div class="card-header text-danger">Xavfli hudud</div>
+                <div class="card-body">
+                    @include('profile.partials.delete-user-form')
                 </div>
             </div>
         </div>
     </div>
+
 @endsection

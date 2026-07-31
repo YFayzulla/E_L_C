@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\GroupTeacher;
+use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,17 +12,65 @@ use Illuminate\Support\Facades\Log;
 
 class GroupController extends Controller
 {
+    /** Sortable columns, whitelisted — never interpolate raw input into ORDER BY. */
+    private const SORTABLE = ['name', 'members_count', 'monthly_payment', 'created_at'];
+
+    /**
+     * NOTE: the parent class declares index() with no parameters, so this one
+     * cannot take a Request either — read the query string with request().
+     */
     public function index()
     {
         try {
-            $groups = Group::where('id', '!=', 1) // Assuming 1 is the "Unassigned" group
-            ->orderBy('name')
-                ->get(); // Added pagination
-            return view('admin.group.index', compact('groups'));
+            $request = request();
+
+            [$sortCol, $sortDir] = $this->resolveSort($request->input('sort'));
+
+            // ?q[]=x would reach the scope as an array and blow up inside the
+            // query builder — flatten everything to a scalar string first.
+            $filters = collect($request->only('q', 'teacher_id', 'room_id', 'has_students'))
+                ->map(fn ($value) => is_scalar($value) ? (string) $value : null)
+                ->all();
+
+            $groups = Group::query()
+                ->where('id', '!=', 1) // 1 = Kutish zali (Waiting Room)
+                ->with(['teachers:id,name', 'room:id,room'])
+                // Group::getStudentsCountAttribute() shadows `students_count`,
+                // so the count MUST be aliased or the view silently re-queries.
+                ->withCount(['students as members_count'])
+                ->filter($filters)
+                ->orderBy($sortCol, $sortDir)
+                ->paginate(25)
+                ->withQueryString();
+
+            $teachers = User::role('user')->orderBy('name')->get(['id', 'name']);
+            $rooms = Room::orderBy('room')->get(['id', 'room']);
+
+            return view('admin.group.index', compact('groups', 'teachers', 'rooms'));
         } catch (\Exception $e) {
             Log::error('GroupController@index error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik yuz berdi.');
         }
+    }
+
+    /**
+     * "column-direction" from the sort <select> into a safe ORDER BY pair.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function resolveSort(mixed $sort): array
+    {
+        $parts = explode('-', is_scalar($sort) ? (string) $sort : '', 2);
+
+        $column = $parts[0] ?? '';
+        $direction = strtolower($parts[1] ?? 'asc');
+
+        if (! in_array($column, self::SORTABLE, true)) {
+            $column = 'name';
+            $direction = 'asc';
+        }
+
+        return [$column, $direction === 'desc' ? 'desc' : 'asc'];
     }
 
     public function create()

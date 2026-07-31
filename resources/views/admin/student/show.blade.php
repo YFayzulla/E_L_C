@@ -3,10 +3,30 @@
 
     <div class="card">
 
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <h5 class="mb-0">Student's Data</h5>
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0">Talaba ma’lumotlari</h5>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                {{-- SMS: qabul qiluvchi (ota / ona / vasiy / talaba) tanlanadi --}}
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#smsModal">
+                    <i class="bx bx-message-dots me-1"></i>
+                    <span class="d-none d-sm-inline-block">SMS yuborish</span>
+                </button>
+
+                @role('admin')
+                {{-- Talaba nimani ko'rayotganini aynan o'z ko'zi bilan ko'rish --}}
+                <form method="POST" action="{{ route('impersonate.start', $student->id) }}"
+                      onsubmit="return confirm('{{ $student->name }} hisobiga kirasizmi? Barcha amallar shu foydalanuvchi nomidan bajariladi.');">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bx bx-log-in me-1"></i>
+                        <span class="d-none d-sm-inline-block">Profiliga kirish</span>
+                    </button>
+                </form>
+                @endrole
+
             @role('admin')
-            <div class="dt-action-buttons text-end pt-3 pt-md-0">
+            <div class="dt-action-buttons text-end">
                 <div class="dt-buttons btn-group flex-wrap">
                     <div class="btn-group">
                         <a class="btn buttons-collection dropdown-toggle btn-label-primary me-2" tabindex="0"
@@ -25,7 +45,10 @@
                 </div>
             </div>
             @endrole
+            </div>
         </div>
+
+        @include('partials.student-sms-modal', ['student' => $student])
 
         <div class="row mb-5">
             <div class="col-md">
@@ -86,6 +109,78 @@
         </div>
     </div>
 
+    {{-- O'zlashtirish: davomat / uy vazifa / dars faoliyati / test + umumiy reyting.
+         Ko'rsatkichlar talaba o'sha paytda qaysi guruhda bo'lgan bo'lsa o'shanga
+         qarab hisoblanadi, shuning uchun guruhi o'zgargan talabaning tarixi ham
+         shu yerda to'liq ko'rinadi. --}}
+    @isset($progress)
+        @php
+            $tone = fn(?int $v) => $v === null ? 'secondary'
+                : ($v >= config('grading.bands.good', 80) ? 'success'
+                : ($v >= config('grading.bands.ok', 60) ? 'warning' : 'danger'));
+            $labels = [
+                'attendance' => ['Davomat', 'bx-calendar-check'],
+                'homework'   => ['Uy vazifa', 'bx-task'],
+                'skills'     => ['Dars faoliyati', 'bx-book-open'],
+                'tests'      => ['Test', 'bx-clipboard'],
+            ];
+        @endphp
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span>O‘zlashtirish dinamikasi</span>
+                        <div class="d-flex align-items-center gap-2">
+                            @if($progress['current'] !== null)
+                                <span class="badge bg-label-{{ $tone($progress['current']) }}">
+                                    Joriy: {{ $progress['current'] }}
+                                </span>
+                                @if($progress['delta'] !== null && $progress['delta'] !== 0)
+                                    <span class="delta {{ $progress['delta'] > 0 ? 'is-up' : 'is-down' }}">
+                                        <i class="bx bx-{{ $progress['delta'] > 0 ? 'up' : 'down' }}-arrow-alt"></i>
+                                        {{ $progress['delta'] > 0 ? '+' : '' }}{{ $progress['delta'] }}
+                                    </span>
+                                @endif
+                            @endif
+                            <a href="{{ route('progress.student', $student->id) }}"
+                               class="btn btn-sm btn-outline-secondary">Batafsil</a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3 mb-3">
+                            @foreach($labels as $key => [$label, $icon])
+                                @php $value = $progress['components'][$key] ?? null; @endphp
+                                <div class="col-6 col-lg-3">
+                                    <div class="metric-box">
+                                        <div class="metric-value text-{{ $tone($value) }}">
+                                            {{ $value ?? '—' }}
+                                        </div>
+                                        <div class="metric-label">
+                                            <i class="bx {{ $icon }} me-1"></i>{{ $label }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        @if($progress['basis'] === 'attendance_only')
+                            <p class="text-muted mb-3" style="font-size: .8rem;">
+                                <i class="bx bx-info-circle me-1"></i>Hozircha faqat davomat asosida hisoblangan.
+                            </p>
+                        @endif
+
+                        @include('partials.progress-chart', [
+                            'chartId' => 'studentShowProgress',
+                            'buckets' => $progress['buckets'],
+                        ])
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endisset
+
     <div class="row">
         @role('admin')
         <div class="col-md-6 mt-4">
@@ -132,7 +227,10 @@
                         <tr>
                             <th>No</th>
                             <th>Group</th>
-                            <th>Date Joined</th>
+                            {{-- student_information now records departures too (action = 1),
+                                 so this column can no longer be labelled "Date Joined". --}}
+                            <th>Amal</th>
+                            <th>Sana</th>
                         </tr>
                         </thead>
                         <tbody class="table-border-bottom-0">
@@ -140,11 +238,16 @@
                             <tr>
                                 <td>{{$loop->iteration}}</td>
                                 <td>{{$item->group}}</td>
-                                <td>{{$item->created_at->format('d M Y, H:i')}}</td>
+                                <td>
+                                    <span class="badge bg-label-{{ $item->actionTone() }}">
+                                        <i class="bx {{ $item->actionIcon() }} me-1"></i>{{ $item->actionLabel() }}
+                                    </span>
+                                </td>
+                                <td>{{ $item->created_at?->format('d M Y, H:i') ?? '—' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center">No group history found.</td>
+                                <td colspan="4" class="text-center">No group history found.</td>
                             </tr>
                         @endforelse
                         </tbody>

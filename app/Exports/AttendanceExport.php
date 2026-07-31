@@ -51,43 +51,42 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
             ->unique()
             ->toArray();
 
-        // 3. Shu oydagi DAVOMAT (Absent/Late) yozuvlarini olish
+        // 3. Shu oydagi DAVOMAT (Absent/Late) yozuvlarini olish.
+        //    Kelgan talaba uchun qator yozilmaydi — u shundoq ham "bor" hisoblanadi.
         $attendances = Attendance::where('group_id', $this->groupId)
+            ->whereIn('status', [0, 2])
             ->whereYear('created_at', $this->year)
             ->whereMonth('created_at', $this->month)
             ->get();
 
 
-        // Davomatni qulay formatga o'tkazish: [user_id][kun] = status
+        // Davomatni qulay formatga o'tkazish: [user_id][kun] = status.
+        // Kun kaliti (int) — AttendanceService ham aynan shunday kalit ishlatadi,
+        // shuning uchun Excel ekrandagi jadval bilan bir xil chiqadi.
         $attendanceMap = [];
         foreach ($attendances as $att) {
             $day = (int) $att->created_at->format('d');
-            $attendanceMap[$att->user_id][$day] = $att->status;
+            $attendanceMap[$att->user_id][$day] = (int) $att->status;
         }
 
-        // 4. Jadvalni shakllantirish
-        $daysInMonth = Carbon::createFromDate($this->year, $this->month)->daysInMonth;
+        // 4. Jadvalni shakllantirish.
+        // Diqqat: kunni 1 qilib berish shart — aks holda bugungi kun (masalan 31)
+        // qisqa oyga sig'may keyingi oyga oshib ketadi va daysInMonth noto'g'ri bo'ladi.
+        $daysInMonth = Carbon::createFromDate($this->year, $this->month, 1)->daysInMonth;
         $collection = collect();
 
         foreach ($students as $student) {
             // Qator boshida talaba ismi
-            $row = ['Student Name' => $student->name];
+            $row = ['Talaba' => $student->name];
 
             // 1 dan 31 gacha (yoki oy oxirigacha) aylanamiz
             for ($day = 1; $day <= $daysInMonth; $day++) {
                 $statusText = ''; // Default bo'sh
 
-                // 1-Tekshiruv: Aniq davomat yozuvi bormi? (NB yoki Kech)
+                // 1-Tekshiruv: Aniq davomat yozuvi bormi? (kelmadi yoki kechikdi)
                 if (isset($attendanceMap[$student->id][$day])) {
-                    $status = $attendanceMap[$student->id][$day];
-                    if ($status == 0) {
-                        $statusText = 'NB';
-                    } elseif ($status == 2) {
-                        $statusText = 'Reasonable'; // Changed from 'Sababli' to 'Reasonable'
-                    } elseif ($status == 1) {
-                        $statusText = '+'; // Ehtimol bazada 1 qolib ketgan bo'lsa
-                    }
-                } 
+                    $statusText = $attendanceMap[$student->id][$day] === 2 ? 'Kech' : 'NB';
+                }
                 // 2-Tekshiruv: Agar yozuv bo'lmasa, shu kuni dars bo'lganmi?
                 elseif (in_array($day, $lessonDays)) {
                     // Dars bo'lgan va talaba "Absent/Late" emas -> Demak u BOR
@@ -106,9 +105,9 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
 
     public function headings(): array
     {
-        $daysInMonth = Carbon::createFromDate($this->year, $this->month)->daysInMonth;
-        $headings = ['Student Name'];
-        
+        $daysInMonth = Carbon::createFromDate($this->year, $this->month, 1)->daysInMonth;
+        $headings = ['Talaba'];
+
         for ($i = 1; $i <= $daysInMonth; $i++) {
             $headings[] = (string) $i;
         }
@@ -123,7 +122,8 @@ class AttendanceExport implements FromCollection, WithHeadings, ShouldAutoSize, 
                 'font' => ['bold' => true, 'size' => 12],
                 'alignment' => ['horizontal' => 'center'],
             ],
-            // Barcha katakchalarni markazga tekislash (A ustunidan tashqari)
+            // Kun ustunlari: A = talaba ismi, B..AF = 1..31-kunlar.
+            // Boshiga yangi ustun qo'shilsa, bu diapazonni ham kengaytirish shart.
             'B:AG' => ['alignment' => ['horizontal' => 'center']],
         ];
     }

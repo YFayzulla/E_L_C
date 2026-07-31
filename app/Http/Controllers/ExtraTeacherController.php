@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AuthorizesGroupAccess;
 use App\Models\Attendance;
 use App\Models\GroupTeacher;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ExtraTeacherController extends Controller
 {
+    use AuthorizesGroupAccess;
+
     /**
      * O'qituvchi va guruh bog'lanishini o'chirish.
      *
@@ -46,19 +49,25 @@ class ExtraTeacherController extends Controller
      */
     public function attendanceDelete(int $id)
     {
+        // Load first, THEN authorise: `role:user` only proves the caller is a
+        // teacher, not that this row belongs to a group they teach.
+        try {
+            $attendance = Attendance::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Davomat ma\'lumoti topilmadi.');
+        }
+
+        $this->assertTeachesGroup((int) $attendance->group_id);
+
         DB::beginTransaction();
 
         try {
-            $attendance = Attendance::findOrFail($id);
             $attendance->delete();
 
             DB::commit();
 
             return redirect()->back()->with('success', 'Davomat yozuvi muvaffaqiyatli o\'chirildi.');
 
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Davomat ma\'lumoti topilmadi.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ExtraTeacherController@attendanceDelete error: ' . $e->getMessage());

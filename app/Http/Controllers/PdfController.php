@@ -96,8 +96,11 @@ class PdfController extends Controller
     public function teacher()
     {
         try {
+            // Blade `location` va `date_born` ni ham chop etadi - ular select'da
+            // bo'lmagani uchun ustunlar doim bo'sh chiqardi.
             $teachers = User::role('user')
-                ->select('id', 'name', 'phone')
+                ->select('id', 'name', 'phone', 'location', 'date_born', 'percent')
+                ->with('teacherGroups:id,name')
                 ->orderBy('name')
                 ->get();
 

@@ -1,201 +1,238 @@
 @extends('template.master')
+
+@section('title', 'Talabani tahrirlash')
+@section('subtitle', $student->name)
+
 @section('content')
 
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg">
-        <div class="max-w-3xl mx-auto">
-            <h1 class="text-2xl font-bold text-center mb-6">Edit Student Data</h1>
-
-            <form action="{{ route('student.update', $student->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- Essential Information --}}
-                    <div class="md:col-span-2">
-                        <h2 class="text-lg font-semibold border-b pb-2 mb-4">Essential Information</h2>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="name" class="form-label text-dark">Full Name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name', $student->name) }}"
-                               class="form-control" required>
-                        @error('name')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="phone" class="form-label text-dark">Phone Number</label>
-                        <div class="input-group">
-                            <span class="input-group-text">+998</span>
-                            <input type="tel" id="phone" name="phone" maxlength="9" placeholder="912345678"
-                                   value="{{ old('phone', substr($student->phone, -9)) }}" class="form-control"
-                                   required>
-                        </div>
-                        @error('phone')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="group_id" class="form-label text-dark">Group</label>
-                        <select id="group_id" name="group_id[]" class="form-select choices" multiple required
-                                data-placeholder="Select groups">
-                            <option value="">-- Select Groups --</option>
-                            @foreach($groups as $group)
-                                <option value="{{ $group->id }}"
-                                        data-payment="{{ $group->monthly_payment }}" {{ $student->groups->contains($group->id) ? 'selected' : '' }}>
-                                    {{ $group->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('group_id')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div id="group_payments_container" class="mb-3 md:col-span-2" style="display:block">
-                        {{-- Per-group payment inputs will be injected here by JS --}}
-                    </div>
-
-                    {{-- should_pay removed: per-group payments are used instead --}}
-
-                    {{-- Additional Information --}}
-                    <div class="md:col-span-2">
-                        <h2 class="text-lg font-semibold border-b pb-2 mb-4 mt-6">Additional Information</h2>
-                    </div>
-
-
-                    <div class="mb-3">
-                        <label for="parents_name" class="form-label text-dark">Parents Name <span class="text-muted">(not necessary)</span></label>
-                        <input id="parents_name" name="parents_name" type="text"
-                               value="{{ old('parents_name', $student->parents_name) }}"
-                               class="form-control">
-                        @error('parents_name')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="parents_tel" class="form-label text-dark">Parents Phone <span class="text-muted">(not necessary)</span></label>
-                        <div class="input-group">
-                            <input type="text" id="parents_tel" name="parents_tel"
-                                   value="{{ old('parents_tel', $student->parents_tel,) }}"
-                                   class="form-control">
-                        </div>
-                        @error('parents_tel')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="photo" class="form-label text-dark">Photo <span
-                                    class="text-muted">(not necessary)</span></label>
-                        <input id="photo" name="photo" type="file" class="form-control">
-                        @error('photo')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="birth_date" class="form-label text-dark">Birth Date <span class="text-muted">(not necessary)</span></label>
-                        <input id="birth_date" name="birth_date" type="date"
-                               value="{{ old('birth_date', $student->date_born) }}" class="form-control">
-                        @error('birth_date')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label text-dark">New Password <span class="text-muted">(not necessary)</span></label>
-                        <input id="password" name="password" type="password" class="form-control">
-                        @error('password')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3 md:col-span-2">
-                        <label for="location" class="form-label text-dark">Location <span class="text-muted">(not necessary)</span></label>
-                        <input id="location" name="location" type="text"
-                               value="{{ old('location', $student->location) }}" class="form-control">
-                        @error('location')
-                        <div class="text-danger mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3 md:col-span-2">
-                        <label for="description" class="form-label text-dark">Description <span class="text-muted">(not necessary)</span></label>
-                        <textarea id="description" name="description"
-                                  class="form-control">{{ old('description', $student->description) }}</textarea>
-                    </div>
-                </div>
-
-                <div class="mt-6 text-center">
-                    <button type="submit" class="btn btn-warning btn-lg">Submit</button>
-                </div>
-            </form>
-        </div>
+    <div class="page-head justify-content-end">
+        <a href="{{ route('student.show', $student->id) }}" class="btn btn-outline-secondary">
+            <i class="bx bx-user me-1"></i> Profilni ko‘rish
+        </a>
+        <a href="{{ route('student.index') }}" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Ro‘yxatga qaytish
+        </a>
     </div>
+
+    <form action="{{ route('student.update', $student->id) }}" method="POST" enctype="multipart/form-data"
+          id="studentForm">
+        @csrf
+        @method('PUT')
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">Asosiy ma’lumotlar</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="name">Ism familiya <span class="text-danger">*</span></label>
+                                <input type="text" id="name" name="name"
+                                       class="form-control @error('name') is-invalid @enderror"
+                                       value="{{ old('name', $student->name) }}" required>
+                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="phone">Telefon raqami <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">+998</span>
+                                    <input type="tel" id="phone" name="phone" maxlength="9"
+                                           class="form-control @error('phone') is-invalid @enderror"
+                                           value="{{ old('phone', substr($student->phone, -9)) }}"
+                                           placeholder="901234567" inputmode="numeric" required>
+                                </div>
+                                @error('phone') <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div> @enderror
+                            </div>
+
+                            @include('partials.email-field', ['user' => $student])
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="birth_date">Tug‘ilgan sana</label>
+                                <input type="date" id="birth_date" name="birth_date"
+                                       class="form-control @error('birth_date') is-invalid @enderror"
+                                       value="{{ old('birth_date', $student->date_born) }}">
+                                @error('birth_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="password">
+                                    Yangi parol
+                                    <span class="text-muted fw-normal">(o‘zgartirmasangiz bo‘sh qoldiring)</span>
+                                </label>
+                                <input type="text" id="password" name="password"
+                                       class="form-control @error('password') is-invalid @enderror"
+                                       placeholder="••••••">
+                                @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label" for="group_id">Guruhlar <span class="text-danger">*</span></label>
+                                <select id="group_id" name="group_id[]" class="choices form-select" multiple required
+                                        data-placeholder="Guruh tanlang…">
+                                    @foreach($groups as $group)
+                                        <option value="{{ $group->id }}" data-payment="{{ $group->monthly_payment }}"
+                                                @if($student->groups->contains($group->id)) selected @endif>
+                                            {{ $group->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('group_id') <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">Ota-ona ma’lumotlari</div>
+                    <div class="card-body">
+                        @include('partials.guardian-fields', ['guardians' => $guardians ?? []])
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">Qo‘shimcha ma’lumotlar</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="location">Manzil</label>
+                                <input type="text" id="location" name="location"
+                                       class="form-control @error('location') is-invalid @enderror"
+                                       value="{{ old('location', $student->location) }}" placeholder="Ixtiyoriy">
+                                @error('location') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="photo">Rasm</label>
+                                <input type="file" id="photo" name="photo" accept="image/*"
+                                       class="form-control @error('photo') is-invalid @enderror">
+                                @error('photo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @if($student->photo)
+                                    <div class="form-text">Yangi rasm yuklansa, eskisi o‘chadi.</div>
+                                @endif
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label" for="description">Izoh</label>
+                                <textarea id="description" name="description" rows="3"
+                                          class="form-control @error('description') is-invalid @enderror"
+                                          placeholder="Ixtiyoriy">{{ old('description', $student->description) }}</textarea>
+                                @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">Oylik to‘lov</div>
+                    <div class="card-body d-flex flex-column">
+                        <div id="group_payments_container">
+                            {{-- Per-group payment inputs are injected here by JS --}}
+                        </div>
+
+                        <div class="metric-box mt-3">
+                            <div class="metric-label">Jami oylik to‘lov</div>
+                            <div class="metric-value" id="paymentsTotal">0</div>
+                        </div>
+
+                        <div class="form-text mt-2">
+                            To‘lov guruhdan olinadi, kerak bo‘lsa o‘zgartiring.
+                        </div>
+
+                        <div class="mt-auto pt-4 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bx bx-save me-1"></i> Saqlash
+                            </button>
+                            <a href="{{ route('student.index') }}" class="btn btn-outline-secondary">Bekor qilish</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const groupSelect = document.getElementById('group_id');
-            const paymentsContainer = document.getElementById('group_payments_container');
+            var groupSelect = document.getElementById('group_id');
+            var paymentsContainer = document.getElementById('group_payments_container');
+            var totalEl = document.getElementById('paymentsTotal');
+            var formEl = document.getElementById('studentForm');
+            var existingPayments = {!! json_encode(old('group_payment', $student->groups->pluck('pivot.payment', 'id')->toArray())) !!};
 
             function formatNumberWithSpaces(value) {
-                if (!value) return '';
+                if (value === null || value === undefined || value === '') return '';
                 return value.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
             }
 
-            // Strip spaces from group_payment inputs before submit
-            const formEl = document.querySelector('form[action="{{ route('student.update', $student->id) }}"]');
-            if (formEl) {
-                formEl.addEventListener('submit', function () {
-                    const gpInputs = paymentsContainer.querySelectorAll('input[name^="group_payment"]');
-                    gpInputs.forEach(i => i.value = i.value.replace(/\s/g, ''));
+            function recalcTotal() {
+                var total = 0;
+                paymentsContainer.querySelectorAll('.group-payment-input').forEach(function (i) {
+                    var raw = i.value.replace(/\s/g, '');
+                    total += raw ? parseInt(raw, 10) : 0;
                 });
+                totalEl.textContent = formatNumberWithSpaces(total) || '0';
             }
 
-            // Build per-group payment inputs when groups are selected.
             function renderGroupPayments() {
-                const selected = Array.from(groupSelect.selectedOptions).filter(o => o.value);
+                var selected = Array.prototype.slice.call(groupSelect.selectedOptions)
+                    .filter(function (o) { return o.value; });
+
                 paymentsContainer.innerHTML = '';
 
-                selected.forEach(opt => {
-                    const gid = opt.value;
-                    const name = opt.textContent.trim();
-                    const defaultPayment = opt.dataset.payment || '';
-                    const inputName = `group_payment[${gid}]`;
+                if (!selected.length) {
+                    var hint = document.createElement('p');
+                    hint.className = 'text-muted mb-0';
+                    hint.style.fontSize = '.85rem';
+                    hint.textContent = 'Avval guruh tanlang.';
+                    paymentsContainer.appendChild(hint);
+                    recalcTotal();
+                    return;
+                }
 
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'mb-2';
+                selected.forEach(function (opt) {
+                    var gid = opt.value;
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'mb-3';
 
-                    const label = document.createElement('label');
-                    label.className = 'form-label text-dark';
-                    label.textContent = `${name} payment`;
+                    var label = document.createElement('label');
+                    label.className = 'form-label';
+                    label.setAttribute('for', 'group_payment_' + gid);
+                    label.textContent = opt.textContent.trim();
 
-                    const input = document.createElement('input');
+                    var input = document.createElement('input');
                     input.type = 'text';
-                    input.name = inputName;
-                    // Prefill from old input, or pivot payment if available, or group's default
-                    const existingPayments = {!! json_encode(old('group_payment', $student->groups->pluck('pivot.payment', 'id')->toArray())) !!};
-                    input.value = (existingPayments && existingPayments[gid]) ? formatNumberWithSpaces(existingPayments[gid]) : formatNumberWithSpaces(defaultPayment);
+                    input.id = 'group_payment_' + gid;
+                    input.name = 'group_payment[' + gid + ']';
                     input.className = 'form-control group-payment-input';
+                    input.inputMode = 'numeric';
+                    input.value = (existingPayments && existingPayments[gid])
+                        ? formatNumberWithSpaces(existingPayments[gid])
+                        : formatNumberWithSpaces(opt.dataset.payment || '');
+
+                    input.addEventListener('input', function () {
+                        this.value = formatNumberWithSpaces(this.value.replace(/\s/g, ''));
+                        recalcTotal();
+                    });
 
                     wrapper.appendChild(label);
                     wrapper.appendChild(input);
                     paymentsContainer.appendChild(wrapper);
-
-                    input.addEventListener('input', function () {
-                        const rawVal = this.value.replace(/\s/g, '');
-                        this.value = formatNumberWithSpaces(rawVal);
-                    });
                 });
+
+                recalcTotal();
             }
 
-            // Initial render
-            renderGroupPayments();
+            // The server expects plain digits, not the grouped display value.
+            formEl.addEventListener('submit', function () {
+                paymentsContainer.querySelectorAll('.group-payment-input').forEach(function (i) {
+                    i.value = i.value.replace(/\s/g, '');
+                });
+            });
+
             groupSelect.addEventListener('change', renderGroupPayments);
+            renderGroupPayments();
         });
     </script>
 

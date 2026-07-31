@@ -43,13 +43,24 @@ class ProfileController extends Controller
             $user->fill($request->validated());
 
             // Agar email o'zgargan bo'lsa, tasdiqlashni bekor qilish
-            if ($user->isDirty('email')) {
+            $emailChanged = $user->isDirty('email');
+            if ($emailChanged) {
                 $user->email_verified_at = null;
             }
 
             $user->save();
 
             DB::commit(); // Muvaffaqiyatli yakunlash
+
+            // Xat tranzaksiyadan TASHQARIDA yuboriladi: pochta serveri ishlamasa ham
+            // profil o'zgarishi saqlanib qolishi kerak.
+            if ($emailChanged && filled($user->email)) {
+                try {
+                    $user->sendEmailVerificationNotification();
+                } catch (\Throwable $e) {
+                    Log::error('ProfileController@update mail error: ' . $e->getMessage());
+                }
+            }
 
             return Redirect::route('profile.edit')->with('status', 'profile-updated');
 

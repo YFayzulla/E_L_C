@@ -3,21 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AttendanceExport;
+use App\Http\Controllers\Concerns\AuthorizesGroupAccess;
 use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
 use App\Services\AttendanceService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
-use PDF;
 
 class GroupExtraController extends Controller
 {
+    use AuthorizesGroupAccess;
+
     public function __construct(protected AttendanceService $serviceAttendance)
     {
         // Service avtomatik inject qilinadi
@@ -97,57 +98,12 @@ class GroupExtraController extends Controller
     }
 
     /**
-     * Davomatni filtrlash yoki PDF hisobot chiqarish.
-     */
-    public function filter(Request $request, $id)
-    {
-        try {
-            $selectedDate = $request->filled('filter_date') ? Carbon::parse($request->input('filter_date')) : Carbon::today();
-            $group = Group::findOrFail($id);
-            $task = $request->input('task');
-
-            // Umumiy query
-            $items = Attendance::whereDate('created_at', $selectedDate)
-                ->where('group_id', $id)
-                ->with('user:id,name') // Optimizatsiya: N+1 oldini olish
-                ->get();
-
-            if ($task === 'show') {
-                // Endi bu metod ishlatilmasligi mumkin, chunki biz attendance metodini o'zgartirdik.
-                // Lekin agar filter alohida ishlatilsa, uni ham teacher view ga yo'naltirish kerak.
-                // Hozircha qoldiramiz, lekin attendance metodi asosiy hisoblanadi.
-                return view('admin.group.attendance', compact('items', 'group', 'selectedDate'));
-            }
-
-            if ($task === 'report') {
-                try {
-                    $pdf = PDF::loadView('admin.pdf.attendance_in_group', [
-                        'items' => $items,
-                        'group' => $group,
-                        'date' => $selectedDate
-                    ]);
-
-                    $fileName = 'attendance_report_' . $group->name . '_' . $selectedDate->format('Y-m-d') . '.pdf';
-                    return $pdf->download($fileName);
-                } catch (\Exception $pdfEx) {
-                    Log::error('PDF Generation error: ' . $pdfEx->getMessage());
-                    return redirect()->back()->with('error', 'PDF hujjatini yaratishda xatolik.');
-                }
-            }
-
-            return redirect()->back()->with('error', 'Noto\'g\'ri amal tanlandi.');
-
-        } catch (\Exception $e) {
-            Log::error('GroupExtraController@filter error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Ma\'lumotlarni yuklashda xatolik.');
-        }
-    }
-
-    /**
      * Guruhdagi talabalar ro'yxatini ko'rsatish.
      */
     public function show($id)
     {
+        $this->assertTeachesGroup((int) $id);
+
         try {
             // Guruhga tegishli talabalarni pivot jadval orqali olish
             $students = User::whereHas('groups', function ($query) use ($id) {
@@ -172,6 +128,8 @@ class GroupExtraController extends Controller
      */
     public function attendance($id)
     {
+        $this->assertTeachesGroup((int) $id);
+
         try {
             // Use the shared AttendanceService to get data
             $serviceData = $this->serviceAttendance->attendance($id);
@@ -179,19 +137,24 @@ class GroupExtraController extends Controller
             // Return the TEACHER view instead of the admin view
             return view('teacher.attendance.attendance', [
                 'id' => $id,
-                'today' => $serviceData['today'] ?? now(),
-                'data' => $serviceData['data'] ?? [],
-                'year' => $serviceData['year'] ?? date('Y'),
-                'month' => $serviceData['month'] ?? date('m'),
-                'lessonDays' => $serviceData['lessonDays'] ?? [],
-                'attendances' => $serviceData['attendances'] ?? [],
-                'group' => $serviceData['group'] ?? null,
-                'students' => $serviceData['students'] ?? [],
+                'today' => $serviceData['today'],
+                'data' => $serviceData['data'],
+                'year' => $serviceData['year'],
+                'month' => $serviceData['month'],
+                'date' => $serviceData['date'],
+                'lessonDays' => $serviceData['lessonDays'],
+                'attendances' => $serviceData['attendances'],
+                'group' => $serviceData['group'],
+                'students' => $serviceData['students'],
+                'studentNames' => $serviceData['studentNames'],
+                'absentCount' => $serviceData['absentCount'],
+                'lateCount' => $serviceData['lateCount'],
+                'rate' => $serviceData['rate'],
             ]);
 
         } catch (\Exception $e) {
             Log::error('GroupExtraController@attendance error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Davomat jadvalini yuklashda xatolik: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Davomat jadvalini yuklashda xatolik.');
         }
     }
 
@@ -200,21 +163,19 @@ class GroupExtraController extends Controller
      */
     public function export($id)
     {
+        $this->assertTeachesGroup((int) $id);
+
         try {
-            $date = request('date', now()->format('Y-m'));
-            // Sana formatini tekshirish uchun oddiy parsing
-            $parts = explode('-', $date);
+            $date = request('date');
 
-
-            if (count($parts) !== 2) {
-                return redirect()->back()->with('error', 'Noto\'g\'ri sana formati.');
+            if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}$/', $date)) {
+                $date = now()->format('Y-m');
             }
 
-            list($year, $month) = $parts;
-
+            [$year, $month] = array_map('intval', explode('-', $date));
 
             $group = Group::findOrFail($id);
-            $fileName = 'attendance_' . $group->name . '_' . $year . '_' . $month . '.xlsx';
+            $fileName = 'davomat_' . $group->name . '_' . $year . '_' . str_pad((string) $month, 2, '0', STR_PAD_LEFT) . '.xlsx';
 
             return Excel::download(new AttendanceExport($id, $year, $month), $fileName);
 

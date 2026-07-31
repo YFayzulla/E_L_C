@@ -3,8 +3,27 @@
 
     <div class="card">
 
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <h5 class="mb-0">Payment</h5>
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0">To‘lovlar</h5>
+                @if(! $showAll && $hidden > 0)
+                    <small class="text-muted">
+                        {{ $hidden }} ta talaba ko‘rsatilmadi — kutish zalida yoki bitirgan.
+                    </small>
+                @elseif($showAll)
+                    <small class="text-muted">Kutish zalidagilar va bitirganlar ham ko‘rsatilmoqda.</small>
+                @endif
+            </div>
+
+            @if($showAll)
+                <a href="{{ route('dept.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bx bx-filter-alt me-1"></i> Faqat faol talabalar
+                </a>
+            @else
+                <a href="{{ route('dept.index', ['all' => 1]) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bx bx-show me-1"></i> Hammasini ko‘rsatish
+                </a>
+            @endif
         </div>
 
         <div class="table-responsive text-nowrap">

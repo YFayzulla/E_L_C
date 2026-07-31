@@ -1,51 +1,71 @@
 <x-guest-layout>
-    <div class="card">
-        <div class="card-body">
-            <div class="app-brand justify-content-center mb-4 mt-2">
-                <a href="/" class="app-brand-link gap-2">
-                    <span class="app-brand-logo demo">
-                        <img src="{{ asset('logos/SymbolRed.svg') }}" alt="Logo" width="40">
-                    </span>
-                    <span class="app-brand-text demo text-body fw-bold">SpeakUp</span>
-                </a>
-            </div>
-            <h4 class="mb-2 fw-bold text-center">Reset Your Password</h4>
-            <p class="mb-4 text-start">
-                Set your new password for your account.
-            </p>
 
-            <form method="POST" action="{{ route('password.store') }}">
-                @csrf
+    <img src="{{ asset('logos/main.png') }}" alt="ALPHA o‘quv markazi" class="auth-logo">
 
-                <!-- Password Reset Token -->
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+    <h1 class="auth-title">Yangi parol</h1>
+    <p class="auth-sub">Hisobingiz uchun yangi parol o‘rnating</p>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" autofocus value="{{ old('email', $request->email) }}" required />
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-
-                <div class="mb-3 form-password-toggle">
-                    <label class="form-label" for="password">New Password</label>
-                    <div class="input-group input-group-merge">
-                        <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" required autocomplete="new-password" />
-                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                    </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-
-                <div class="mb-3 form-password-toggle">
-                    <label class="form-label" for="password_confirmation">Confirm Password</label>
-                    <div class="input-group input-group-merge">
-                        <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password_confirmation" required autocomplete="new-password" />
-                        <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                    </div>
-                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-                </div>
-
-                <button type="submit" class="btn btn-primary d-grid w-100">Reset Password</button>
-            </form>
+    @if (session('error'))
+        <div class="alert alert-danger d-flex align-items-start gap-2 py-2" role="alert">
+            <i class="bx bx-error-circle fs-5 lh-1 mt-1"></i>
+            <div>{{ session('error') }}</div>
         </div>
-    </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger d-flex align-items-start gap-2 py-2" role="alert">
+            <i class="bx bx-error-circle fs-5 lh-1 mt-1"></i>
+            <div>{{ $errors->first() }}</div>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('password.store') }}" novalidate>
+        @csrf
+
+        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+        <div class="mb-3">
+            <label class="form-label" for="email">Pochta manzili</label>
+            <div class="position-relative">
+                <i class="bx bx-envelope position-absolute text-muted"
+                   style="left: .75rem; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                <input id="email" name="email" type="email" value="{{ old('email', $request->email) }}"
+                       class="form-control ps-5 @error('email') is-invalid @enderror"
+                       placeholder="misol@pochta.uz" dir="ltr" required autofocus autocomplete="email">
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="password">Yangi parol</label>
+            <div class="position-relative">
+                <i class="bx bx-lock-alt position-absolute text-muted"
+                   style="left: .75rem; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                <input id="password" name="password" type="password"
+                       class="form-control ps-5 @error('password') is-invalid @enderror"
+                       placeholder="••••••••" required autocomplete="new-password">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label" for="password_confirmation">Parolni takrorlang</label>
+            <div class="position-relative">
+                <i class="bx bx-lock-alt position-absolute text-muted"
+                   style="left: .75rem; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                <input id="password_confirmation" name="password_confirmation" type="password"
+                       class="form-control ps-5 @error('password_confirmation') is-invalid @enderror"
+                       placeholder="••••••••" required autocomplete="new-password">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+            Parolni saqlash <i class="bx bx-right-arrow-alt ms-1"></i>
+        </button>
+    </form>
+
+    <p class="text-center mt-3 mb-0">
+        <a href="{{ route('login') }}" class="text-decoration-none">
+            <i class="bx bx-chevron-left"></i> Kirish sahifasiga qaytish
+        </a>
+    </p>
+
 </x-guest-layout>

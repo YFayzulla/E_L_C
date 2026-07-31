@@ -1,22 +1,43 @@
 @extends('template.master')
+
+@section('title', 'Baholash')
+@section('subtitle', 'Baholash uchun guruhni tanlang')
+
 @section('content')
 
-        <div class="d-flex justify-content-center">
-            <table class="table table-sm w-75">
-                @forelse($groups as $group)
+    <div class="card">
+        @if($groups->isEmpty())
+            <div class="empty-state">
+                <i class="bx bx-list-check"></i>
+                <h6>Guruh yo‘q</h6>
+                <p class="mb-0">Sizga hali baholash uchun guruh biriktirilmagan.</p>
+            </div>
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
                     <tr>
-                        <th>
-                            <a href="{{route('assessment.show', $group->group_id)}}" class="btn btn-outline-primary w-100 text-left">
-                                <b>{{$group->group->name}}</b>
-                            </a>
-                        </th>
+                        <th>Guruh</th>
+                        <th class="text-end" style="width: 8rem;">Amal</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td>No groups assigned for assessment yet.</td>
-                    </tr>
-                @endforelse
-            </table>
-        </div>
+                    </thead>
+                    {{-- id="myTable": navbardagi tezkor qidiruv shu jadvalni filtrlaydi --}}
+                    <tbody id="myTable">
+                    @foreach($groups as $group)
+                        <tr>
+                            <td class="fw-semibold">{{ $group->group->name ?? '—' }}</td>
+                            <td class="text-end">
+                                <a href="{{ route('assessment.show', $group->group_id) }}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    Baholash <i class="bx bx-right-arrow-alt ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </div>
 
 @endsection

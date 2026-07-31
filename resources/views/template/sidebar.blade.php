@@ -1,10 +1,17 @@
+@php
+    /**
+     * Small helper so every entry stays a one-liner.
+     * Pass the route names that should light the item up.
+     */
+    $isActive = fn(...$routes) => request()->routeIs(...$routes) ? 'active' : '';
+@endphp
+
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-    <div class="app-brand demo"
-         style="height: auto; min-height: 120px; display: flex; align-items: center; justify-content: center;">
-        <a href="{{ route('dashboard') }}" class="app-brand-link" style="width: 100%; text-align: center;">
-            <img src="{{ asset('logos/main.png') }}"
-                 alt="Logo"
-                 style="width: 100%; max-width: 170px; height: auto; object-fit: contain;">
+
+    <div class="app-brand">
+        <a href="{{ route('dashboard') }}" class="app-brand-link d-flex align-items-center justify-content-center w-100">
+            <img src="{{ asset('logos/main.png') }}" alt="ALPHA o'quv markazi" class="brand-logo"
+                 style="max-width: 150px; width: 100%; height: auto; object-fit: contain;">
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -14,78 +21,265 @@
 
     <ul class="menu-inner py-1">
 
+        {{-- ================= ADMIN ================= --}}
         @role('admin')
-        {{-- Admin Menu --}}
-        <li class="menu-item @if(request()->routeIs('dashboard')) active @endif">
+        <li class="menu-header small">Umumiy</li>
+
+        <li class="menu-item {{ $isActive('dashboard') }}">
             <a href="{{ route('dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bxs-dashboard"></i>
-                <div data-i18n="Analytics">Dashboard</div>
+                <div>Boshqaruv paneli</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('teacher.index', 'teacher.create', 'teacher.edit', 'teacher.show')) active @endif">
+
+        <li class="menu-header small">O'quv jarayoni</li>
+
+        <li class="menu-item {{ $isActive('teacher.index', 'teacher.create', 'teacher.edit', 'teacher.show') }}">
             <a href="{{ route('teacher.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Analytics">Teachers</div>
+                <i class="menu-icon tf-icons bx bx-chalkboard"></i>
+                <div>O'qituvchilar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('group.index', 'group.create', 'group.edit', 'group.show', 'group.attendance', 'group.create.room')) active @endif">
+
+        <li class="menu-item {{ $isActive('group.index', 'group.create', 'group.edit', 'group.attendance', 'group.students') }}">
             <a href="{{ route('group.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-group"></i>
-                <div data-i18n="Analytics">Groups</div>
+                <div>Guruhlar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('student.index', 'student.create', 'student.edit', 'student.show')) active @endif">
+
+        <li class="menu-item {{ $isActive('student.index', 'student.create', 'student.edit', 'student.show') }}">
             <a href="{{ route('student.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bxs-user"></i>
-                <div data-i18n="Analytics">Students</div>
+                <i class="menu-icon tf-icons bx bx-user-voice"></i>
+                <div>Talabalar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('dept.index')) active @endif">
-            <a href="{{ route('dept.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-money"></i>
-                <div data-i18n="Analytics">Payment</div>
+
+        <li class="menu-item {{ $isActive('parents.index', 'parents.create', 'parents.edit') }}">
+            <a href="{{ route('parents.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-heart"></i>
+                <div>Ota-onalar</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('test') || request()->routeIs('test.show')) active @endif">
+
+        <li class="menu-item {{ $isActive('attendance.overview', 'attendance.log') }}">
+            <a href="{{ route('attendance.overview') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div>Davomat</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('test', 'test.show') }}">
             <a href="{{ route('test') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-test-tube"></i>
-                <div data-i18n="Analytics">Assessment</div>
+                <i class="menu-icon tf-icons bx bx-clipboard"></i>
+                <div>Baholash</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('waiters.index')) active @endif">
+
+        <li class="menu-item {{ $isActive('homework.admin.index') }}">
+            <a href="{{ route('homework.admin.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Uy vazifalari</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('progress.index', 'progress.group', 'progress.student', 'skills.report') }}">
+            <a href="{{ route('progress.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div>O'zlashtirish</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('certificates.index', 'certificates.create') }}">
+            <a href="{{ route('certificates.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-award"></i>
+                <div>Sertifikatlar</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('sms-templates.index', 'sms-templates.create', 'sms-templates.edit') }}">
+            <a href="{{ route('sms-templates.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-message-square-dots"></i>
+                <div>SMS shablonlari</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('waiters.index') }}">
             <a href="{{ route('waiters.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-door-open"></i>
-                <div data-i18n="Analytics">Waiting Room</div>
+                <i class="menu-icon tf-icons bx bx-hourglass"></i>
+                <div>Kutish xonasi</div>
             </a>
         </li>
-        {{--        <li class="menu-item @if(request()->routeIs('finance.other')) active @endif">--}}
-        {{--            <a href="{{ route('finance.other') }}" class="menu-link">--}}
-        {{--                <i class="menu-icon tf-icons bx bx-coin-stack"></i>--}}
-        {{--                <div data-i18n="Analytics">Finance</div>--}}
-        {{--            </a>--}}
-        {{--        </li>--}}
+
+        <li class="menu-header small">Moliya</li>
+
+        <li class="menu-item {{ $isActive('dept.index', 'dept.create', 'dept.edit', 'dept.show') }}">
+            <a href="{{ route('dept.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>To'lovlar</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('finance.other') }}">
+            <a href="{{ route('finance.other') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div>Xarajatlar</div>
+            </a>
+        </li>
         @endrole
 
+        {{-- ================= TEACHER ================= --}}
         @role('user')
-        {{-- Teacher Menu --}}
-        <li class="menu-item @if(request()->routeIs('teacher.groups')) active @endif">
+        <li class="menu-header small">Ish stoli</li>
+
+        <li class="menu-item {{ $isActive('dashboard') }}">
+            <a href="{{ route('dashboard') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                <div>Boshqaruv paneli</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('teacher.groups') }}">
             <a href="{{ route('teacher.groups') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-group"></i>
-                <div data-i18n="Analytics">My Groups</div>
+                <div>Mening guruhlarim</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('attendance') || request()->routeIs('group.attendance')) active @endif">
+
+        <li class="menu-item {{ $isActive('attendance', 'attendance.check', 'group.attendance') }}">
             <a href="{{ route('attendance') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-task"></i>
-                <div data-i18n="Analytics">Attendance</div>
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div>Davomat</div>
             </a>
         </li>
-        <li class="menu-item @if(request()->routeIs('assessment.teacher.groups') || request()->routeIs('assessment.show')) active @endif">
+
+        <li class="menu-item {{ $isActive('assessment.teacher.groups', 'assessment.index', 'assessment.show') }}">
             <a href="{{ route('assessment.teacher.groups') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-list-check"></i>
-                <div data-i18n="Analytics">Assessment</div>
+                <div>Baholash</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('homework.index', 'homework.create', 'homework.edit', 'homework.show', 'homework.grade') }}">
+            <a href="{{ route('homework.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Uy vazifalari</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('skills.groups', 'skills.grade', 'skills.report') }}">
+            <a href="{{ route('skills.groups') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book-open"></i>
+                <div>Ko'nikmalar</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('progress.index', 'progress.group', 'progress.student') }}">
+            <a href="{{ route('progress.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div>O'zlashtirish</div>
             </a>
         </li>
         @endrole
+
+        {{-- ================= STUDENT ================= --}}
+        @role('student')
+        <li class="menu-header small">Mening sahifam</li>
+
+        <li class="menu-item {{ $isActive('dashboard') }}">
+            <a href="{{ route('dashboard') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                <div>Bosh sahifa</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('attendance.index') }}">
+            <a href="{{ route('attendance.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div>Davomatim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('assessment.index', 'assessment.show') }}">
+            <a href="{{ route('assessment.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-medal"></i>
+                <div>Natijalarim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('student.homework', 'student.homework.show') }}">
+            <a href="{{ route('student.homework') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div>Uy vazifalarim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('student.skills') }}">
+            <a href="{{ route('student.skills') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book-open"></i>
+                <div>Ko'nikmalarim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('student.progress') }}">
+            <a href="{{ route('student.progress') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div>O'zlashtirishim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('student.certificates') }}">
+            <a href="{{ route('student.certificates') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-award"></i>
+                <div>Sertifikatlarim</div>
+            </a>
+        </li>
+        @endrole
+
+        {{-- ================= PARENT (OTA-ONA) ================= --}}
+        @role('parent')
+        <li class="menu-header small">Ota-ona kabineti</li>
+
+        <li class="menu-item {{ $isActive('parent.index', 'parent.child') }}">
+            <a href="{{ route('parent.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-heart"></i>
+                <div>Farzandlarim</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('parent.attendance') }}">
+            <a href="{{ route('parent.attendance') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div>Davomat</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('parent.payments') }}">
+            <a href="{{ route('parent.payments') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-wallet"></i>
+                <div>To'lovlar</div>
+            </a>
+        </li>
+        @endrole
+
+        {{-- ================= EVERYONE ================= --}}
+        <li class="menu-header small">Hisob</li>
+
+        <li class="menu-item {{ $isActive('profile.edit') }}">
+            <a href="{{ route('profile.edit') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div>Profil</div>
+            </a>
+        </li>
+
+        <li class="menu-item">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="menu-link w-100 text-start border-0 bg-transparent">
+                    <i class="menu-icon tf-icons bx bx-log-out"></i>
+                    <div>Chiqish</div>
+                </button>
+            </form>
+        </li>
     </ul>
 </aside>

@@ -1,78 +1,121 @@
 @extends('template.master')
+
+@section('title', 'O‘qituvchilar')
+@section('subtitle', 'O‘qituvchilar, ularning guruhlari va talabalari')
+
 @section('content')
 
+    <div class="page-head">
+        <div class="page-sub">Jami {{ $teachers->count() }} ta o‘qituvchi</div>
+        <div class="d-flex gap-2 flex-wrap">
+            @role('admin')
+            <a href="{{ url('/teacher/pdf') }}" class="btn btn-outline-secondary">
+                <i class="bx bxs-file-pdf me-1"></i> PDF
+            </a>
+            @endrole
+            <a href="{{ route('teacher.create') }}" class="btn btn-primary">
+                <i class="bx bx-plus me-1"></i> Yangi o‘qituvchi
+            </a>
+        </div>
+    </div>
+
     <div class="card">
-
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <h5 class="mb-0">Teachers</h5>
-            <div class="dt-action-buttons text-end pt-3 pt-md-0">
-                <div class="dt-buttons btn-group flex-wrap">
-                    @role('admin')
-                    <div class="btn-group">
-                        <a class="btn buttons-collection dropdown-toggle btn-label-primary me-2" tabindex="0"
-                           aria-controls="DataTables_Table_0" type="button" id="dropdownMenuButton"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <span><i class="bx bx-export me-sm-1"></i> <span
-                                        class="d-none d-sm-inline-block">Export</span></span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" href="{{ URL::to('/teacher/pdf') }}"><i
-                                            class="bx bxs-file-pdf me-1"></i> Pdf</a></li>
-                        </ul>
-                    </div>
-                    @endrole
-                    <a href="{{ route('teacher.create') }}" class="btn btn-secondary create-new btn-primary"
-                       tabindex="0"
-                       aria-controls="DataTables_Table_0">
-                        <span><i class="bx bx-plus me-sm-1"></i> <span
-                                    class="d-none d-sm-inline-block">Add New Teacher</span></span>
-                    </a>
-                </div>
+        @if($teachers->isEmpty())
+            <div class="empty-state">
+                <i class="bx bx-user-voice"></i>
+                <h6>O‘qituvchilar yo‘q</h6>
+                <p class="mb-3">Birinchi o‘qituvchini qo‘shing va unga guruh biriktiring.</p>
+                <a href="{{ route('teacher.create') }}" class="btn btn-primary btn-sm">
+                    <i class="bx bx-plus me-1"></i> Yangi o‘qituvchi
+                </a>
             </div>
-        </div>
-
-        <div class="table-responsive text-nowrap">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>id</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Groups</th>
-                    <th>action</th>
-                </tr>
-                </thead>
-                <tbody id="myTable" class="table-border-bottom-0">
-                @foreach($teachers as $teacher)
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
                     <tr>
-                        <td>{{$loop->index+1}}</td>
-                        <td>{{$teacher->name}}</td>
-                        <td>+{{$teacher->phone}}</td>
-                        <td>
-                            @foreach($teacher->teacherGroups as $group)
-                                <span class="badge bg-label-primary me-1">{{ $group->name }}</span>
-                            @endforeach
-                        </td>
-                        <td class="d-flex">
-
-                            <a href="{{route('teacher.edit',$teacher->id)}}" class="btn-outline-warning btn m-1">
-                                <i class='bx bx-edit-alt'></i>
-                            </a>
-                            <form action="{{route('teacher.destroy',$teacher->id)}}" method="post"
-                                  onsubmit="return confirm('are you sure for deleting ');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="" class="btn-outline-danger btn m-1">
-                                    <i class='bx bx-trash-alt'></i>
-                                </button>
-                            </form>
-                        </td>
+                        <th style="width: 3rem;">#</th>
+                        <th>O‘qituvchi</th>
+                        <th>Telefon</th>
+                        <th>Guruhlar</th>
+                        <th class="text-center">Talabalar</th>
+                        <th class="text-center">Ulush</th>
+                        <th class="text-end">Amallar</th>
                     </tr>
-                @endforeach
-                </tbody>
-            </table>
-        </div>
-     
+                    </thead>
+                    <tbody id="myTable">
+                    @foreach($teachers as $teacher)
+                        <tr>
+                            <td class="text-muted">{{ $loop->iteration }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar avatar-sm">
+                                        @if($teacher->photo)
+                                            <img src="{{ asset('storage/' . $teacher->photo) }}" alt=""
+                                                 class="rounded-circle w-100 h-100" style="object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($teacher->name, 0, 2)) }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <a href="{{ route('teacher.show', $teacher->id) }}"
+                                           class="fw-semibold text-truncate d-block">{{ $teacher->name }}</a>
+                                        @if($teacher->location)
+                                            <small class="text-muted">{{ $teacher->location }}</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td dir="ltr">+{{ $teacher->phone }}</td>
+                            <td>
+                                @forelse($teacher->teacherGroups->take(3) as $group)
+                                    <span class="badge bg-label-primary me-1 mb-1 d-inline-block">{{ $group->name }}</span>
+                                @empty
+                                    <span class="text-muted">— biriktirilmagan</span>
+                                @endforelse
+                                @if($teacher->groups_count > 3)
+                                    <a href="{{ route('teacher.show', $teacher->id) }}"
+                                       class="badge bg-label-info d-inline-block">+{{ $teacher->groups_count - 3 }}</a>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-label-warning">{{ $studentCounts[$teacher->id] ?? 0 }}</span>
+                            </td>
+                            <td class="text-center">
+                                @if($teacher->percent !== null && $teacher->percent !== '')
+                                    <span class="badge bg-label-info">{{ $teacher->percent }}%</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{{ route('teacher.show', $teacher->id) }}"
+                                       class="btn btn-sm btn-outline-secondary" title="Ko‘rish">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                    <a href="{{ route('teacher.edit', $teacher->id) }}"
+                                       class="btn btn-sm btn-outline-secondary" title="Tahrirlash">
+                                        <i class="bx bx-edit-alt"></i>
+                                    </a>
+                                    <form action="{{ route('teacher.destroy', $teacher->id) }}" method="post"
+                                          onsubmit="return confirm('{{ $teacher->name }} o‘chirilsinmi? Guruh biriktirishlari ham bekor qilinadi.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="O‘chirish">
+                                            <i class="bx bx-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 
 @endsection

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class EmailVerificationNotificationController extends Controller
 {
@@ -14,12 +14,24 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(RouteServiceProvider::HOME);
+        $user = $request->user();
+
+        // TRUE for blank addresses too, so phone-only accounts simply bounce home.
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->intended(route('dashboard'))
+                ->with('success', 'Hisobingiz allaqachon tasdiqlangan.');
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        // The mailer runs synchronously (QUEUE_CONNECTION=sync); an unreachable SMTP
+        // host must show an Uzbek message instead of a 500 page.
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            Log::error('EmailVerificationNotificationController@store error: ' . $e->getMessage());
 
-        return back()->with('status', 'verification-link-sent');
+            return back()->with('error', 'Xatni yuborib bo‘lmadi. Keyinroq qayta urinib ko‘ring.');
+        }
+
+        return back()->with('success', 'Tasdiqlash xati pochtangizga qayta yuborildi.');
     }
 }

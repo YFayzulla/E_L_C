@@ -1,30 +1,40 @@
 @extends('template.pdf')
 @section('pdf')
 
-    <table class="table table-striped">
-        <TR>
-            <th>id</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Location</th>
-            <th>Date born</th>
-        </TR>
+    <h3 style="margin:0 0 4px 0;">O‘qituvchilar ro‘yxati</h3>
+    <p style="margin:0 0 14px 0; font-size:12px; color:#666;">
+        ALPHA o‘quv markazi &middot; {{ now()->format('d.m.Y H:i') }} &middot; jami {{ count($teacher) }} ta
+    </p>
 
+    <table>
+        <thead>
+        <tr>
+            <th style="width:34px;">#</th>
+            <th>Ism familiya</th>
+            <th style="width:110px;">Telefon</th>
+            <th>Guruhlar</th>
+            <th style="width:88px;">Tug‘ilgan sana</th>
+            <th>Manzil</th>
+            <th style="width:52px;">Ulush</th>
+        </tr>
+        </thead>
+        <tbody>
         @forelse($teacher as $item)
             <tr>
-                <th>{{$loop->index+1}}</th>
-                <th>{{$item->name}}</th>
-                <th>{{$item->phone}}</th>
-                <th>{{$item->location}}</th>
-                <th>{{$item->date_born}}</th>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $item->name }}</td>
+                <td>+{{ $item->phone }}</td>
+                <td>{{ $item->teacherGroups->pluck('name')->implode(', ') ?: '—' }}</td>
+                <td>{{ $item->date_born ? \Carbon\Carbon::parse($item->date_born)->format('d.m.Y') : '—' }}</td>
+                <td>{{ $item->location ?: '—' }}</td>
+                <td>{{ $item->percent !== null && $item->percent !== '' ? $item->percent . '%' : '—' }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="5" class="text-center">No teacher data available.</td>
+                <td colspan="7" style="text-align:center;">O‘qituvchilar topilmadi.</td>
             </tr>
         @endforelse
-
-
+        </tbody>
     </table>
 
 @endsection

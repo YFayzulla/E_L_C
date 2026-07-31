@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\StudentExport;
+use App\Http\Controllers\Concerns\AuthorizesGroupAccess;
 use App\Http\Requests\Student\StoreRequest;
 use App\Http\Requests\Student\UpdateRequest;
 use App\Models\Assessment;
@@ -11,6 +12,8 @@ use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
+use App\Services\ParentAccountService;
+use App\Services\ProgressService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +23,12 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
+    use AuthorizesGroupAccess;
+
+    public function __construct(private ParentAccountService $parents)
+    {
+    }
+
     /**
      * Barcha talabalar ro'yxati.
      */
@@ -76,6 +85,8 @@ class StudentController extends Controller
                 'password' => Hash::make($request->phone),
                 'date_born' => $request->birth_date,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
+                // Blank must be stored as NULL — `users.email` is uniquely indexed.
+                'email' => $request->email ?: null,
                 'parents_name' => $request->parents_name,
                 'parents_tel' => $request->parents_tel,
                 'location' => $request->location,
@@ -118,7 +129,20 @@ class StudentController extends Controller
                 'status_month' => 0
             ]);
 
+            // Guardian details create (or reuse) a parent account so the family
+            // can follow this student from the ota-ona portal.
+            // Ota / ona (va ixtiyoriy vasiy) hisoblari bir yo'la yaratiladi va
+            // parent_student.relation orqali bog'lanadi. Bu ham
+            // users.parents_name / parents_tel ustunlarini birlamchi vasiy
+            // bo'yicha yangilab qo'yadi.
+            $this->parents->syncGuardians($user, $this->guardianInput($request));
+
             DB::commit();
+
+            // Mail is deliberately sent AFTER the commit: QUEUE_CONNECTION=sync and an
+            // unreachable MAIL_HOST would otherwise throw inside the transaction and roll
+            // the whole student back. A failed e-mail must never lose the record.
+            $this->sendVerificationMail($user);
 
             return redirect()->route('student.index')->with('success', 'Talaba muvaffaqiyatli qo\'shildi.');
 
@@ -135,10 +159,49 @@ class StudentController extends Controller
     }
 
     /**
+     * Guardian blocks off the student form, keyed by relation.
+     *
+     * Falls back to the legacy single parents_name/parents_tel pair so an older
+     * form (or an integration) that still posts those two fields keeps working.
+     *
+     * @return array<string, array{name: ?string, phone: ?string, email: ?string}>
+     */
+    private function guardianInput(Request $request): array
+    {
+        $out = [];
+
+        foreach (ParentAccountService::RELATIONS as $relation) {
+            $block = $request->input("guardians.{$relation}", []);
+
+            $out[$relation] = [
+                'name'  => $block['name'] ?? null,
+                'phone' => $block['phone'] ?? null,
+                'email' => $block['email'] ?? null,
+            ];
+        }
+
+        if (blank($out['ota']['phone']) && filled($request->input('parents_tel'))) {
+            $out['ota'] = [
+                'name'  => $request->input('parents_name'),
+                'phone' => $request->input('parents_tel'),
+                'email' => null,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * Talaba ma'lumotlarini ko'rsatish.
      */
     public function show($id)
     {
+        // Outside the try: this route is role:admin|user, so without a
+        // relationship check any teacher could read any student's full record
+        // (phone, passport, address, guardian number) by editing the URL.
+        // abort() throws, and the catch below would swallow it into a redirect.
+        $this->assertTeachesStudent((int) $id);
+
         try {
             $student = User::with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
@@ -152,7 +215,11 @@ class StudentController extends Controller
                 ->latest('assessments.created_at')
                 ->get();
 
-            return view('admin.student.show', compact('student', 'attendances', 'groupHistory', 'testResults'));
+            $progress = app(ProgressService::class)->forStudent((int) $id);
+
+            return view('admin.student.show', compact(
+                'student', 'attendances', 'groupHistory', 'testResults', 'progress'
+            ));
         } catch (\Exception $e) {
             Log::error('StudentController@show error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talaba ma\'lumotlarini yuklashda xatolik.');
@@ -167,7 +234,9 @@ class StudentController extends Controller
         try {
             $student = User::with('groups')->findOrFail($id);
             $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
-            return view('admin.student.edit', compact('student', 'groups'));
+            $guardians = $this->parents->guardiansOf($student);
+
+            return view('admin.student.edit', compact('student', 'groups', 'guardians'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Talaba topilmadi.');
         }
@@ -180,12 +249,15 @@ class StudentController extends Controller
     {
         $newPhotoPath = null;
         $oldPhotoPath = null;
+        $student = null;
+        $emailChanged = false;
 
         DB::beginTransaction();
 
         try {
             $student = User::findOrFail($id);
             $oldPhotoPath = $student->photo;
+            $originalEmail = $student->email;
 
             if ($request->hasFile('photo')) {
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
@@ -194,10 +266,15 @@ class StudentController extends Controller
                 $newPhotoPath = $oldPhotoPath;
             }
 
+            // Blank must be stored as NULL — `users.email` is uniquely indexed.
+            $newEmail = $request->email ?: null;
+            $emailChanged = $newEmail !== $originalEmail;
+
             $updateData = [
                 'name' => $request->name,
                 'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
                 'date_born' => $request->birth_date,
+                'email' => $newEmail,
                 'parents_name' => $request->parents_name,
                 'parents_tel' => $request->parents_tel,
                 'location' => $request->location,
@@ -207,6 +284,13 @@ class StudentController extends Controller
 
             if ($request->filled('password')) {
                 $updateData['password'] = Hash::make($request->password);
+            }
+
+            // A new address is unconfirmed by definition. `email_verified_at` is
+            // intentionally NOT fillable, so it is assigned directly; the update()
+            // below persists it together with the rest of the dirty attributes.
+            if ($emailChanged) {
+                $student->email_verified_at = null;
             }
 
             $student->update($updateData);
@@ -250,10 +334,22 @@ class StudentController extends Controller
                 ['dept' => $sumPayments]
             );
 
+            // Keep the guardian link in step with the phone number on the form:
+            // drop links that no longer match, then (re)create the current one.
+            // syncGuardians unlinks anyone dropped from the form itself, so the
+            // old single-number prune is not needed here.
+            $this->parents->syncGuardians($student, $this->guardianInput($request));
+
             DB::commit();
 
             if ($request->hasFile('photo') && $oldPhotoPath && Storage::disk('public')->exists($oldPhotoPath)) {
                 Storage::disk('public')->delete($oldPhotoPath);
+            }
+
+            // Only bother the student when the address actually moved, and only
+            // once the row is safely committed (see the note in store()).
+            if ($emailChanged) {
+                $this->sendVerificationMail($student);
             }
 
             return redirect()->route('student.index')->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
@@ -282,6 +378,7 @@ class StudentController extends Controller
             $photoPath = $student->photo;
 
             $student->groups()->detach();
+            $student->guardians()->detach();
             StudentInformation::where('user_id', $student->id)->delete();
             DeptStudent::where('user_id', $student->id)->delete();
             Attendance::where('user_id', $student->id)->delete();
@@ -300,6 +397,26 @@ class StudentController extends Controller
             DB::rollBack();
             Log::error('StudentController@destroy error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
+        }
+    }
+
+    /**
+     * Fire the confirmation e-mail without ever letting the mailer break the save.
+     *
+     * MUST be called outside a transaction: the mailer runs synchronously
+     * (QUEUE_CONNECTION=sync) and the SMTP host is not always reachable.
+     * A blank address is a no-op inside the model.
+     */
+    private function sendVerificationMail(?User $user): void
+    {
+        if (! $user || blank($user->email)) {
+            return;
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $e) {
+            Log::error('StudentController@sendVerificationMail error: ' . $e->getMessage());
         }
     }
 

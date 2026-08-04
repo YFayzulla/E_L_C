@@ -350,7 +350,12 @@ html[data-theme] .menu-item {
     margin: 2px 0 !important;
 }
 
-html[data-theme] .bg-menu-theme .menu-link,
+/*
+ * `:not(.layout-menu-toggle)` matters. The mobile close button in .app-brand
+ * carries .menu-link purely to inherit the menu's colours, so `width: 100%`
+ * turned it into a full-width blue slab sitting across the top of the sidebar.
+ */
+html[data-theme] .bg-menu-theme .menu-link:not(.layout-menu-toggle),
 html[data-theme] .layout-wrapper:not(.layout-horizontal) .bg-menu-theme .menu-inner .menu-item .menu-link {
     color: var(--app-text-muted);
     font-size: .89rem;
@@ -361,6 +366,43 @@ html[data-theme] .layout-wrapper:not(.layout-horizontal) .bg-menu-theme .menu-in
     margin: 0;
     width: 100%;
     transition: background-color .15s ease, color .15s ease;
+}
+
+/* ---------------------------------------- mobile sidebar close button ---- */
+
+html[data-theme] .app-brand .layout-menu-toggle {
+    flex: 0 0 auto;
+    width: 2.25rem;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--app-radius-sm);
+    background: transparent;
+    color: var(--app-text-muted);
+    transition: background-color .15s ease, color .15s ease;
+}
+
+html[data-theme] .app-brand .layout-menu-toggle:hover,
+html[data-theme] .app-brand .layout-menu-toggle:focus,
+html[data-theme] .app-brand .layout-menu-toggle:active {
+    background: var(--app-surface-3);
+    color: var(--app-text);
+    box-shadow: none;
+}
+
+html[data-theme] .app-brand .layout-menu-toggle i {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+/* The logo takes the space that is left, not all of it — otherwise the close
+   button is pushed onto a line of its own. */
+html[data-theme] .app-brand .app-brand-link {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 html[data-theme] .bg-menu-theme .menu-link:hover,

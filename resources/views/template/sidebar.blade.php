@@ -9,7 +9,9 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
     <div class="app-brand">
-        <a href="{{ route('dashboard') }}" class="app-brand-link d-flex align-items-center justify-content-center w-100">
+        {{-- No w-100: on mobile the close button shares this row, and a
+             full-width link pushes it onto a line of its own. --}}
+        <a href="{{ route('dashboard') }}" class="app-brand-link d-flex align-items-center justify-content-center">
             <img src="{{ asset('logos/main.png') }}" alt="ALPHA o'quv markazi" class="brand-logo"
                  style="max-width: 150px; width: 100%; height: auto; object-fit: contain;">
         </a>

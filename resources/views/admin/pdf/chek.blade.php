@@ -184,17 +184,22 @@
     // --- DATA PREP (Updated for Many-to-Many) ---
     $studentName = $student->name ?? ($payment->name ?? 'Unknown Student');
     
-    // Get room from the first group, or fallback
-    $roomName = $student->groups->first()?->room?->room ?? 'Unknown Room';
-    
+    // $student can be null: a payment row whose account has since been deleted.
+    // The row still carries the payer's name and the group name as plain
+    // strings, so the receipt stays printable — but every reach THROUGH the
+    // student has to be null-safe or the page dies with
+    // "Call to a member function first() on null".
+    $roomName = $student?->groups->first()?->room?->room ?? 'Unknown Room';
+
     // Use payment group name if available, otherwise list student's groups
-    $courseName = $payment->group ?? ($student->groups->pluck('name')->implode(', ') ?: 'IELTS/CEFR/GEN.ENG');
+    $courseName = $payment->group
+        ?? ($student?->groups->pluck('name')->implode(', ') ?: 'IELTS/CEFR/GEN.ENG');
 
     $methodRaw = strtolower($payment->type_of_money ?? 'cash');
     $method = $methodRaw === 'electronic' ? 'CARD' : 'CASH';
 
     $amount = (float)($payment->payment ?? 0);
-    $monthlyBase = (float)($dept ?? ($student->deptStudent->dept ?? $student->should_pay ?? 0));
+    $monthlyBase = (float)($dept ?? ($student?->deptStudent->dept ?? $student?->should_pay ?? 0));
     $partialPaid = (float) data_get($student, 'deptStudent.payed', 0);
     $remainingToPay = max(0, $monthlyBase - $partialPaid);
 

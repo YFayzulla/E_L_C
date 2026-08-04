@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class AssessmentController extends Controller
 {
@@ -82,19 +83,33 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $skills = (array) config('grading.skills');
+
         // 1. Validatsiya (Ma'lumotlar butunligini tekshirish)
         $request->validate([
-            'student' => 'required|array',
-            'reason' => 'required|array',
-            'end_mark' => 'array',
-            'lesson' => 'nullable|string',
+            'student'   => 'required|array',
+            'student.*' => 'required|integer',
+            // Which skill each mark measured. Empty means "Umumiy" — a test
+            // that is not about one skill — and is stored as NULL.
+            'skill'     => 'array',
+            'skill.*'   => ['nullable', Rule::in($skills)],
+            'end_mark'  => 'array',
+            'end_mark.*' => 'nullable|integer|min:0|max:100',
+            'reason'    => 'array',
+            'reason.*'  => 'nullable|string|max:255',
+            'lesson'    => 'nullable|string|max:255',
+        ], [
+            'skill.*.in'       => 'Ko‘nikma noto‘g‘ri tanlandi.',
+            'end_mark.*.max'   => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
+            'end_mark.*.min'   => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
         ]);
 
         $end_marks = $request->input('end_mark', []);
         $reasons = $request->input('reason', []);
+        $skillInput = $request->input('skill', []);
         $users = $request->input('student', []);
 
-        if (empty($reasons)) {
+        if (empty($users)) {
             return redirect()->back()->with('error', 'Saqlash uchun ma\'lumot topilmadi.');
         }
 
@@ -114,27 +129,41 @@ class AssessmentController extends Controller
             $studentsToUpdate = [];
 
             // 3. Ma'lumotlarni tayyorlash
-            foreach ($reasons as $index => $reason) {
-                $userId = $users[$index] ?? null;
-                $mark = $end_marks[$index] ?? null;
-
-                if (!$userId) continue;
-
-                // Agar baho mavjud bo'lsa va 0 bo'lmasa, assessment jadvaliga yozamiz
-                if ($mark !== null && $mark != 0) {
-                    $assessments[] = [
-                        'get_mark' => $mark,
-                        'user_id' => $userId,
-                        'for_what' => $reason,
-                        'group' => $group->name,
-                        'history_id' => $history->id,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ];
+            //
+            // Iterate the students, not the reasons: the note is optional now
+            // that the skill carries the meaning, and a blank note used to make
+            // the whole row disappear.
+            foreach ($users as $index => $userId) {
+                if (! $userId) {
+                    continue;
                 }
 
-                // Talabaning joriy bahosini yangilash uchun arrayga yig'amiz
-                $studentsToUpdate[$userId] = $mark;
+                $raw  = $end_marks[$index] ?? null;
+                $mark = ($raw === null || $raw === '') ? null : (int) $raw;
+
+                // Blank means "not assessed" and is skipped. A real 0 is a
+                // mark and IS stored — the old `$mark != 0` check dropped it
+                // silently, so a student who scored nothing simply vanished
+                // from the record and from their progress figure.
+                if ($mark !== null) {
+                    $skill = $skillInput[$index] ?? null;
+
+                    $assessments[] = [
+                        'get_mark'   => $mark,
+                        // NULL = "Umumiy": a test that measures no one skill.
+                        'skill'      => filled($skill) ? $skill : null,
+                        'user_id'    => $userId,
+                        'for_what'   => $reasons[$index] ?? null,
+                        'group'      => $group->name,
+                        'history_id' => $history->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+
+                    // users.mark is the "latest mark" shown on the student
+                    // card; only a real mark should move it.
+                    $studentsToUpdate[$userId] = $mark;
+                }
             }
 
             // 4. Assessment jadvaliga bitta so'rov bilan yozish (Bulk Insert)

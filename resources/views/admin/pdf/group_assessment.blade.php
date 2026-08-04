@@ -17,7 +17,7 @@
                 <th>{{$group->student->name}}</th>
                 <th>{{$group->group}}</th>
                 <th>{{$group->get_mark}}</th>
-                <th>{{$group->for_what}}</th>
+                <th>{{ $group->skillLabel() }}</th>
                 <th>{{$group->rec_group}}</th>
             </tr>
         @empty

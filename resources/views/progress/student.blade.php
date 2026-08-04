@@ -159,7 +159,7 @@
                                 @php $mark = (int) $test->get_mark; @endphp
                                 <tr>
                                     <td>{{ $test->test_name ?? 'Test' }}</td>
-                                    <td class="text-muted">{{ $test->for_what ?: '—' }}</td>
+                                    <td class="text-muted">{{ $test->skillLabel() }}</td>
                                     <td class="text-center">
                                         <span class="badge bg-label-{{ $tone($mark) }}">{{ $mark }}</span>
                                     </td>

@@ -155,7 +155,7 @@
                                 @php $mark = (int) $result->get_mark; @endphp
                                 <tr>
                                     <td>{{ $result->test_name ?? 'Test' }}</td>
-                                    <td class="text-muted">{{ $result->for_what ?: '—' }}</td>
+                                    <td class="text-muted">{{ $result->skillLabel() }}</td>
                                     <td>
                                         <span class="badge bg-label-{{ $mark >= 80 ? 'success' : ($mark >= 60 ? 'warning' : 'danger') }}">
                                             {{ $result->get_mark }}

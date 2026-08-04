@@ -253,7 +253,8 @@ class StudentApiController extends ApiController
             'tests'      => $tests->map(fn($t) => [
                 'name'  => $t->test_name ?? 'Test',
                 'mark'  => $t->get_mark,
-                'for'   => $t->for_what,
+                'skill' => $t->skill,
+                'for'   => $t->skillLabel(),
                 'date'  => $t->created_at?->format('d.m.Y'),
             ]),
         ]);

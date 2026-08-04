@@ -49,16 +49,7 @@
                             <td class="text-muted">{{ $loop->iteration }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="avatar avatar-sm">
-                                        @if($teacher->photo)
-                                            <img src="{{ asset('storage/' . $teacher->photo) }}" alt=""
-                                                 class="rounded-circle w-100 h-100" style="object-fit: cover;">
-                                        @else
-                                            <span class="avatar-initial rounded-circle bg-label-primary">
-                                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($teacher->name, 0, 2)) }}
-                                            </span>
-                                        @endif
-                                    </div>
+                                    <x-avatar :user="$teacher" />
                                     <div class="min-w-0">
                                         <a href="{{ route('teacher.show', $teacher->id) }}"
                                            class="fw-semibold text-truncate d-block">{{ $teacher->name }}</a>

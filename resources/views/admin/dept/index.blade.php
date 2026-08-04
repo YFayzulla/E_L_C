@@ -43,7 +43,7 @@
                 @forelse($students as $student)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td><strong>{{ $student->name }}</strong></td>
+                        <td><x-avatar :user="$student" label class="fw-semibold" /></td>
                         <td><strong>{{ $student->phone }}</strong></td>
                         <td>{{ $student->groups->isNotEmpty() ? $student->groups->pluck('name')->implode(', ') : 'No group' }}</td>
                         <th>{{$student->should_pay}}</th>

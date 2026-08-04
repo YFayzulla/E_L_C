@@ -1223,15 +1223,54 @@ html[data-theme] .progress-bar {
     border-radius: var(--app-radius-pill);
 }
 
+/*
+ * Round, always. This used to force a small square radius, which quietly
+ * defeated the `rounded-circle` class the markup asks for.
+ */
 html[data-theme] .avatar img,
 html[data-theme] .avatar .avatar-initial {
-    border-radius: var(--app-radius-sm);
+    border-radius: 50%;
+    /* A hairline ring keeps a light photo from bleeding into a light row. */
+    box-shadow: 0 0 0 1px var(--app-border);
 }
 
 html[data-theme] .avatar .avatar-initial {
-    background-color: var(--app-primary-soft);
-    color: var(--app-primary);
     font-weight: 600;
+    letter-spacing: .01em;
+}
+
+/* Sneat's tints, restated against the theme tokens so they hold in dark mode.
+   The component picks one per person from their name, so a long list of
+   initials does not read as a single block of colour. */
+html[data-theme] .avatar .avatar-initial.bg-label-primary   { background-color: var(--app-primary-soft);   color: var(--app-primary); }
+html[data-theme] .avatar .avatar-initial.bg-label-success   { background-color: var(--app-success-soft);   color: var(--app-success); }
+html[data-theme] .avatar .avatar-initial.bg-label-info      { background-color: var(--app-info-soft);      color: var(--app-info); }
+html[data-theme] .avatar .avatar-initial.bg-label-warning   { background-color: var(--app-warning-soft);   color: var(--app-warning); }
+html[data-theme] .avatar .avatar-initial.bg-label-danger    { background-color: var(--app-danger-soft);    color: var(--app-danger); }
+html[data-theme] .avatar .avatar-initial.bg-label-secondary { background-color: var(--app-surface-3);      color: var(--app-text-muted); }
+
+/* Name + picture in one cell: the name truncates, the picture never shrinks. */
+html[data-theme] .avatar-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+html[data-theme] .avatar-cell > .avatar {
+    flex: 0 0 auto;
+}
+
+html[data-theme] .avatar-cell .avatar-cell-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+html[data-theme] a.avatar-cell:hover .avatar-cell-text {
+    color: var(--app-primary);
 }
 
 html[data-theme] .avatar.avatar-online:after {

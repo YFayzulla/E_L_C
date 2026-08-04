@@ -114,16 +114,7 @@
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar avatar-sm">
-                                            @if($student->photo)
-                                                <img src="{{ asset('storage/' . $student->photo) }}" alt=""
-                                                     class="rounded-circle w-100 h-100" style="object-fit: cover;">
-                                            @else
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
-                                                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($student->name, 0, 2)) }}
-                                                </span>
-                                            @endif
-                                        </div>
+                                        <x-avatar :user="$student" />
                                         <span class="fw-semibold">{{ $student->name }}</span>
                                     </div>
                                 </td>

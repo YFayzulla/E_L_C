@@ -53,7 +53,7 @@
                 @forelse($students as $student)
                     <tr>
                         <th>{{$loop->index+1}}</th>
-                        <th>{{$student->name}}</th>
+                        <th><x-avatar :user="$student" label /></th>
                         <th>+{{$student->phone}}</th>
                         <th>{{$student->parents_tel}}</th>
                         <th>{{$student->studentsGroup()}}</th>

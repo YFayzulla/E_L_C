@@ -71,19 +71,11 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar avatar-sm">
-                                            <span class="avatar-initial rounded-circle bg-label-primary">
-                                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($student->name, 0, 2)) }}
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <div class="fw-semibold">{{ $student->name }}</div>
-                                            <div class="text-muted" style="font-size: .75rem;">
-                                                {{ $sub?->submitted_at?->format('d.m.Y H:i') ?? 'Topshirmagan' }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{-- The photo was missing here entirely: only initials. --}}
+                                    <x-avatar :user="$student"
+                                              label
+                                              :meta="$sub?->submitted_at?->format('d.m.Y H:i') ?? 'Topshirmagan'"
+                                              class="fw-semibold" />
                                 </td>
 
                                 <td>

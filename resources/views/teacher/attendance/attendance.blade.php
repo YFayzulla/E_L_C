@@ -177,7 +177,7 @@
                             @endphp
                             <tr>
                                 <td class="text-muted">{{ $loop->iteration }}</td>
-                                <td class="fw-semibold">{{ $student->name }}</td>
+                                <td><x-avatar :user="$student" label class="fw-semibold" /></td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm" role="group" aria-label="{{ $student->name }} holati">
                                         <input type="radio" class="btn-check" name="status[{{ $student->id }}]"

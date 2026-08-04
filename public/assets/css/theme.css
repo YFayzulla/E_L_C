@@ -370,7 +370,19 @@ html[data-theme] .layout-wrapper:not(.layout-horizontal) .bg-menu-theme .menu-in
 
 /* ---------------------------------------- mobile sidebar close button ---- */
 
+/*
+ * Sneat ships this as a round blue pill floating on the sidebar's edge:
+ *
+ *   .app-brand .layout-menu-toggle   { position: absolute; left: 15rem;
+ *                                      background: #696cff; border: 7px solid #f5f5f9 }
+ *   .app-brand .layout-menu-toggle i { width: 1.5rem; height: 1.5rem; color: #fff }
+ *
+ * Every one of those has to be undone, and `color` on the icon is the one that
+ * is easy to miss: leave it and the chevron stays white, so a quiet button
+ * renders as an empty box.
+ */
 html[data-theme] .app-brand .layout-menu-toggle {
+    position: static;
     flex: 0 0 auto;
     width: 2.25rem;
     min-width: 2.25rem;
@@ -379,7 +391,8 @@ html[data-theme] .app-brand .layout-menu-toggle {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    border-radius: var(--app-radius-sm);
+    border: 0;
+    border-radius: 50%;
     background: transparent;
     color: var(--app-text-muted);
     transition: background-color .15s ease, color .15s ease;
@@ -394,8 +407,11 @@ html[data-theme] .app-brand .layout-menu-toggle:active {
 }
 
 html[data-theme] .app-brand .layout-menu-toggle i {
-    font-size: 1.35rem;
+    width: auto;
+    height: auto;
+    font-size: 1.5rem;
     line-height: 1;
+    color: inherit;
 }
 
 /* The logo takes the space that is left, not all of it — otherwise the close

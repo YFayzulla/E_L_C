@@ -311,6 +311,13 @@ html[data-theme] .brand-logo {
     transition: filter .2s ease;
 }
 
+/*
+ * The horizontal padding here is what insets the highlighted row from the
+ * sidebar edges. Sneat sizes .menu-item assuming .menu-inner has no padding,
+ * so the items kept their old width and hung 21px past the edge — the sidebar
+ * scrolled sideways even though every label fitted. `width: auto` below lets
+ * them fill this content box instead of a remembered one.
+ */
 html[data-theme] .menu-inner {
     padding: .25rem .75rem 1.25rem !important;
     /* Native fallback: PerfectScrollbar normally drives this, but if its JS
@@ -346,8 +353,18 @@ html[data-theme] .bg-menu-theme .menu-header:before {
     display: none;
 }
 
-html[data-theme] .menu-item {
+html[data-theme] .menu-item,
+html[data-theme] .menu-header {
     margin: 2px 0 !important;
+    /* Sneat gives these a width computed from the sidebar, which ignores the
+       padding added to .menu-inner above. `auto` makes them fill whatever
+       content box they are actually in, so nothing overflows sideways; and
+       .menu-inner is a column flex container, so `align-self: stretch` is what
+       makes the highlighted row span the full width instead of hugging its
+       label. */
+    width: auto !important;
+    max-width: 100%;
+    align-self: stretch;
 }
 
 /*

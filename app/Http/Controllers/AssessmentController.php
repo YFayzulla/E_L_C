@@ -85,29 +85,36 @@ class AssessmentController extends Controller
     {
         $skills = (array) config('grading.skills');
 
-        // 1. Validatsiya (Ma'lumotlar butunligini tekshirish)
+        /*
+         * The form is a grid — one row per student, one column per skill —
+         * exactly like the Ko‘nikmalar page:
+         *
+         *     score[<student id>][<skill>] = 0..100
+         *     comment[<student id>]        = free text
+         *
+         * One `assessments` row is written per filled cell, so the overall is
+         * simply the mean of those rows. It is NOT stored: a sixth "overall"
+         * row would make every average that reads this table count the same
+         * marks twice, including the progress figure.
+         */
         $request->validate([
-            'student'   => 'required|array',
-            'student.*' => 'required|integer',
-            // Which skill each mark measured. Empty means "Umumiy" — a test
-            // that is not about one skill — and is stored as NULL.
-            'skill'     => 'array',
-            'skill.*'   => ['nullable', Rule::in($skills)],
-            'end_mark'  => 'array',
-            'end_mark.*' => 'nullable|integer|min:0|max:100',
-            'reason'    => 'array',
-            'reason.*'  => 'nullable|string|max:255',
-            'lesson'    => 'nullable|string|max:255',
+            'student'      => 'required|array',
+            'student.*'    => 'required|integer',
+            'score'        => 'array',
+            'score.*'      => 'array',
+            'score.*.*'    => 'nullable|integer|min:0|max:100',
+            'comment'      => 'array',
+            'comment.*'    => 'nullable|string|max:250',
+            'lesson'       => 'nullable|string|max:255',
         ], [
-            'skill.*.in'       => 'Ko‘nikma noto‘g‘ri tanlandi.',
-            'end_mark.*.max'   => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
-            'end_mark.*.min'   => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
+            'score.*.*.integer' => 'Ball butun son bo‘lishi kerak.',
+            'score.*.*.max'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
+            'score.*.*.min'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
         ]);
 
-        $end_marks = $request->input('end_mark', []);
-        $reasons = $request->input('reason', []);
-        $skillInput = $request->input('skill', []);
-        $users = $request->input('student', []);
+        $scores   = (array) $request->input('score', []);
+        $comments = (array) $request->input('comment', []);
+        $users    = (array) $request->input('student', []);
 
         if (empty($users)) {
             return redirect()->back()->with('error', 'Saqlash uchun ma\'lumot topilmadi.');
@@ -128,41 +135,49 @@ class AssessmentController extends Controller
             $assessments = [];
             $studentsToUpdate = [];
 
-            // 3. Ma'lumotlarni tayyorlash
-            //
-            // Iterate the students, not the reasons: the note is optional now
-            // that the skill carries the meaning, and a blank note used to make
-            // the whole row disappear.
-            foreach ($users as $index => $userId) {
+            // 3. Ma'lumotlarni tayyorlash — one row per filled cell
+            $now = now();
+
+            foreach ($users as $userId) {
+                $userId = (int) $userId;
+
                 if (! $userId) {
                     continue;
                 }
 
-                $raw  = $end_marks[$index] ?? null;
-                $mark = ($raw === null || $raw === '') ? null : (int) $raw;
+                $given = [];
 
-                // Blank means "not assessed" and is skipped. A real 0 is a
-                // mark and IS stored — the old `$mark != 0` check dropped it
-                // silently, so a student who scored nothing simply vanished
-                // from the record and from their progress figure.
-                if ($mark !== null) {
-                    $skill = $skillInput[$index] ?? null;
+                foreach ($skills as $skill) {
+                    $raw = $scores[$userId][$skill] ?? null;
+
+                    // Blank means "not assessed": skipped, and kept out of the
+                    // mean so it cannot drag the overall toward zero. A real 0
+                    // IS a mark and is stored — the old `!= 0` check dropped it
+                    // silently, so a student who scored nothing vanished from
+                    // the record and from their progress figure.
+                    if ($raw === null || $raw === '') {
+                        continue;
+                    }
+
+                    $mark    = (int) $raw;
+                    $given[] = $mark;
 
                     $assessments[] = [
                         'get_mark'   => $mark,
-                        // NULL = "Umumiy": a test that measures no one skill.
-                        'skill'      => filled($skill) ? $skill : null,
+                        'skill'      => $skill,
                         'user_id'    => $userId,
-                        'for_what'   => $reasons[$index] ?? null,
+                        'for_what'   => $comments[$userId] ?? null,
                         'group'      => $group->name,
                         'history_id' => $history->id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
+                }
 
-                    // users.mark is the "latest mark" shown on the student
-                    // card; only a real mark should move it.
-                    $studentsToUpdate[$userId] = $mark;
+                // users.mark is the "latest mark" on the student card, so it
+                // gets the overall — the plain mean of whatever was scored.
+                if ($given !== []) {
+                    $studentsToUpdate[$userId] = (int) round(array_sum($given) / count($given));
                 }
             }
 

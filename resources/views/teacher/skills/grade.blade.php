@@ -106,12 +106,16 @@
                                     {{ $labels[$skill] ?? ucfirst($skill) }}
                                 </th>
                             @endforeach
+                            <th style="min-width: 7rem;">
+                                <i class="bx bx-calculator me-1"></i>
+                                {{ config('grading.overall_label', 'Umumiy') }}
+                            </th>
                             <th style="min-width: 16rem;">Izoh</th>
                         </tr>
                         </thead>
                         <tbody id="myTable">
                         @foreach($students as $student)
-                            <tr>
+                            <tr data-student="{{ $student->id }}">
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <x-avatar :user="$student" />
@@ -128,12 +132,17 @@
                                         <input type="number" inputmode="numeric" min="0" max="100" step="1"
                                                name="score[{{ $student->id }}][{{ $skill }}]"
                                                value="{{ $value }}"
-                                               class="form-control grade-input @error($field) is-invalid @enderror"
+                                               class="form-control grade-input js-score @error($field) is-invalid @enderror"
                                                placeholder="—"
                                                aria-label="{{ $student->name }} — {{ $labels[$skill] ?? $skill }}">
                                         @error($field) <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </td>
                                 @endforeach
+
+                                <td>
+                                    {{-- Derived on the fly; nothing is posted or stored for it. --}}
+                                    <span class="badge bg-label-secondary js-overall" style="font-size: .9rem;">—</span>
+                                </td>
 
                                 <td>
                                     <input type="text" maxlength="250"
@@ -162,6 +171,39 @@
                 </div>
             </div>
         </form>
+
+        <script>
+            // Live arithmetic mean per row. Blank cells are "not assessed" and
+            // stay out of it, matching how the server treats them.
+            (function () {
+                document.querySelectorAll('#myTable tr[data-student]').forEach(function (row) {
+                    const out = row.querySelector('.js-overall');
+                    if (!out) { return; }
+
+                    function recalc() {
+                        const values = [...row.querySelectorAll('.js-score')]
+                            .map(i => i.value.trim())
+                            .filter(v => v !== '')
+                            .map(Number)
+                            .filter(n => Number.isFinite(n));
+
+                        if (values.length === 0) {
+                            out.textContent = '—';
+                            out.className = 'badge bg-label-secondary js-overall';
+                            return;
+                        }
+
+                        const mean = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                        out.textContent = mean;
+                        out.className = 'badge js-overall bg-label-'
+                            + (mean >= 80 ? 'success' : mean >= 60 ? 'warning' : 'danger');
+                    }
+
+                    row.querySelectorAll('.js-score').forEach(i => i.addEventListener('input', recalc));
+                    recalc();
+                });
+            })();
+        </script>
 
     @endif
 

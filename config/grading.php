@@ -11,9 +11,10 @@ return [
     | this list can grow without another migration.
     */
 
-    'skills' => ['reading', 'listening', 'writing', 'speaking'],
+    'skills' => ['grammar', 'reading', 'listening', 'writing', 'speaking'],
 
     'skill_labels' => [
+        'grammar'   => 'Grammatika',
         'reading'   => "O‘qish",
         'listening' => 'Tinglash',
         'writing'   => 'Yozish',
@@ -21,11 +22,26 @@ return [
     ],
 
     'skill_icons' => [
+        'grammar'   => 'bx-spreadsheet',
         'reading'   => 'bx-book-open',
         'listening' => 'bx-headphone',
         'writing'   => 'bx-pencil',
         'speaking'  => 'bx-microphone',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Overall
+    |--------------------------------------------------------------------------
+    | The plain arithmetic mean of whichever skills were actually scored —
+    | never stored, always derived. Storing it as a sixth row would make every
+    | average that reads `assessments` count the same marks twice.
+    |
+    | Skills left blank are "not assessed", so they stay out of the mean rather
+    | than dragging it toward zero.
+    */
+
+    'overall_label' => 'Umumiy',
 
     /*
     |--------------------------------------------------------------------------

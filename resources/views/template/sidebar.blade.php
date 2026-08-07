@@ -74,7 +74,7 @@
         <li class="menu-item {{ $isActive('test', 'test.show') }}">
             <a href="{{ route('test') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-clipboard"></i>
-                <div>Baholash</div>
+                <div>Oylik test</div>
             </a>
         </li>
 
@@ -158,7 +158,7 @@
         <li class="menu-item {{ $isActive('assessment.teacher.groups', 'assessment.index', 'assessment.show') }}">
             <a href="{{ route('assessment.teacher.groups') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-list-check"></i>
-                <div>Baholash</div>
+                <div>Oylik test</div>
             </a>
         </li>
 

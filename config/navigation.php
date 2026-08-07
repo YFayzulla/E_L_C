@@ -44,12 +44,12 @@ return [
         'attendance.index' => ['Davomatim', "Qoldirilgan va kechikilgan darslar"],
 
         // Assessment
-        'assessment.index'          => ['Natijalar', null],
-        'assessment.show'           => ['Baholash', null],
-        'assessment.create'         => ['Yangi baholash', null],
-        'assessment.edit'           => ['Baholashni tahrirlash', null],
-        'assessment.teacher.groups' => ['Baholash', "Guruhni tanlang"],
-        'test'                      => ['Baholash', "Test natijalari"],
+        'assessment.index'          => ['Oylik test natijalari', null],
+        'assessment.show'           => ['Oylik test', null],
+        'assessment.create'         => ['Yangi oylik test', null],
+        'assessment.edit'           => ['Oylik testni tahrirlash', null],
+        'assessment.teacher.groups' => ['Oylik test', "Guruhni tanlang"],
+        'test'                      => ['Oylik test', "Test natijalari"],
         'test.show'                 => ['Test natijalari', null],
 
         // Finance

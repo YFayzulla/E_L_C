@@ -1,7 +1,7 @@
 @extends('template.master')
 
-@section('title', 'Baholash')
-@section('subtitle', 'Baholash uchun guruhni tanlang')
+@section('title', 'Oylik test')
+@section('subtitle', 'Oylik test uchun guruhni tanlang')
 
 @section('content')
 
@@ -10,7 +10,7 @@
             <div class="empty-state">
                 <i class="bx bx-list-check"></i>
                 <h6>Guruh yo‘q</h6>
-                <p class="mb-0">Sizga hali baholash uchun guruh biriktirilmagan.</p>
+                <p class="mb-0">Sizga hali oylik test uchun guruh biriktirilmagan.</p>
             </div>
         @else
             <div class="table-responsive">
@@ -29,7 +29,7 @@
                             <td class="text-end">
                                 <a href="{{ route('assessment.show', $group->group_id) }}"
                                    class="btn btn-sm btn-outline-secondary">
-                                    Baholash <i class="bx bx-right-arrow-alt ms-1"></i>
+                                    Test o‘tkazish <i class="bx bx-right-arrow-alt ms-1"></i>
                                 </a>
                             </td>
                         </tr>

@@ -299,7 +299,8 @@ class Controller extends BaseController
         return [
             'groups' => $groups,
             'student_count' => $teacher->teacherHasStudents(),
-            'salary' => $teacher->teacherPayment(),
+            // Hisoblangan oylik o'qituvchining o'z panelidan olib tashlandi —
+            // u faqat admin ro'yxatida ko'rinadi (TeacherController@index).
             'today_absences' => Attendance::whereIn('group_id', $groupIds)
                 ->whereIn('status', [0, 2])
                 ->whereDate('created_at', Carbon::today())

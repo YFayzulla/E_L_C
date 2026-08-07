@@ -141,12 +141,10 @@
             </a>
         </li>
 
-        <li class="menu-item {{ $isActive('teacher.groups') }}">
-            <a href="{{ route('teacher.groups') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-group"></i>
-                <div>Mening guruhlarim</div>
-            </a>
-        </li>
+        {{-- "Mening guruhlarim" olib tashlandi: Davomat, Oylik test va
+             Ko'nikmalar bo'limlarining har biri baribir guruh tanlashdan
+             boshlanadi, ya'ni u takroriy qadam edi. Marshrutning o'zi
+             (teacher.groups) joyida qoldi — unga havolalar bor. --}}
 
         <li class="menu-item {{ $isActive('attendance', 'attendance.check', 'group.attendance') }}">
             <a href="{{ route('attendance') }}" class="menu-link">

@@ -410,7 +410,7 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-4">
+        <div class="col-6">
             <div class="card stat-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -422,7 +422,7 @@
             </div>
         </div>
 
-        <div class="col-6 col-lg-4">
+        <div class="col-6">
             <div class="card stat-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -430,19 +430,6 @@
                         <div class="stat-value">{{ $student_count }}</div>
                     </div>
                     <span class="stat-icon is-info"><i class="bx bx-user-voice"></i></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-lg-4">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="stat-label">Hisoblangan oylik</div>
-                        <div class="stat-value">{{ number_format($salary, 0, '.', ' ') }}</div>
-                        <small class="text-muted">so‘m</small>
-                    </div>
-                    <span class="stat-icon is-success"><i class="bx bx-wallet"></i></span>
                 </div>
             </div>
         </div>

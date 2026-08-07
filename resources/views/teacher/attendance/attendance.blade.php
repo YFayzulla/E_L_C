@@ -177,7 +177,18 @@
                             @endphp
                             <tr>
                                 <td class="text-muted">{{ $loop->iteration }}</td>
-                                <td><x-avatar :user="$student" label class="fw-semibold" /></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <x-avatar :user="$student" label class="fw-semibold" />
+                                        {{-- A teacher may move a student between the groups they
+                                             teach; the controller re-checks that on every request. --}}
+                                        <a href="{{ route('student.transfer.form', $student->id) }}"
+                                           class="btn-icon text-muted flex-shrink-0"
+                                           title="{{ $student->name }} — boshqa guruhga ko‘chirish">
+                                            <i class="bx bx-transfer"></i>
+                                        </a>
+                                    </div>
+                                </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm" role="group" aria-label="{{ $student->name }} holati">
                                         <input type="radio" class="btn-check" name="status[{{ $student->id }}]"

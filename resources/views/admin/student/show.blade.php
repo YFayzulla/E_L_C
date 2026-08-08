@@ -230,6 +230,7 @@
                             {{-- student_information now records departures too (action = 1),
                                  so this column can no longer be labelled "Date Joined". --}}
                             <th>Amal</th>
+                            <th>Kim</th>
                             <th>Sana</th>
                         </tr>
                         </thead>
@@ -243,11 +244,20 @@
                                         <i class="bx {{ $item->actionIcon() }} me-1"></i>{{ $item->actionLabel() }}
                                     </span>
                                 </td>
+                                <td>
+                                    {{-- Aktyor ustuni keyinroq qo'shilgan, shuning uchun eski
+                                         qatorlarda u bo'sh — buni yashirmasdan aytamiz. --}}
+                                    @if($item->actor)
+                                        <x-avatar :user="$item->actor" label />
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td>{{ $item->created_at?->format('d M Y, H:i') ?? '—' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">No group history found.</td>
+                                <td colspan="5" class="text-center">No group history found.</td>
                             </tr>
                         @endforelse
                         </tbody>

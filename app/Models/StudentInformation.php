@@ -18,11 +18,29 @@ class StudentInformation extends Model
 
     use HasFactory;
 
-    protected $fillable = ['user_id', 'group_id', 'group', 'action'];
+    protected $fillable = ['user_id', 'group_id', 'group', 'action', 'actor_id'];
 
     protected $casts = [
         'action' => 'integer',
     ];
+
+    /**
+     * Kim qildi. Null — eski qatorlar (ustun keyinroq qo'shilgan) yoki
+     * autentifikatsiyasiz kontekst: konsol buyruqlari va seeder'lar.
+     */
+    public function actor()
+    {
+        return $this->belongsTo(User::class, 'actor_id');
+    }
+
+    /**
+     * Tarix jadvalida ko'rsatish uchun. Aktyor o'chirilgan bo'lsa ham
+     * (actor_id NULL ga o'tadi) qator o'z ma'nosini yo'qotmaydi.
+     */
+    public function actorLabel(): string
+    {
+        return $this->actor?->name ?? 'Noma’lum';
+    }
 
     public function groups()
     {

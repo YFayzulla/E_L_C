@@ -650,11 +650,22 @@ html[data-theme] .table tbody tr:last-child > * {
 }
 
 /* a table living directly inside a card should meet its edges cleanly */
-html[data-theme] .card > .table-responsive,
 html[data-theme] .card > .table {
     border-bottom-left-radius: var(--app-radius);
     border-bottom-right-radius: var(--app-radius);
     overflow: hidden;
+}
+
+/* Same rounding for the scrolling wrapper — but NOT `overflow: hidden`.
+   That is the whole point of .table-responsive: a table wider than the card
+   has to scroll inside it. Hiding both axes clipped wide tables instead, so
+   their last columns became unreachable on narrow screens. Only the vertical
+   axis is hidden, which is what the rounded corners actually need. */
+html[data-theme] .card > .table-responsive {
+    border-bottom-left-radius: var(--app-radius);
+    border-bottom-right-radius: var(--app-radius);
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 /* --------------------------------------------------------------------------

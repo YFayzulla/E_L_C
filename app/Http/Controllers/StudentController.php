@@ -113,6 +113,7 @@ class StudentController extends Controller
                     'user_id' => $user->id,
                     'group_id' => $group->id,
                     'group' => $group->name,
+                    'actor_id' => auth()->id(),
                 ]);
             }
 
@@ -205,7 +206,12 @@ class StudentController extends Controller
         try {
             $student = User::with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
-            $groupHistory = StudentInformation::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+            // `actor` oldindan yuklanadi: aks holda tarixdagi har bir qator
+            // uchun bittadan qo'shimcha so'rov ketardi.
+            $groupHistory = StudentInformation::where('user_id', $id)
+                ->with('actor:id,name,photo')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             // Fetch test results (Assessments)
             // We need to join with LessonAndHistory to get the test name
@@ -319,7 +325,8 @@ class StudentController extends Controller
                 StudentInformation::create([
                     'user_id' => $student->id,
                     'group_id' => $group->id,
-                    'group' => $group->name
+                    'group' => $group->name,
+                    'actor_id' => auth()->id(),
                 ]);
             }
 

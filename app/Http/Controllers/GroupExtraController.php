@@ -74,6 +74,7 @@ class GroupExtraController extends Controller
                     'user_id' => $user->id,
                     'group_id' => $group->id,
                     'group' => $group->name,
+                    'actor_id' => auth()->id(),
                 ]);
             }
 

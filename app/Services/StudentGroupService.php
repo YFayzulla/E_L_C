@@ -92,12 +92,19 @@ class StudentGroupService
 
             $names = Group::whereIn('id', array_merge($joined, $left))->pluck('name', 'id');
 
+            // `$actorId` shu paytgacha qabul qilinib, hech qayerga
+            // yozilmasdan tashlab yuborilardi — tarixda "kim ko'chirdi"
+            // degan savol javobsiz qolardi. Chaqiruvchi bermasa, joriy
+            // foydalanuvchiga tushamiz; konsolda ikkalasi ham null bo'ladi.
+            $actorId ??= auth()->id();
+
             foreach ($joined as $groupId) {
                 StudentInformation::create([
                     'user_id' => $student->id,
                     'group_id' => $groupId,
                     'group' => $names[$groupId] ?? null,
                     'action' => self::ACTION_JOINED,
+                    'actor_id' => $actorId,
                 ]);
             }
 
@@ -107,6 +114,7 @@ class StudentGroupService
                     'group_id' => $groupId,
                     'group' => $names[$groupId] ?? null,
                     'action' => self::ACTION_LEFT,
+                    'actor_id' => $actorId,
                 ]);
             }
 

@@ -159,15 +159,38 @@ class Centre extends Model
         };
     }
 
+    /**
+     * Markazning to'liq host nomi.
+     *
+     * Standart bo'lmagan port joriy so'rovdan olinadi: ishlanma serveri
+     * 8000-portda turadi va portsiz havola 80-portga ketib ochilmay
+     * qolardi. Konsolda port qo'shilmaydi — u yerda gap production
+     * manzili haqida.
+     *
+     * ResolveCentre bu metodni ISHLATMAYDI — u `config('app.domain')` ni
+     * to'g'ridan-to'g'ri o'qiydi va `$request->getHost()` portsiz keladi,
+     * ya'ni bu yerdagi port markaz aniqlashga ta'sir qilmaydi.
+     */
     public function host(): string
     {
-        return $this->slug . '.' . config('app.domain');
+        return $this->slug . '.' . config('app.domain') . $this->portSuffix();
     }
 
     public function url(string $path = '/'): string
     {
         return rtrim(config('app.scheme', 'https') . '://' . $this->host(), '/')
             . '/' . ltrim($path, '/');
+    }
+
+    private function portSuffix(): string
+    {
+        if (app()->runningInConsole()) {
+            return '';
+        }
+
+        $port = request()?->getPort();
+
+        return $port && ! in_array((int) $port, [80, 443], true) ? ':' . $port : '';
     }
 
     public function logoUrl(): ?string

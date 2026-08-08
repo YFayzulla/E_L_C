@@ -86,7 +86,13 @@ class AuthController extends ApiController
         // replaces the old token instead of piling them up forever.
         $user->tokens()->where('name', $device)->delete();
 
-        $token = $user->createToken($device)->plainTextToken;
+        // Token qaysi markazda berilgan bo'lsa, o'sha markazda ishlaydi.
+        // Markaz host'dan aniqlanadi, ya'ni bitta APK barcha markazlarga
+        // yaraydi — faqat manzil boshqa bo'ladi.
+        $centre = \App\Models\Centre::current();
+        $abilities = $centre ? ['centre:' . $centre->id] : ['*'];
+
+        $token = $user->createToken($device, $abilities)->plainTextToken;
 
         return $this->ok([
             'token' => $token,

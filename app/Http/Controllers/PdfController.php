@@ -64,7 +64,10 @@ class PdfController extends Controller
     public function history($id)
     {
         try {
-            $student = User::with('groups') // Eager load groups without column constraints
+            // inCurrentCentre(): `users` da centre_id yo'q, ya'ni global scope
+            // bu yerga tegmaydi va id URL'dan keladi.
+            $student = User::inCurrentCentre()
+                ->with('groups') // Eager load groups without column constraints
                 ->findOrFail($id);
 
             // Fetch attendances with necessary relationships

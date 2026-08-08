@@ -86,6 +86,7 @@ class Kernel extends HttpKernel
         'centre'        => \App\Http\Middleware\EnsureCentreResolved::class,
         'centre.member' => \App\Http\Middleware\EnsureCentreMember::class,
         'super-admin'   => \App\Http\Middleware\EnsureSuperAdmin::class,
+        'centre.token'  => \App\Http\Middleware\EnsureTokenForCentre::class,
 
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

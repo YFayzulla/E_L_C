@@ -36,15 +36,23 @@ class SmsCheck extends Command
         $this->line('  <options=bold>Eskiz SMS — tekshiruv</>');
         $this->newLine();
 
-        // ---------------------------------------------------------- config
+        // ------------------------------------------------------------ config
+        // Aynan qaysi sozlama kuchda ekanini ko'rsatamiz: markazning o'z
+        // Eskiz hisobi bo'lsa .env dagi qiymat emas, o'shaniki ishlaydi.
+        $effective = $sms->effectiveConfig();
+
         $rows = [
-            ['ESKIZ_EMAIL', filled(config('eskiz.email')) ? '<info>bor</info>' : '<error>YO\'Q</error>'],
-            ['ESKIZ_PASSWORD', filled(config('eskiz.password')) ? '<info>bor</info>' : '<error>YO\'Q</error>'],
-            ['ESKIZ_FROM', (string) config('eskiz.from')],
-            ['ESKIZ_ENABLED', config('eskiz.enabled') ? 'true' : '<comment>false</comment>'],
+            ['Manba', $effective['per_centre']
+                ? '<info>markazning o‘z hisobi</info>'
+                : '<comment>global .env</comment>'],
+            ['Email', filled($effective['email']) ? '<info>bor</info>' : '<error>YO\'Q</error>'],
+            ['Parol', $effective['has_password'] ? '<info>bor</info>' : '<error>YO\'Q</error>'],
+            ['Jo‘natuvchi', (string) $effective['from']],
+            ['Yoqilgan', $effective['enabled'] ? 'true' : '<comment>false</comment>'],
             ['ESKIZ_DRY_RUN', config('eskiz.dry_run') ? '<comment>true</comment>' : 'false'],
             ['Manzil', (string) config('eskiz.base_url')],
-            ['Callback', config('eskiz.callback_url') ?: '—'],
+            ['Callback', $effective['callback'] ?: '—'],
+            ['Token kaliti', $effective['token_key']],
         ];
 
         $this->table(['Sozlama', 'Qiymat'], $rows);

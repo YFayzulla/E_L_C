@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Centre;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -128,14 +129,118 @@ class MessageService
      */
     public function isConfigured(): bool
     {
-        return filled(config('eskiz.email')) && filled(config('eskiz.password'));
+        return filled($this->setting('email')) && filled($this->setting('password'));
+    }
+
+    /* ==================================================================
+     | Markazga xos sozlama
+     ================================================================== */
+
+    /**
+     * Eskiz sozlamasi: markazniki bo'lsa o'shaniki, bo'lmasa global .env.
+     *
+     * Har bir o'quv markazining o'z Eskiz hisobi bo'ladi — SMS ular
+     * nomidan ketadi va hisobdan ularning puli yechiladi. Global .env
+     * sozlamasi esa bitta markazli o'rnatma uchun va yangi markaz o'z
+     * hisobini kiritmaguncha zaxira sifatida qoladi.
+     *
+     * Faqat shu to'rtta kalit markazga xos; base_url, timeout, dry_run,
+     * blocklist va token_ttl_days — infratuzilma, ular global.
+     */
+    private function setting(string $key, $default = null)
+    {
+        $centre = Centre::current();
+
+        if ($centre !== null) {
+            $own = match ($key) {
+                'email'    => $centre->sms_email,
+                'password' => $centre->sms_password,
+                'from'     => $centre->sms_from,
+                'enabled'  => $centre->sms_enabled,
+                default    => null,
+            };
+
+            // Markaz o'z hisobini kiritgan bo'lsa — o'shaniki.
+            // `enabled` uchun false ham qiymat, shuning uchun null tekshiruvi.
+            if ($key === 'enabled') {
+                if ($own !== null && filled($centre->sms_email)) {
+                    return (bool) $own;
+                }
+            } elseif (filled($own)) {
+                return $own;
+            }
+        }
+
+        return config("eskiz.{$key}", $default);
+    }
+
+    /**
+     * Token kesh kaliti.
+     *
+     * Ilgari bu yagona 'eskiz.token' satri edi va markazlar bir-birining
+     * tokenini yozib yuborardi — bu jimgina ishlamay qo'yish, xato bermaydi.
+     * Kalit hisob (email) dan kelib chiqadi: bir xil hisobdan foydalanayotgan
+     * markazlar bitta tokenni baham ko'radi, alohida hisoblilar esa
+     * bir-biriga tegmaydi.
+     */
+    private function tokenKey(): string
+    {
+        $base = config('eskiz.token_cache_key', 'eskiz.token');
+        $email = (string) $this->setting('email');
+
+        return $email === '' ? $base : $base . '.' . md5($email);
+    }
+
+    /**
+     * Eskiz yetkazib berish hisobotini qaytaradigan manzil.
+     *
+     * Markaz aniq bo'lsa uning o'z subdomeni beriladi: aks holda barcha
+     * markazlarning hisoboti bitta hostga tushib, qaysi markazniki ekani
+     * yo'qolardi. Operator sozlagan yo'l saqlanadi, faqat host almashadi.
+     */
+    private function callbackUrl(): ?string
+    {
+        $configured = config('eskiz.callback_url');
+
+        if (blank($configured)) {
+            return null;
+        }
+
+        $centre = Centre::current();
+
+        if ($centre === null) {
+            return $configured;
+        }
+
+        return $centre->url(parse_url($configured, PHP_URL_PATH) ?: '/sms/callback');
+    }
+
+    /**
+     * Konsol va admin ekranlari uchun: hozir aynan qaysi sozlama kuchda.
+     *
+     * @return array<string, mixed>
+     */
+    public function effectiveConfig(): array
+    {
+        $centre = Centre::current();
+
+        return [
+            'centre'      => $centre?->slug,
+            'email'       => $this->setting('email'),
+            'has_password' => filled($this->setting('password')),
+            'from'        => $this->setting('from'),
+            'enabled'     => (bool) $this->setting('enabled', true),
+            'per_centre'  => $centre !== null && filled($centre->sms_email),
+            'callback'    => $this->callbackUrl(),
+            'token_key'   => $this->tokenKey(),
+        ];
     }
 
     /** Configured AND not switched off AND not in dry-run. */
     public function canSend(): bool
     {
         return $this->isConfigured()
-            && (bool) config('eskiz.enabled', true)
+            && (bool) $this->setting('enabled', true)
             && ! (bool) config('eskiz.dry_run', false);
     }
 
@@ -154,7 +259,7 @@ class MessageService
             ];
         }
 
-        if (! config('eskiz.enabled', true)) {
+        if (! $this->setting('enabled', true)) {
             return [
                 'ok' => false, 'level' => 'secondary',
                 'title' => 'O‘chirilgan',
@@ -173,7 +278,7 @@ class MessageService
         return [
             'ok' => true, 'level' => 'success',
             'title' => 'Ulangan',
-            'detail' => 'Jo‘natuvchi nomi: ' . config('eskiz.from') . '.',
+            'detail' => 'Jo‘natuvchi nomi: ' . $this->setting('from') . '.',
         ];
     }
 
@@ -191,7 +296,7 @@ class MessageService
             return null;
         }
 
-        $key = config('eskiz.token_cache_key', 'eskiz.token');
+        $key = $this->tokenKey();
 
         if (! $force && ($cached = Cache::get($key))) {
             return $cached;
@@ -201,8 +306,8 @@ class MessageService
             $response = Http::timeout(config('eskiz.timeout', 15))
                 ->asForm()
                 ->post($this->url('/auth/login'), [
-                    'email'    => config('eskiz.email'),
-                    'password' => config('eskiz.password'),
+                    'email'    => $this->setting('email'),
+                    'password' => $this->setting('password'),
                 ]);
 
             $token = $response->json('data.token');
@@ -229,7 +334,7 @@ class MessageService
     /** Ask Eskiz to extend the current token. Falls back to a fresh login. */
     public function refreshToken(): ?string
     {
-        $token = Cache::get(config('eskiz.token_cache_key', 'eskiz.token'));
+        $token = Cache::get($this->tokenKey());
 
         if (! $token) {
             return $this->getToken(true);
@@ -244,7 +349,7 @@ class MessageService
 
             if ($response->successful() && $fresh) {
                 Cache::put(
-                    config('eskiz.token_cache_key', 'eskiz.token'),
+                    $this->tokenKey(),
                     $fresh,
                     now()->addDays((int) config('eskiz.token_ttl_days', 25))
                 );
@@ -321,7 +426,7 @@ class MessageService
             return $this->result(false, 'not_configured');
         }
 
-        if (! config('eskiz.enabled', true)) {
+        if (! $this->setting('enabled', true)) {
             Log::info("Eskiz: disabled (ESKIZ_ENABLED=false), SMS to {$phone} not sent.");
 
             return $this->result(false, 'disabled');
@@ -361,10 +466,10 @@ class MessageService
         $payload = [
             'mobile_phone' => $phone,
             'message'      => $message,
-            'from'         => (string) config('eskiz.from', '4546'),
+            'from'         => (string) $this->setting('from', '4546'),
         ];
 
-        if ($callback = config('eskiz.callback_url')) {
+        if ($callback = $this->callbackUrl()) {
             $payload['callback_url'] = $callback;
         }
 
@@ -382,7 +487,7 @@ class MessageService
 
             // Token expired or revoked — re-authenticate once, then give up.
             if ($response->status() === 401 && ! $isRetry) {
-                Cache::forget(config('eskiz.token_cache_key', 'eskiz.token'));
+                Cache::forget($this->tokenKey());
 
                 return $this->dispatch($phone, $message, true);
             }

@@ -24,7 +24,7 @@
         })();
     </script>
 
-    <link rel="icon" type="image/png" href="{{ asset('logos/main.png') }}"/>
+    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandLogo() }}"/>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}"/>
@@ -62,7 +62,7 @@
 
 <body class="error-body">
 <div>
-    <img src="{{ asset('logos/main.png') }}" alt="ALPHA o'quv markazi" class="error-logo">
+    <img src="{{ \App\Models\Centre::brandLogo() }}" alt="{{ \App\Models\Centre::brandName() }}" class="error-logo">
 
     <div class="error-code text-{{ $tone }}">{{ $code }}</div>
     <h4 class="mb-2">{{ $message }}</h4>

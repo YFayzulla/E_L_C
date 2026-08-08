@@ -24,9 +24,22 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ResolveCentre
 {
+    /**
+     * Markazga xos qiymatlar yozilishidan OLDINGI baholash sozlamalari.
+     *
+     * Bir marta — birinchi so'rovda — olinadi va shundan keyin har bir
+     * markaz uchun boshlang'ich nuqta bo'lib xizmat qiladi.
+     */
+    private static ?array $pristineGrading = null;
+
     public function handle(Request $request, Closure $next): Response
     {
         $centre = $this->resolve($request);
+
+        // Har doim ulashiladi, null bo'lsa ham: apex sahifalari ham shu
+        // o'zgaruvchiga qaraydi va uni faqat markaz bor paytda ulashish
+        // "Undefined variable $centre" ga olib kelardi.
+        View::share('centre', $centre);
 
         if ($centre !== null) {
             app(CentreContext::class)->set($centre);
@@ -38,7 +51,39 @@ class ResolveCentre
             ]);
             date_default_timezone_set($centre->timezone);
 
-            View::share('centre', $centre);
+            // Markazga xos baholash sozlamalari config ustiga yoziladi.
+            //
+            // Shu bitta blok tufayli kod bo'ylab tarqalgan 41 ta
+            // config('grading.*') chaqiruvi o'zgarishsiz qoladi va
+            // ularning har birini Centre::setting() ga o'tkazish shart
+            // emas — bitta unutilgan joy jimgina eski qiymatni olardi.
+            //
+            // Faqat OVERRIDABLE_SETTINGS ro'yxatidagilar: markazga
+            // `skills` ni qayta ta'riflashga ruxsat berilsa, o'sha paytda
+            // yozilgan har bir lesson_skill_grades qatori qaysi to'plam
+            // kuchda bo'lganini bilmasdan o'qib bo'lmasdi.
+            // Config jarayon davomida global. Bitta jarayonda ikkita markaz
+            // ishlansa (test, konsol, Octane) oldingisining qiymati qolib
+            // ketardi — shuning uchun har safar ASL holatdan boshlanadi.
+            self::$pristineGrading ??= config('grading');
+            config(['grading' => self::$pristineGrading]);
+
+            foreach (Centre::OVERRIDABLE_SETTINGS as $key) {
+                $value = data_get($centre->settings, $key);
+
+                if ($value === null) {
+                    continue;
+                }
+
+                // Massivlar QO'SHILADI, almashtirilmaydi: markaz faqat
+                // `bands.good` ni o'zgartirsa, `bands.ok` yo'qolib ketmasligi
+                // kerak — aks holda undan o'qiydigan kod jimgina null oladi.
+                if (is_array($value) && is_array(config("grading.{$key}"))) {
+                    $value = array_replace_recursive(config("grading.{$key}"), $value);
+                }
+
+                config(["grading.{$key}" => $value]);
+            }
         }
 
         return $next($request);

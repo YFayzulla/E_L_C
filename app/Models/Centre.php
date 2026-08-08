@@ -176,6 +176,67 @@ class Centre extends Model
     }
 
     /**
+     * Sahifalarda ko'rsatiladigan logotip.
+     *
+     * Markaz o'zinikini yuklamagan bo'lsa — platformaning standart
+     * logotipi. Bitta joyda turishi muhim: aks holda o'nga yaqin
+     * blade faylining biri eskisida qolib ketardi.
+     */
+    public static function brandLogo(): string
+    {
+        return static::current()?->logoUrl() ?? asset('logos/main.png');
+    }
+
+    /** Sahifalarda ko'rsatiladigan nom (alt matni va sarlavhalar uchun). */
+    public static function brandName(): string
+    {
+        return static::current()?->name ?? (string) config('app.name', 'ALPHA');
+    }
+
+    /**
+     * Markaz rangi asosidagi CSS token ustidan yozish.
+     *
+     * theme.css da asosiy rangdan kelib chiqadigan OLTITA token bor. Faqat
+     * `--app-primary` ni almashtirish yarim bo'yalgan interfeys berardi —
+     * tugma yangi rangda, uning hover holati va yumshoq foni esa eskisida.
+     * Shuning uchun hammasi bitta hex dan hisoblanadi.
+     *
+     * Noto'g'ri qiymat — null, ya'ni standart mavzu. Chiqishga faqat
+     * o'n oltilik raqamlar tushadi, ya'ni {!! !!} bilan chiqarish xavfsiz.
+     */
+    public function brandCssVariables(): ?string
+    {
+        $hex = ltrim((string) $this->brand_color, '#');
+
+        if (! preg_match('/^[0-9a-fA-F]{6}$/', $hex)) {
+            return null;
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        $hover = sprintf(
+            '#%02x%02x%02x',
+            (int) round($r * .85),
+            (int) round($g * .85),
+            (int) round($b * .85)
+        );
+
+        // Yorug' rang ustida oq matn o'qilmaydi — shuning uchun yorqinlikka
+        // qarab qora yoki oq tanlanadi.
+        $luminance = (.299 * $r + .587 * $g + .114 * $b) / 255;
+        $contrast = $luminance > .6 ? '#10131c' : '#ffffff';
+
+        return "--app-primary:#{$hex};"
+            . "--app-primary-hover:{$hover};"
+            . "--app-primary-contrast:{$contrast};"
+            . "--app-primary-soft:rgba({$r},{$g},{$b},.10);"
+            . "--app-primary-soft-hover:rgba({$r},{$g},{$b},.16);"
+            . "--app-primary-ring:rgba({$r},{$g},{$b},.28);";
+    }
+
+    /**
      * A grading key, this centre's value winning over the global default.
      *
      * Only OVERRIDABLE_SETTINGS are honoured — letting a centre redefine

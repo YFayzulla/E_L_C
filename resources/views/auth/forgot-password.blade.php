@@ -1,6 +1,6 @@
 <x-guest-layout>
 
-    <img src="{{ asset('logos/main.png') }}" alt="ALPHA o‘quv markazi" class="auth-logo">
+    <img src="{{ \App\Models\Centre::brandLogo() }}" alt="{{ \App\Models\Centre::brandName() }}" class="auth-logo">
 
     <h1 class="auth-title">Parolni unutdingizmi?</h1>
     <p class="auth-sub">Pochta manzilingizni kiriting — tiklash havolasini yuboramiz</p>

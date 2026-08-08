@@ -12,7 +12,7 @@
         {{-- No w-100: on mobile the close button shares this row, and a
              full-width link pushes it onto a line of its own. --}}
         <a href="{{ route('dashboard') }}" class="app-brand-link d-flex align-items-center justify-content-center">
-            <img src="{{ asset('logos/main.png') }}" alt="ALPHA o'quv markazi" class="brand-logo"
+            <img src="{{ \App\Models\Centre::brandLogo() }}" alt="{{ \App\Models\Centre::brandName() }}" class="brand-logo"
                  style="max-width: 150px; width: 100%; height: auto; object-fit: contain;">
         </a>
 

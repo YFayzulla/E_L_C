@@ -10,6 +10,7 @@ use App\Models\Homework;
 use App\Models\HomeworkSubmission;
 use App\Models\LessonSkillGrade;
 use App\Services\ProgressService;
+use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -165,7 +166,7 @@ class StudentApiController extends ApiController
 
             if ($request->hasFile('file')) {
                 $new = $request->file('file')->store(
-                    $upload['directory'] ?? 'homework',
+                    TenantStorage::path($upload['directory'] ?? 'homework'),
                     $upload['disk'] ?? 'public'
                 );
 

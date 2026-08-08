@@ -1,6 +1,6 @@
 <x-guest-layout>
 
-    <img src="{{ asset('logos/main.png') }}" alt="" class="auth-logo">
+    <img src="{{ \App\Models\Centre::brandLogo() }}" alt="" class="auth-logo">
 
     <h1 class="auth-title">Qaysi markazga kirasiz?</h1>
     <p class="auth-sub">

@@ -7,6 +7,7 @@ use App\Models\Certificate;
 use App\Models\Group;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -71,7 +72,7 @@ class CertificateController extends Controller
 
         try {
             if ($request->hasFile('file')) {
-                $stored = $request->file('file')->store(self::DIR, self::DISK);
+                $stored = $request->file('file')->store(TenantStorage::path(self::DIR), self::DISK);
             }
         } catch (\Exception $e) {
             Log::error('CertificateController@store upload error: ' . $e->getMessage());

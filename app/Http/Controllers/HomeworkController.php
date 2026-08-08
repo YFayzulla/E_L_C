@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Homework;
 use App\Models\HomeworkSubmission;
 use Illuminate\Database\Eloquent\Builder;
+use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -633,7 +634,7 @@ class HomeworkController extends Controller
         $name = $prefix . '_' . now()->format('YmdHis') . '_' . uniqid() . '.'
             . strtolower($file->getClientOriginalExtension() ?: 'dat');
 
-        return $file->storeAs($upload['directory'], $name, $upload['disk'] ?? 'public');
+        return $file->storeAs(TenantStorage::path($upload['directory']), $name, $upload['disk'] ?? 'public');
     }
 
     private function deleteUpload(?string $path): void

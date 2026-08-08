@@ -22,7 +22,7 @@
         })();
     </script>
 
-    <link rel="icon" type="image/png" href="{{ asset('logos/main.png') }}"/>
+    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandLogo() }}"/>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -33,6 +33,13 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/theme-default.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}?v={{ filemtime(public_path('assets/css/theme.css')) }}"/>
+
+    {{-- Markaz rangi standart mavzu ustiga yoziladi. Faqat to'g'ri hex
+         qiymat chiqadi (Centre::brandCssVariables tekshiradi). --}}
+    @if(isset($centre) && $centre?->brandCssVariables())
+        <style>html[data-theme]{ {!! $centre->brandCssVariables() !!} }</style>
+    @endif
+
 
     <style>
         html[data-theme] body.auth-body {

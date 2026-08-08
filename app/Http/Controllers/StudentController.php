@@ -14,6 +14,7 @@ use App\Models\StudentInformation;
 use App\Models\User;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
+use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -71,7 +72,7 @@ class StudentController extends Controller
         if ($request->hasFile('photo')) {
             try {
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
-                $uploadedFilePath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
+                $uploadedFilePath = $request->file('photo')->storeAs(TenantStorage::path('Photo'), $fileName, 'public');
             } catch (\Exception $e) {
                 return redirect()->back()->withInput()->with('error', 'Rasmni yuklashda xatolik: ' . $e->getMessage());
             }
@@ -267,7 +268,7 @@ class StudentController extends Controller
 
             if ($request->hasFile('photo')) {
                 $fileName = time() . '.' . $request->file('photo')->getClientOriginalExtension();
-                $newPhotoPath = $request->file('photo')->storeAs('Photo', $fileName, 'public');
+                $newPhotoPath = $request->file('photo')->storeAs(TenantStorage::path('Photo'), $fileName, 'public');
             } else {
                 $newPhotoPath = $oldPhotoPath;
             }

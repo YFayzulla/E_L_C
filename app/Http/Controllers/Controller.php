@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Attendance;
+use App\Models\Centre;
 use App\Models\Finance;
 use App\Models\Group;
 use App\Models\HistoryPayments;
@@ -34,6 +35,15 @@ class Controller extends BaseController
 
             if (!$user) {
                 return redirect()->route('login');
+            }
+
+            // Apex domen: markaz yo'q. Bu yerda "boshqaruv paneli" degan
+            // narsa yo'q — Spatie teams'siz rol so'rovlari bo'sh qaytadi va
+            // sahifa jimgina bo'm-bo'sh chiqardi.
+            if (Centre::current() === null) {
+                return redirect()->route(
+                    $user->is_super_admin ? 'super.centres.index' : 'centres.choose'
+                );
             }
 
             // 1. ADMIN UCHUN DASHBOARD

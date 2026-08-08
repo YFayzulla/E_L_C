@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Centre;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +31,28 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return redirect()->intended($this->destinationFor($request->user()));
+    }
+
+    /**
+     * Kirgandan keyin qayerga.
+     *
+     * Markaz subdomenida — o'sha markazning paneli (a'zolik LoginRequest da
+     * allaqachon tekshirilgan). Apexda esa markaz yo'q: platforma egasi o'z
+     * paneliga, qolganlar markaz tanlash oynasiga tushadi, va u bitta
+     * markaz bo'lsa to'g'ridan-to'g'ri o'sha yerga o'tkazadi.
+     */
+    private function destinationFor(?User $user): string
+    {
+        if (Centre::current() !== null) {
+            return RouteServiceProvider::HOME;
+        }
+
+        if ($user?->is_super_admin) {
+            return route('super.centres.index');
+        }
+
+        return route('centres.choose');
     }
 
     /**

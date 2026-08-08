@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AttendanceAdminController;
+use App\Http\Controllers\CentreChoiceController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DeptStudentController;
+use App\Http\Controllers\SuperAdmin\CentreAdminController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GroupController;
@@ -53,6 +55,32 @@ Route::pattern('homework', '[0-9]+');
 Route::post('sms/callback', [MessageService::class, 'receive'])->name('sms.callback');
 
 require __DIR__ . '/auth.php';
+
+/*
+|--------------------------------------------------------------------------
+| APEX DOMEN — markazsiz sahifalar
+|--------------------------------------------------------------------------
+| Bular ataylab `centre` middleware'idan tashqarida: apexning o'zida markaz
+| yo'q va bo'lishi ham shart emas. Sessiya cookie'si barcha subdomenlar
+| bo'ylab umumiy, shuning uchun bu yerda tanlangan markazga o'tish qayta
+| kirishni talab qilmaydi — lekin har bir subdomenda EnsureCentreMember
+| a'zolikni qaytadan tekshiradi.
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('centres', [CentreChoiceController::class, 'index'])->name('centres.choose');
+
+    Route::middleware('super-admin')->prefix('super')->name('super.')->group(function () {
+        Route::controller(CentreAdminController::class)->group(function () {
+            Route::get('centres', 'index')->name('centres.index');
+            Route::get('centres/create', 'create')->name('centres.create');
+            Route::post('centres', 'store')->name('centres.store');
+            Route::get('centres/{centre}/edit', 'edit')->whereNumber('centre')->name('centres.edit');
+            Route::put('centres/{centre}', 'update')->whereNumber('centre')->name('centres.update');
+            Route::post('centres/{centre}/admin', 'attachAdmin')->whereNumber('centre')->name('centres.admin');
+            Route::post('owners', 'toggleOwner')->name('owners.toggle');
+        });
+    });
+});
 
 // --- AUTHENTICATED USERS (Common) ---
 Route::middleware('auth')->group(function () {

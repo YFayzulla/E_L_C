@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Centre;
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
@@ -64,6 +65,30 @@ class LoginRequest extends FormRequest
             throw ValidationException::withMessages([
                 'login' => __('auth.failed'),
             ]);
+        }
+
+        // Markaz subdomenida kirish: a'zolik AYNAN shu yerda tekshiriladi.
+        //
+        // Aks holda odam muvaffaqiyatli kirib, keyin har bir sahifada 403
+        // olardi — tashqaridan bu "nimadir buzilgan" bo'lib ko'rinadi,
+        // holbuki sabab oddiy: u bu markazga biriktirilmagan.
+        //
+        // Parol allaqachon tekshirilgan, ya'ni hisob shu odamniki — markaz
+        // nomini aytish hech qanday ma'lumotni oshkor qilmaydi.
+        $centre = Centre::current();
+
+        if ($centre !== null && ! $user->is_super_admin) {
+            $member = $user->centres()
+                ->whereKey($centre->id)
+                ->wherePivot('status', Centre::MEMBER_ACTIVE)
+                ->exists();
+
+            if (! $member) {
+                throw ValidationException::withMessages([
+                    'login' => 'Siz «' . $centre->name . '» o‘quv markaziga biriktirilmagansiz. '
+                        . 'O‘zingiz ishlaydigan markaz manzilidan kiring yoki administrator bilan bog‘laning.',
+                ]);
+            }
         }
 
         Auth::login($user, $this->boolean('remember'));

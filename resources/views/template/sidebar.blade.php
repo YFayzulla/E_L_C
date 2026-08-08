@@ -262,6 +262,31 @@
         </li>
         @endrole
 
+        {{-- ================= SUPER-ADMIN (platforma egasi) ================= --}}
+        {{-- Spatie roli emas, `users.is_super_admin` bayrog'i: markazsiz rol
+             biriktirish imkonsiz (model_has_roles.centre_id NOT NULL), va
+             super-admin aynan markazlardan yuqorida turadi. --}}
+        @if(auth()->user()?->is_super_admin)
+        <li class="menu-header small">Platforma</li>
+
+        <li class="menu-item {{ $isActive('super.centres.index', 'super.centres.create', 'super.centres.edit') }}">
+            <a href="{{ route('super.centres.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-buildings"></i>
+                <div>O'quv markazlari</div>
+            </a>
+        </li>
+        @endif
+
+        {{-- Bir nechta markazda ishlaydigan odam uchun almashtirish yo'li. --}}
+        @if(auth()->check() && auth()->user()->centres()->count() > 1)
+        <li class="menu-item">
+            <a href="{{ \App\Models\Centre::current() ? url('/centres') : route('centres.choose') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-transfer-alt"></i>
+                <div>Markazni almashtirish</div>
+            </a>
+        </li>
+        @endif
+
         {{-- ================= EVERYONE ================= --}}
         <li class="menu-header small">Hisob</li>
 

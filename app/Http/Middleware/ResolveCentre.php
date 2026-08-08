@@ -71,8 +71,17 @@ class ResolveCentre
             abort(404);
         }
 
+        // Wildcard DNS (*.domen.uz) hamma narsani shu yerga olib keladi,
+        // shu jumladan pochta va platformaning o'z subdomenlarini ham.
+        // Ular markaz emas — apex kabi ishlanadi, ya'ni markazsiz.
+        // Tekshiruv bazaga qadar: kimdir qatorni qo'lda yozib qo'ygan
+        // bo'lsa ham `www.domen.uz` markazga aylanib qolmasligi kerak.
+        if (Centre::isReservedSlug($slug)) {
+            return $this->default();
+        }
+
         $centre = Cache::remember(
-            "centre.slug.{$slug}",
+            Centre::cacheKey($slug),
             now()->addSeconds(60),
             fn() => Centre::where('slug', $slug)->first()
         );
@@ -113,7 +122,7 @@ class ResolveCentre
         }
 
         return Cache::remember(
-            "centre.slug.{$slug}",
+            Centre::cacheKey($slug),
             now()->addSeconds(60),
             fn() => Centre::where('slug', $slug)->first()
         );

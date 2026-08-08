@@ -39,6 +39,80 @@ class SmsTemplate extends Model
         'general'  => 'bx-message-dots',
     ];
 
+    /**
+     * Har bir yangi markaz shu sakkiztasi bilan ochiladi.
+     *
+     * Ilgari bu ro'yxat faqat migratsiya ichida INSERT qilingandi, ya'ni u
+     * bir marta — birinchi markaz uchun — ishlagan va ikkinchi markaz
+     * shablonsiz qolardi. Endi manba shu yerda; CentreProvisioner har bir
+     * markazga o'z nusxasini yozadi.
+     *
+     * Oddiy qatorlar: markaz ularni erkin tahrirlaydi yoki o'chiradi.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public static function defaults(): array
+    {
+        return [
+            [
+                'name' => 'Darsga kelmadi',
+                'slug' => 'absence',
+                'event' => 'absence',
+                'body' => 'Hurmatli ota-ona! Farzandingiz {talaba} {sana} kuni {guruh} guruhidagi darsga kelmadi. {markaz}',
+                'sort_order' => 10,
+            ],
+            [
+                'name' => 'Darsga kechikdi',
+                'slug' => 'late',
+                'event' => 'late',
+                'body' => 'Hurmatli ota-ona! Farzandingiz {talaba} {sana} kuni {guruh} guruhidagi darsga kechikib keldi. {markaz}',
+                'sort_order' => 20,
+            ],
+            [
+                'name' => 'Bir necha darsni qoldirdi',
+                'slug' => 'absence-repeated',
+                'event' => 'absence',
+                'body' => 'Hurmatli ota-ona! Farzandingiz {talaba} so‘nggi paytda {qoldirgan} ta darsni qoldirdi. Iltimos, biz bilan bog‘laning. {markaz}',
+                'sort_order' => 30,
+            ],
+            [
+                'name' => 'Test natijasi',
+                'slug' => 'grade',
+                'event' => 'grade',
+                'body' => 'Hurmatli ota-ona! Farzandingiz {talaba} {sana} kuni bo‘lib o‘tgan testdan {baho} ball to‘pladi. {markaz}',
+                'sort_order' => 40,
+            ],
+            [
+                'name' => 'Oylik o‘zlashtirish',
+                'slug' => 'progress',
+                'event' => 'grade',
+                'body' => 'Hurmatli ota-ona! {talaba}ning {guruh} guruhidagi o‘zlashtirishi: {reyting}%, davomati {davomat}%. {markaz}',
+                'sort_order' => 50,
+            ],
+            [
+                'name' => 'Uy vazifasini bajarmadi',
+                'slug' => 'homework-missing',
+                'event' => 'homework',
+                'body' => 'Hurmatli ota-ona! Farzandingiz {talaba} uy vazifasini bajarmadi. Iltimos, e’tibor qarating. {markaz}',
+                'sort_order' => 60,
+            ],
+            [
+                'name' => 'To‘lov eslatmasi',
+                'slug' => 'payment-reminder',
+                'event' => 'payment',
+                'body' => 'Hurmatli ota-ona! {talaba} uchun {oy} oyi to‘lovi kutilmoqda. Qarzdorlik: {qarz} so‘m. {markaz}',
+                'sort_order' => 70,
+            ],
+            [
+                'name' => 'Umumiy xabar',
+                'slug' => 'general',
+                'event' => 'general',
+                'body' => 'Hurmatli ota-ona! ',
+                'sort_order' => 90,
+            ],
+        ];
+    }
+
     /** Placeholder => what it means, shown as help under the editor. */
     public const PLACEHOLDERS = [
         'talaba'    => 'Talabaning ismi',

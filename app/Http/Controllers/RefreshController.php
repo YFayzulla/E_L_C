@@ -21,7 +21,7 @@ class RefreshController extends Controller
 
         try {
             // Userni qidirish
-            $user = User::findOrFail($id);
+            $user = User::inCurrentCentre()->findOrFail($id);
 
             // Statusni yangilash
             // update() methodi bool qaytaradi, shuning uchun save() ishlatish shart emas

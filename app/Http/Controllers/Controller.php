@@ -9,7 +9,9 @@ use App\Models\Group;
 use App\Models\HistoryPayments;
 use App\Models\LessonAndHistory;
 use App\Models\User;
+use App\Tenancy\TenantQuery;
 use Carbon\Carbon;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -188,9 +190,17 @@ class Controller extends BaseController
         }
 
         // --- teachers, in TWO queries rather than 3 per teacher --------------
-        $teacherRows = DB::table('group_teachers')
+        //
+        // TenantQuery, DB::table emas: xom so'rov global scope'dan tashqarida
+        // qoladi va bu panel aynan shu sababdan boshqa markazning
+        // o'qituvchilarini ko'rsatardi. `group_user` join'i ham alohida
+        // cheklanadi — join qilingan jadvalga scope tegmaydi.
+        $teacherRows = TenantQuery::table('group_teachers')
             ->join('users', 'users.id', '=', 'group_teachers.teacher_id')
-            ->leftJoin('group_user', 'group_user.group_id', '=', 'group_teachers.group_id')
+            ->leftJoin('group_user', function (JoinClause $join) {
+                $join->on('group_user.group_id', '=', 'group_teachers.group_id');
+                TenantQuery::constrain($join, 'group_user');
+            })
             ->select(
                 'users.id',
                 'users.name',
@@ -206,12 +216,12 @@ class Controller extends BaseController
 
         // SUM over the join double-counts when a teacher has several groups, so
         // the payout is recomputed from a clean per-group sum.
-        $groupTotals = DB::table('group_user')
+        $groupTotals = TenantQuery::table('group_user')
             ->select('group_id', DB::raw('SUM(payment) as total'))
             ->groupBy('group_id')
             ->pluck('total', 'group_id');
 
-        $teacherGroups = DB::table('group_teachers')
+        $teacherGroups = TenantQuery::table('group_teachers')
             ->get(['teacher_id', 'group_id'])
             ->groupBy('teacher_id');
 

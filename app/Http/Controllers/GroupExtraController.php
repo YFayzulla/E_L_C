@@ -60,7 +60,7 @@ class GroupExtraController extends Controller
         DB::beginTransaction();
 
         try {
-            $user = User::findOrFail($id);
+            $user = User::inCurrentCentre()->findOrFail($id);
             $groupIds = $request->group_id;
 
             // 1. User guruhini yangilash (Eski guruhlardan chiqarib, yangisiga qo'shish)

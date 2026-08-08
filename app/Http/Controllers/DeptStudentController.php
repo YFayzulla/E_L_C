@@ -79,7 +79,7 @@ class DeptStudentController extends Controller
             return redirect()->back()->with('error', 'To\'lov miqdori noto\'g\'ri kiritildi.');
         }
 
-        $user = User::with('deptStudent', 'groups')->findOrFail($id);
+        $user = User::inCurrentCentre()->with('deptStudent', 'groups')->findOrFail($id);
         $deptStudent = $user->deptStudent;
 
         if (!$deptStudent) {

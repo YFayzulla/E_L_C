@@ -107,7 +107,7 @@ class ProgressController extends Controller
         $this->assertTeachesStudent($student);
 
         try {
-            $studentModel = User::with('groups')->findOrFail($student);
+            $studentModel = User::inCurrentCentre()->with('groups')->findOrFail($student);
 
             $progress = $this->progress()->forStudent($student);
 

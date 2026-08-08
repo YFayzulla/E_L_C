@@ -41,7 +41,7 @@ class StudentSmsController extends Controller
             'audiences.min'      => 'Kamida bitta qabul qiluvchini tanlang.',
         ]);
 
-        $model = User::findOrFail($student);
+        $model = User::inCurrentCentre()->findOrFail($student);
 
         abort_unless($model->hasRole('student'), 404, 'Talaba topilmadi.');
 

@@ -261,7 +261,7 @@ class TeacherAdminPanel extends Controller
         ]);
 
         try {
-            $student = User::findOrFail($id);
+            $student = User::inCurrentCentre()->findOrFail($id);
             $teacherName = auth()->user()->name;
             $groupName = $request->group_name;
             

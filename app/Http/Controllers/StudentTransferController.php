@@ -32,7 +32,7 @@ class StudentTransferController extends Controller
     {
         $this->assertTeachesStudent($student);
 
-        $model = User::with('groups')->findOrFail($student);
+        $model = User::inCurrentCentre()->with('groups')->findOrFail($student);
 
         abort_unless($model->hasRole('student'), 404, 'Talaba topilmadi.');
 
@@ -85,7 +85,7 @@ class StudentTransferController extends Controller
     {
         $this->assertTeachesStudent($student);
 
-        $model = User::findOrFail($student);
+        $model = User::inCurrentCentre()->findOrFail($student);
 
         abort_unless($model->hasRole('student'), 404, 'Talaba topilmadi.');
 

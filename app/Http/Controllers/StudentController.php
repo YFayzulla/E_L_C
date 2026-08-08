@@ -204,7 +204,7 @@ class StudentController extends Controller
         $this->assertTeachesStudent((int) $id);
 
         try {
-            $student = User::with('groups')->findOrFail($id);
+            $student = User::inCurrentCentre()->with('groups')->findOrFail($id);
             $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
             // `actor` oldindan yuklanadi: aks holda tarixdagi har bir qator
             // uchun bittadan qo'shimcha so'rov ketardi.
@@ -238,7 +238,7 @@ class StudentController extends Controller
     public function edit($id)
     {
         try {
-            $student = User::with('groups')->findOrFail($id);
+            $student = User::inCurrentCentre()->with('groups')->findOrFail($id);
             $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
             $guardians = $this->parents->guardiansOf($student);
 
@@ -261,7 +261,7 @@ class StudentController extends Controller
         DB::beginTransaction();
 
         try {
-            $student = User::findOrFail($id);
+            $student = User::inCurrentCentre()->findOrFail($id);
             $oldPhotoPath = $student->photo;
             $originalEmail = $student->email;
 
@@ -381,7 +381,7 @@ class StudentController extends Controller
         DB::beginTransaction();
 
         try {
-            $student = User::findOrFail($id);
+            $student = User::inCurrentCentre()->findOrFail($id);
             $photoPath = $student->photo;
 
             $student->groups()->detach();

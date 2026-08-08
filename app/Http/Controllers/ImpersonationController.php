@@ -37,7 +37,7 @@ class ImpersonationController extends Controller
             'Avval joriy seansdan qayting.'
         );
 
-        $target = User::findOrFail($user);
+        $target = User::inCurrentCentre()->findOrFail($user);
 
         abort_if($target->id === $admin->id, 400, 'O‘zingizga kira olmaysiz.');
 
@@ -76,6 +76,10 @@ class ImpersonationController extends Controller
 
         abort_unless($adminId, 403, 'Siz boshqa hisobda emassiz.');
 
+        // Ataylab markazga cheklanmagan: id URL'dan emas, sessiyadan keladi va
+        // impersonate boshlanganda allaqachon tekshirilgan. Bu yerga
+        // inCurrentCentre() qo'yilsa, hech qaysi markazga a'zo bo'lmagan
+        // super-admin o'z hisobiga qaytolmay qolardi.
         $admin = User::find($adminId);
 
         // The admin was deleted mid-session: fall back to a clean logout rather

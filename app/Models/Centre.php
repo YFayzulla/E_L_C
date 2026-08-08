@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 /**
  * O'quv markazi — a tenant.
@@ -28,6 +30,25 @@ class Centre extends Model
     public const MEMBER_INVITED   = 0;
     public const MEMBER_ACTIVE    = 1;
     public const MEMBER_SUSPENDED = 2;
+
+    /**
+     * Subdomenlar wildcard (*.domen.uz) bo'lgani uchun har qanday slug
+     * avtomatik host'ga aylanadi — shu sababli bir nechtasi band.
+     *
+     * `www` markaz bo'lib qolsa apex bilan to'qnashadi; `mail`, `smtp`,
+     * `ns1` va shu kabilar pochta/DNS yozuvlarini o'g'irlaydi; `api`,
+     * `admin`, `app` esa keyinchalik platformaning o'ziga kerak bo'ladi.
+     * Ro'yxat ikki joyda ishlatiladi — markaz yaratishda tekshiruv
+     * sifatida va ResolveCentre da, chunki bazaga qo'lda yozib qo'yilgan
+     * qator ham shu yerdan o'tishi kerak.
+     */
+    public const RESERVED_SLUGS = [
+        'www', 'api', 'admin', 'app', 'mail', 'smtp', 'imap', 'pop', 'webmail',
+        'ftp', 'cpanel', 'whm', 'ns', 'ns1', 'ns2', 'dns', 'mx',
+        'static', 'assets', 'cdn', 'img', 'media', 'files', 'storage',
+        'blog', 'docs', 'help', 'support', 'status', 'test', 'dev', 'staging',
+        'super', 'superadmin', 'platform', 'panel', 'login', 'auth',
+    ];
 
     /** Grading keys a centre may override. Anything else stays global. */
     public const OVERRIDABLE_SETTINGS = [
@@ -57,6 +78,43 @@ class Centre extends Model
 
     /** Never let the credential reach a view or a JSON response by accident. */
     protected $hidden = ['sms_password'];
+
+    /* ========================================================= slug va kesh */
+
+    /**
+     * ResolveCentre keshi shu kalitda turadi. Ikkala tomon ham shu yerdan
+     * olishi kerak — aks holda kesh yozadigan va tozalaydigan kod ayri
+     * kalitlar bilan ishlab, to'xtatilgan markaz hamon ochiq qolardi.
+     */
+    public static function cacheKey(string $slug): string
+    {
+        return 'centre.slug.' . Str::lower($slug);
+    }
+
+    public static function isReservedSlug(string $slug): bool
+    {
+        return in_array(Str::lower($slug), self::RESERVED_SLUGS, true);
+    }
+
+    protected static function booted(): void
+    {
+        // To'xtatish yoki nomni o'zgartirish darhol kuchga kirsin: aks holda
+        // panelda "to'xtatdim, lekin markaz hamon ochiq" degan holat bo'lardi.
+        static::saved(fn (self $centre) => $centre->forgetCache());
+        static::deleted(fn (self $centre) => $centre->forgetCache());
+    }
+
+    public function forgetCache(): void
+    {
+        Cache::forget(self::cacheKey((string) $this->slug));
+
+        // Slug o'zgargan bo'lsa eskisi ham osilib qolmasin.
+        $previous = $this->getOriginal('slug');
+
+        if ($previous && $previous !== $this->slug) {
+            Cache::forget(self::cacheKey((string) $previous));
+        }
+    }
 
     /* ============================================================ relations */
 

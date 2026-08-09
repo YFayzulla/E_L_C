@@ -40,26 +40,26 @@ class StudentTransferController extends Controller
             $isAdmin = auth()->user()->hasRole('admin');
             $waitingRoomId = Group::waitingRoomId();
 
+            // Markazning BARCHA guruhlari — o'qituvchiga ham, adminga ham.
+            //
+            // Ilgari o'qituvchi faqat o'zi dars beradigan guruhlarni ko'rardi,
+            // ya'ni talabani hamkasbining guruhiga o'tkaza olmasdi va buning
+            // uchun har safar administratorni chaqirishga majbur edi. Global
+            // scope ro'yxatni baribir shu markaz bilan cheklaydi.
             $targets = Group::query()
                 ->with('teachers:id,name')
                 ->withCount(['students as members_count'])
-                ->when(! $isAdmin, function ($query) use ($waitingRoomId) {
-                    $query->whereIn('id', $this->accessibleGroupIds())
-                        ->where('id', '!=', $waitingRoomId);
-                })
                 // Kutish zali sorts last: it is a holding pen, not a destination.
                 ->orderByRaw('CASE WHEN id = ? THEN 1 ELSE 0 END, name', [$waitingRoomId])
                 ->get();
 
             $selectableIds = $targets->pluck('id')->map(fn ($id) => (int) $id)->all();
 
-            // A teacher may not detach a student from somebody else's group, so
-            // those memberships are shown read-only and re-submitted untouched.
-            // The Kutish zali is NOT preserved — leaving it is the whole point
-            // of being assigned to a real group.
+            // Hamma guruh tanlanadigan bo'lgach, "qulflangan a'zolik" degan
+            // tushuncha yo'qoldi: forma talabaning haqiqiy holatini to'liq
+            // ko'rsatadi va yuborilgani ayni o'sha holatga aylanadi.
             $lockedGroups = $model->groups->reject(
                 fn ($group) => in_array((int) $group->id, $selectableIds, true)
-                    || (int) $group->id === $waitingRoomId
             );
 
             $currentIds = $model->groups->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -89,31 +89,35 @@ class StudentTransferController extends Controller
 
         abort_unless($model->hasRole('student'), 404, 'Talaba topilmadi.');
 
+        // O'qituvchi endi markazning istalgan guruhiga ko'chira oladi, shu
+        // jumladan hamkasbinikiga ham — bu ataylab, chunki formada ham
+        // hammasi ko'rinadi.
+        //
+        // Qolgan yagona chegara — yuqoridagi assertTeachesStudent(): o'qituvchi
+        // faqat O'ZI dars beradigan talabani ko'chira oladi. Guruhlar
+        // ro'yxatini esa global scope markaz bilan cheklab turadi, ya'ni
+        // boshqa markazning guruhi bu yerga tusha olmaydi.
+        //
+        // Rolga bog'liq "saqlab qolish" mantiqi olib tashlandi: forma haqiqiy
+        // holatni to'liq ko'rsatgach, yuborilgan ro'yxat ayni o'sha holatga
+        // aylanishi kerak. Aks holda belgisi olingan guruh jimgina qaytib
+        // qo'shilardi.
         $targets = $request->targetGroupIds();
-        $isAdmin = auth()->user()->hasRole('admin');
 
-        if (! $isAdmin) {
-            abort_if(
-                in_array(Group::waitingRoomId(), $targets, true),
-                403,
-                'Kutish zaliga faqat administrator ko‘chira oladi.'
-            );
+        // Ammo formada UMUMAN ko'rinmagan a'zolik saqlanadi. Bu odatda bo'sh:
+        // ro'yxatda markazning barcha guruhi bor. Faqat talaba ro'yxatga
+        // tushmaydigan guruhga (masalan o'chirilganiga) a'zo bo'lib qolgan
+        // bo'lsa ishlaydi — yuborilgan ma'lumot uni "olib tashlandi" deb
+        // talqin qilinmasligi kerak, chunki o'qituvchi uni ko'rmagan ham.
+        $visible = Group::query()->pluck('id')->map(fn ($id) => (int) $id)->all();
 
-            // Every posted target must belong to this teacher…
-            $this->assertTeachesGroups($targets);
+        $invisible = array_diff(
+            $model->groups()->pluck('groups.id')->map(fn ($id) => (int) $id)->all(),
+            $visible
+        );
 
-            // …and memberships outside their reach survive the sync untouched,
-            // the Kutish zali excepted — a student assigned to a real group
-            // must be able to leave it.
-            $accessible = $this->accessibleGroupIds()->map(fn ($id) => (int) $id)->all();
-
-            $preserved = array_diff(
-                $model->groups()->pluck('groups.id')->map(fn ($id) => (int) $id)->all(),
-                $accessible,
-                [Group::waitingRoomId()]
-            );
-
-            $targets = array_values(array_unique(array_merge($targets, $preserved)));
+        if ($invisible !== []) {
+            $targets = array_values(array_unique(array_merge($targets, $invisible)));
         }
 
         try {
@@ -127,8 +131,34 @@ class StudentTransferController extends Controller
                 ->with('error', 'Talabani ko‘chirishda xatolik yuz berdi. O‘zgarishlar saqlanmadi.');
         }
 
-        return redirect()->route('student.show', $model->id)
+        return redirect()->to($this->destinationAfter($model))
             ->with('success', $this->summary($model, $change));
+    }
+
+    /**
+     * Ko'chirishdan keyin qayerga qaytish.
+     *
+     * O'qituvchi talabani o'zi dars bermaydigan guruhga o'tkazishi mumkin —
+     * va shu zahoti unga kirish huquqini yo'qotadi. Talaba sahifasiga
+     * qaytarish o'sha holatda 403 berardi: ko'chirish muvaffaqiyatli
+     * o'tgan bo'lsa ham, foydalanuvchi xato ko'rardi.
+     */
+    private function destinationAfter(User $model): string
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            return route('student.show', $model->id);
+        }
+
+        // Hamon o'qitayotgan bo'lsa — talaba sahifasi ochiladi.
+        $stillTeaches = $model->groups()
+            ->whereIn('groups.id', $this->accessibleGroupIds())
+            ->exists();
+
+        return $stillTeaches
+            ? route('student.show', $model->id)
+            : route('attendance');
     }
 
     /**

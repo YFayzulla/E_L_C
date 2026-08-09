@@ -99,10 +99,13 @@
                                 {{ number_format((int) $student->should_pay, 0, '.', ' ') }} so‘m
                             </span>
                         </div>
+                        {{-- Odatda bo'sh: ro'yxatda markazning barcha guruhi bor.
+                             Faqat talaba ro'yxatda yo'q guruhga (masalan o'chirilganiga)
+                             a'zo bo'lib qolgan holatda ko'rinadi. --}}
                         @if($lockedGroups->isNotEmpty())
                             <div class="text-muted mt-2" style="font-size: .8rem;">
                                 <i class="bx bx-lock-alt me-1"></i>
-                                Sizga biriktirilmagan {{ $lockedGroups->count() }} ta guruh
+                                Ro‘yxatda yo‘q {{ $lockedGroups->count() }} ta guruh
                                 ({{ $lockedGroups->pluck('name')->implode(', ') }})
                                 o‘zgarishsiz saqlanadi —
                                 {{ number_format($lockedTotal, 0, '.', ' ') }} so‘m.
@@ -145,12 +148,9 @@
                             @error('group_id.*') <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div> @enderror
 
                             <div class="form-text mt-2">
-                                @if($isAdmin)
-                                    Barcha guruhlar, shu jumladan Kutish zali ham mavjud.
-                                @else
-                                    Faqat sizga biriktirilgan guruhlar ko‘rsatilmoqda. Kutish zaliga
-                                    ko‘chirish administrator huquqini talab qiladi.
-                                @endif
+                                Markazning barcha guruhlari, shu jumladan Kutish zali ham mavjud.
+                                Belgilangan guruhlar talabaning yakuniy ro‘yxati bo‘ladi —
+                                belgisi olingani o‘sha guruhdan chiqariladi.
                             </div>
 
                             <hr class="my-4">

@@ -345,15 +345,7 @@ class TeacherController extends Controller
      */
     private function attachToCurrentCentre(User $teacher, $percent): void
     {
-        $centre = Centre::current();
-
-        if ($centre === null) {
-            $teacher->assignRole('user');
-
-            return;
-        }
-
-        app(CentreMembershipService::class)->attach($centre, $teacher, 'user', [
+        app(CentreMembershipService::class)->attachToCurrent($teacher, 'user', [
             'percent' => $percent === null || $percent === '' ? null : (int) $percent,
         ]);
     }

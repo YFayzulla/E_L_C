@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use App\Services\ParentAccountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +59,7 @@ class ParentAdminController extends Controller
                 'description' => $data['description'] ?? null,
             ]);
 
-            $parent->assignRole('parent');
+            app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
             $parent->children()->sync($this->childPivot($data['children'] ?? []));
 
             DB::commit();

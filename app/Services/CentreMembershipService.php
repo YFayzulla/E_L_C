@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Centre;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * The only place that attaches people to centres and gives them roles.
@@ -58,6 +59,37 @@ class CentreMembershipService
         });
 
         $user->unsetRelation('centres');
+    }
+
+    /**
+     * Attach somebody to the centre the current request belongs to.
+     *
+     * Bu — ilova ichida yangi odam yaratadigan HAR BIR joy uchun yagona
+     * to'g'ri chaqiruv. Yalang'och `assignRole()` rol beradi, lekin
+     * `centre_user` qatorini YOZMAYDI — natijada odam yaratiladi, ro'yxatlarda
+     * ko'rinadi, lekin kira olmaydi: EnsureCentreMember uni to'sadi.
+     * Aynan shu sababdan ko'chishdan keyin yaratilgan talabalar 403 olardi.
+     *
+     * Markazsiz rol berishning IMKONI YO'Q: `model_has_roles.centre_id`
+     * NOT NULL va birlamchi kalit tarkibida. Shuning uchun bu yerda
+     * "markazsiz ham urinib ko'ramiz" degan zaxira yo'l yo'q — u baribir
+     * tushunarsiz baza xatosiga olib borardi. Sabab aniq aytiladi:
+     * chaqiruvchi markaz kontekstini o'rnatishi kerak
+     * (Centre::for(...) yoki CentreContext::each(...)).
+     */
+    public function attachToCurrent(User $user, string $role, array $attributes = []): void
+    {
+        $centre = Centre::current();
+
+        if ($centre === null) {
+            throw new RuntimeException(
+                "«{$role}» rolini berish uchun markaz konteksti kerak, lekin u o‘rnatilmagan. "
+                . 'HTTP so‘rovda buni ResolveCentre qiladi; konsolda '
+                . 'Centre::for($centre, fn() => ...) yoki Centre::each(...) ichida chaqiring.'
+            );
+        }
+
+        $this->attach($centre, $user, $role, $attributes);
     }
 
     /**

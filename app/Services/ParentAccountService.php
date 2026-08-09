@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -181,7 +182,7 @@ class ParentAccountService
             // An existing account with this number: only promote it to parent
             // if it is not already a student/teacher/admin.
             if ($parent->roles()->count() === 0) {
-                $parent->assignRole('parent');
+                app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
             }
 
             if (! $parent->hasRole('parent')) {
@@ -218,7 +219,7 @@ class ParentAccountService
             'password' => Hash::make(substr($phone, -9)),
         ]);
 
-        $parent->assignRole('parent');
+        app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
 
         return $parent;
     }

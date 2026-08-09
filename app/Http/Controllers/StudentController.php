@@ -12,6 +12,7 @@ use App\Models\DeptStudent;
 use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
+use App\Services\CentreMembershipService;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
 use App\Tenancy\TenantStorage;
@@ -95,7 +96,10 @@ class StudentController extends Controller
                 'description' => $request->description,
             ]);
 
-            $user->assignRole('student');
+            // attachToCurrent, assignRole emas: yalang'och assignRole rol
+            // beradi, lekin centre_user qatorini yozmaydi — talaba
+            // yaratiladi, ro'yxatda ko'rinadi, lekin KIRA OLMAYDI.
+            app(CentreMembershipService::class)->attachToCurrent($user, 'student');
 
             $groupIds = $request->group_id; // This is now an array
 

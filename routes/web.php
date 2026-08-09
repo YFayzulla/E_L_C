@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AttendanceAdminController;
 use App\Http\Controllers\CentreChoiceController;
+use App\Http\Controllers\CentreSettingsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DeptStudentController;
 use App\Http\Controllers\SuperAdmin\CentreAdminController;
@@ -161,6 +162,14 @@ Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attenda
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    // --- MARKAZ SOZLAMALARI ---
+    // Super-admin panelidan farqi: u yerda platforma egasi markazning o'zini
+    // boshqaradi, bu yerda esa markaz admini o'quv jarayoniga oid qarorni.
+    Route::controller(CentreSettingsController::class)->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::put('/', 'update')->name('update');
+    });
 
     // --- TEST ROUTES (TUZATILDI) ---
     Route::controller(TestResultController::class)->prefix('Test')->group(function () {

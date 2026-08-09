@@ -57,6 +57,9 @@ class Centre extends Model
         'late_penalty',
         'progress_months',
         'require_email_verification',
+        // Ko'nikma baholash usuli: 'skills' yoki 'single'. Markaz uni
+        // Sozlamalar sahifasidan o'zgartiradi.
+        'skill_mode',
     ];
 
     protected $fillable = [

@@ -245,7 +245,15 @@ class LessonSkillGradeController extends Controller
                 ->groupBy('user_id', 'skill')
                 ->get();
 
-            $skills = (array) config('grading.skills', []);
+            // Ustunlar ro'yxati konfiguratsiyadan HAM, ma'lumotdan HAM
+            // to'ldiriladi. Markaz baholash usulini o'zgartirsa (masalan
+            // beshta ko'nikmadan bitta umumiy bahoga), eski baholar o'z
+            // kalitlari bilan bazada qoladi — ular hisobotdan tushib
+            // qolmasligi kerak, aks holda o'tgan oylar bo'sh ko'rinardi.
+            $skills = array_values(array_unique(array_merge(
+                (array) config('grading.skills', []),
+                $rows->pluck('skill')->filter()->unique()->all()
+            )));
 
             // [user id][skill] => ['avg' => int, 'marks' => int]
             $matrix = [];

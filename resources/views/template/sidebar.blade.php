@@ -128,6 +128,15 @@
                 <div>Xarajatlar</div>
             </a>
         </li>
+
+        <li class="menu-header small">Markaz</li>
+
+        <li class="menu-item {{ $isActive('settings.edit') }}">
+            <a href="{{ route('settings.edit') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div>Sozlamalar</div>
+            </a>
+        </li>
         @endrole
 
         {{-- ================= TEACHER ================= --}}

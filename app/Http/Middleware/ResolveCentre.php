@@ -84,6 +84,14 @@ class ResolveCentre
 
                 config(["grading.{$key}" => $value]);
             }
+
+            // Baholash usuli — oxirida, chunki u `skills` ro'yxatining
+            // o'zini almashtiradi. Bitta joyda qilingani muhim: kod bo'ylab
+            // tarqalgan `config('grading.skills')` o'qishlari (baholash
+            // formasi, oylik test, validatsiya, API) o'zgarishsiz qoladi.
+            if (config('grading.skill_mode') === 'single') {
+                config(['grading.skills' => [config('grading.single_skill', 'overall')]]);
+            }
         }
 
         return $next($request);

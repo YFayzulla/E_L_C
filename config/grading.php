@@ -13,12 +13,30 @@ return [
 
     'skills' => ['grammar', 'reading', 'listening', 'writing', 'speaking'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Baholash usuli
+    |--------------------------------------------------------------------------
+    | 'skills' — yuqoridagi beshta ko'nikma bo'yicha alohida baho.
+    | 'single' — dars uchun bitta umumiy baho.
+    |
+    | Markaz buni o'z sozlamalaridan o'zgartira oladi (Sozlamalar sahifasi).
+    | Usul o'zgarganda ESKI BAHOLAR joyida qoladi: ular o'z kalitlari bilan
+    | yozilgan va hisobotlarda ko'rinaveradi — ustunlar ro'yxati ma'lumotdan
+    | ham to'ldiriladi, faqat konfiguratsiyadan emas.
+    */
+    'skill_mode' => env('GRADING_SKILL_MODE', 'skills'),
+
+    /** 'single' usulida ishlatiladigan yagona kalit. */
+    'single_skill' => 'overall',
+
     'skill_labels' => [
         'grammar'   => 'Grammatika',
         'reading'   => "O‘qish",
         'listening' => 'Tinglash',
         'writing'   => 'Yozish',
         'speaking'  => 'Gapirish',
+        'overall'   => 'Umumiy baho',
     ],
 
     'skill_icons' => [
@@ -27,6 +45,7 @@ return [
         'listening' => 'bx-headphone',
         'writing'   => 'bx-pencil',
         'speaking'  => 'bx-microphone',
+        'overall'   => 'bx-star',
     ],
 
     /*

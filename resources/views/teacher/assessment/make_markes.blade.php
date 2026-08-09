@@ -40,10 +40,14 @@
                                 {{ $labels[$skill] ?? ucfirst($skill) }}
                             </th>
                         @endforeach
-                        <th style="min-width: 7rem;">
-                            <i class="bx bx-calculator me-1"></i>
-                            {{ config('grading.overall_label', 'Umumiy') }}
-                        </th>
+                        @if(count($skills) > 1)
+                            {{-- Bitta ko'nikma bo'lsa bu ustun o'sha bahoni
+                                 takrorlaydi, ya'ni ortiqcha. --}}
+                            <th style="min-width: 7rem;">
+                                <i class="bx bx-calculator me-1"></i>
+                                {{ config('grading.overall_label', 'Umumiy') }}
+                            </th>
+                        @endif
                         <th style="min-width: 14rem;">Izoh</th>
                     </tr>
                     </thead>
@@ -71,11 +75,13 @@
                                 </td>
                             @endforeach
 
-                            <td>
-                                {{-- Derived, never posted: the server recomputes it from the
-                                     marks so a hand-edited field cannot disagree with them. --}}
-                                <span class="badge bg-label-secondary js-overall" style="font-size: .9rem;">—</span>
-                            </td>
+                            @if(count($skills) > 1)
+                                <td>
+                                    {{-- Derived, never posted: the server recomputes it from the
+                                         marks so a hand-edited field cannot disagree with them. --}}
+                                    <span class="badge bg-label-secondary js-overall" style="font-size: .9rem;">—</span>
+                                </td>
+                            @endif
 
                             <td>
                                 <input type="text" maxlength="250"
@@ -109,6 +115,8 @@
         </div>
     </form>
 
+    @if(count($skills) > 1)
+    {{-- Bitta ustunda hisoblanadigan o'rtacha o'sha bahoning o'zi — ortiqcha. --}}
     <script>
         // Live arithmetic mean, so the teacher sees the overall while typing.
         // Blank cells are skipped, exactly as the server does.
@@ -145,5 +153,6 @@
             });
         })();
     </script>
+    @endif
 
 @endsection

@@ -294,14 +294,29 @@ class CentreDoctor extends Command
             $this->warn("  {$inactive} ta a’zolik faol emas (taklif qilingan yoki to‘xtatilgan) — ular ham kira olmaydi.");
         }
 
-        // Hech qaysi markazda roli yo'q foydalanuvchilar.
+        // Hech qaysi markazda roli yo'q foydalanuvchilar. Ular ham kira
+        // olmaydi (`role:` middleware o'tkazmaydi), shuning uchun sonini
+        // aytish yetarli emas — kimligini ko'rsatamiz.
         $roleless = DB::table('users as u')
             ->leftJoin($table . ' as mr', 'mr.model_id', '=', 'u.id')
             ->whereNull('mr.model_id')
-            ->count();
+            ->select('u.id', 'u.name', 'u.phone', 'u.email', 'u.created_at')
+            ->orderBy('u.id')
+            ->get();
 
-        if ($roleless > 0) {
-            $this->warn("  {$roleless} ta foydalanuvchining hech qaysi markazda roli yo‘q.");
+        if ($roleless->isNotEmpty()) {
+            $this->warn('  ' . $roleless->count()
+                . ' ta foydalanuvchining hech qaysi markazda roli yo‘q — ular kira olmaydi:');
+
+            $this->table(
+                ['#', 'ism', 'telefon', 'pochta', 'yaratilgan'],
+                $roleless->take(20)->map(fn ($u) => [
+                    $u->id, $u->name, $u->phone, $u->email ?: '—', $u->created_at,
+                ])->all()
+            );
+
+            $this->line('    Rol berish: markaz sahifasidan tahrirlang yoki '
+                . 'kerak bo‘lmasa hisobni o‘chiring.');
         }
     }
 

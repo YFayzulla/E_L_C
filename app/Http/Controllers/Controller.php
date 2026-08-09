@@ -105,8 +105,13 @@ class Controller extends BaseController
                 return view('studentPage', $this->studentDashboardData($user));
             }
 
-            // 4. O'QITUVCHI UCHUN DASHBOARD
-            if ($user->hasRole('user')) {
+            // 4. O'QITUVCHI VA SUPPORT TEACHER UCHUN DASHBOARD
+            //
+            // Bir xil ma'lumot: ikkalasi ham `group_teachers` orqali
+            // biriktiriladi, ya'ni "mening guruhlarim" ikkovi uchun ham
+            // bir xil ma'noni beradi. Farq sidebarda — support faqat
+            // baholash bo'limlarini ko'radi.
+            if ($user->hasRole('user') || $user->hasRole('support')) {
                 return view('dashboard', $this->teacherDashboardData($user));
             }
 

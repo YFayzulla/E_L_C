@@ -191,6 +191,34 @@
         </li>
         @endrole
 
+        {{-- ================= SUPPORT TEACHER ================= --}}
+        {{-- Vazifasi tor: faqat baholash. Davomat, uy vazifasi va
+             o'zlashtirish bo'limlari unga tegishli emas. --}}
+        @role('support')
+        <li class="menu-header small">Baholash</li>
+
+        <li class="menu-item {{ $isActive('dashboard') }}">
+            <a href="{{ route('dashboard') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                <div>Boshqaruv paneli</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('assessment.teacher.groups', 'assessment.index', 'assessment.show') }}">
+            <a href="{{ route('assessment.teacher.groups') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-list-check"></i>
+                <div>Oylik test</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('skills.groups', 'skills.grade', 'skills.report') }}">
+            <a href="{{ route('skills.groups') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-book-open"></i>
+                <div>Ko'nikmalar</div>
+            </a>
+        </li>
+        @endrole
+
         {{-- ================= STUDENT ================= --}}
         @role('student')
         <li class="menu-header small">Mening sahifam</li>

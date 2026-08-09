@@ -16,6 +16,26 @@ use Illuminate\Validation\Rule;
 
 class AssessmentController extends Controller
 {
+    use \App\Http\Controllers\Concerns\AuthorizesGroupAccess;
+
+    /**
+     * Baho qo'ya oladigan rollar.
+     *
+     * Marshrut guruhida `student` ham bor, chunki talaba O'Z natijalarini
+     * shu kontrollerning index() amali orqali ko'radi. Lekin baholash
+     * formasi unga tegishli emas.
+     */
+    private function assertGrader(): void
+    {
+        $user = auth()->user();
+
+        abort_unless(
+            $user && ($user->hasRole('admin') || $user->hasRole('user') || $user->hasRole('support')),
+            403,
+            'Baho qo‘yish huquqi yo‘q.'
+        );
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -49,6 +69,14 @@ class AssessmentController extends Controller
      */
     public function show($id)
     {
+        // Bu sahifa BAHO QO'YISH formasi, ko'rish emas. Ilgari unda hech
+        // qanday tekshiruv yo'q edi: istalgan o'qituvchi (va hatto talaba)
+        // /assessment/{istalgan guruh} manzilini ochib, o'zga guruhga baho
+        // qo'ya olardi. `role:` middleware faqat "u o'qituvchimi" degan
+        // savolga javob beradi, "bu guruh uniki mi" degan savolga emas.
+        $this->assertGrader();
+        $this->assertTeachesGroup((int) $id);
+
         try {
             $group = Group::findOrFail($id);
 
@@ -83,6 +111,9 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->assertGrader();
+        $this->assertTeachesGroup((int) $id);
+
         $skills = (array) config('grading.skills');
 
         /*

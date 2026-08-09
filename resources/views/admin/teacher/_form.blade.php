@@ -53,7 +53,28 @@
                         @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
+                    @php
+                        // Mavjud xodimning turi: hozirgi roli bo'yicha.
+                        $currentRole = old('role', $teacher && $teacher->hasRole('support') ? 'support' : 'user');
+                    @endphp
+
                     <div class="col-md-6">
+                        <label class="form-label" for="role">Xodim turi</label>
+                        <select id="role" name="role" class="form-select @error('role') is-invalid @enderror">
+                            <option value="user" @selected($currentRole === 'user')>O‘qituvchi</option>
+                            <option value="support" @selected($currentRole === 'support')>Support teacher</option>
+                        </select>
+                        @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <div class="form-text">
+                            Support teacher faqat oylik test va dars jarayonidagi
+                            ko‘nikmalarni baholaydi.
+                        </div>
+                    </div>
+
+                    {{-- Ulush faqat oddiy o'qituvchida: support teacher oyligi
+                         guruh tushumiga bog'liq emas. JS uni yashiradi, server
+                         esa baribir support uchun foizni saqlamaydi. --}}
+                    <div class="col-md-6" id="percent-field" @style(['display: none' => $currentRole === 'support'])>
                         <label class="form-label" for="percent">Ulush (foiz)</label>
                         <div class="input-group">
                             <input type="number" id="percent" name="percent" min="0" max="100" step="1"
@@ -180,3 +201,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Support teacher oyligi guruh tushumiga bog'liq emas — foiz maydoni
+    // unga ko'rsatilmaydi. Server ham baribir uni saqlamaydi, bu shunchaki
+    // formani chalg'ituvchi maydondan tozalaydi.
+    (function () {
+        const role = document.getElementById('role');
+        const field = document.getElementById('percent-field');
+
+        if (!role || !field) { return; }
+
+        const sync = () => { field.style.display = role.value === 'support' ? 'none' : ''; };
+
+        role.addEventListener('change', sync);
+        sync();
+    })();
+</script>

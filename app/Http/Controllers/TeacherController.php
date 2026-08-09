@@ -21,6 +21,15 @@ use Illuminate\Support\Facades\Storage;
 class TeacherController extends Controller
 {
     /**
+     * Bu ekran boshqaradigan rollar.
+     *
+     * `support` — vazifasi tor xodim: faqat oylik testni va dars
+     * jarayonidagi ko'nikmalarni baholaydi. Guruhga oddiy o'qituvchi kabi
+     * biriktiriladi, lekin oyligi guruh to'lovlaridan hisoblanmaydi.
+     */
+    public const STAFF_ROLES = ['user', 'support'];
+
+    /**
      * O'qituvchilar ro'yxati.
      *
      * DIQQAT: bazaviy Controller index() ni parametrsiz e'lon qilgan,
@@ -29,7 +38,7 @@ class TeacherController extends Controller
     public function index()
     {
         try {
-            $teachers = User::role('user')
+            $teachers = User::role(self::STAFF_ROLES)
                 ->with('teacherGroups:id,name')
                 ->withCount(['teacherGroups as groups_count'])
                 ->orderBy('name')
@@ -51,7 +60,7 @@ class TeacherController extends Controller
     public function show($id)
     {
         try {
-            $teacher = User::role('user')->findOrFail($id);
+            $teacher = User::role(self::STAFF_ROLES)->findOrFail($id);
 
             // group_teachers QATOR id kerak - biriktirishni uzish shu id bo'yicha ketadi.
             $groupLinks = GroupTeacher::with([
@@ -150,7 +159,11 @@ class TeacherController extends Controller
             // Membership and role go through the one writer that knows about
             // Spatie teams; a bare assignRole() here would stamp whatever
             // centre happened to be current, or none at all.
-            $this->attachToCurrentCentre($teacher, $request->input('percent'));
+            $this->attachToCurrentCentre(
+                $teacher,
+                $request->input('percent'),
+                $this->staffRole($request)
+            );
 
             if ($this->groupsWereSubmitted($request)) {
                 $teacher->teacherGroups()->sync($this->cleanGroupIds($request));
@@ -194,7 +207,7 @@ class TeacherController extends Controller
         try {
             // role('user') SHART: usiz /teacher/{talaba_id}/edit talaba ustida
             // o'qituvchi formasini ochib yuboradi (show() allaqachon shu filtrni qo'llaydi).
-            $teacher = User::role('user')->with('teacherGroups:id,name')->findOrFail($id);
+            $teacher = User::role(self::STAFF_ROLES)->with('teacherGroups:id,name')->findOrFail($id);
 
             $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")
                 ->get(['id', 'name']);
@@ -219,7 +232,7 @@ class TeacherController extends Controller
         try {
             // role('user') SHART: usiz PUT /teacher/{talaba_id} talabaning
             // telefon/parol/foizini o'qituvchi formasi bilan qayta yozadi.
-            $teacher = User::role('user')->findOrFail($id);
+            $teacher = User::role(self::STAFF_ROLES)->findOrFail($id);
             $oldPhotoPath = $teacher->photo;
 
             if ($request->hasFile('photo')) {
@@ -245,7 +258,18 @@ class TeacherController extends Controller
 
             $teacher->update($updateData);
 
-            $this->syncPercent($teacher, $request->input('percent'));
+            // Xodim turi o'zgargan bo'lsa rolni almashtiramiz. setRole()
+            // eskisini olib tashlab yangisini beradi, ya'ni odam bir vaqtda
+            // ham o'qituvchi, ham support bo'lib qolmaydi.
+            $role = $this->staffRole($request);
+
+            if ($request->has('role') && ! $teacher->hasRole($role)) {
+                app(CentreMembershipService::class)->setRole(Centre::current(), $teacher, $role);
+                $teacher->unsetRelation('roles');
+            }
+
+            // Support uchun foiz saqlanmaydi — oyligi guruhga bog'liq emas.
+            $this->syncPercent($teacher, $role === 'support' ? null : $request->input('percent'));
 
             // Multi-select hech narsa yubormasa, sync([]) BARCHA guruhni uzib yuboradi.
             if ($this->groupsWereSubmitted($request)) {
@@ -302,7 +326,7 @@ class TeacherController extends Controller
         try {
             // role('user') SHART: usiz DELETE /teacher/{talaba_id} talabani
             // "o'qituvchi o'chirildi" degan yashil flash bilan o'chirib yuboradi.
-            $teacher = User::role('user')->findOrFail($id);
+            $teacher = User::role(self::STAFF_ROLES)->findOrFail($id);
             $photoPath = $teacher->photo;
 
             $teacher->teacherGroups()->detach();
@@ -343,10 +367,26 @@ class TeacherController extends Controller
      * Falls back to a bare assignRole() while no centre is resolved, which is
      * the case until the tenant middleware is wired up.
      */
-    private function attachToCurrentCentre(User $teacher, $percent): void
+    /**
+     * Formadan kelgan xodim turi. Noma'lum qiymat oddiy o'qituvchiga
+     * tushadi — validatsiya uni allaqachon cheklab qo'ygan.
+     */
+    private function staffRole(Request $request): string
     {
-        app(CentreMembershipService::class)->attachToCurrent($teacher, 'user', [
-            'percent' => $percent === null || $percent === '' ? null : (int) $percent,
+        $role = (string) $request->input('role', 'user');
+
+        return in_array($role, self::STAFF_ROLES, true) ? $role : 'user';
+    }
+
+    private function attachToCurrentCentre(User $teacher, $percent, string $role = 'user'): void
+    {
+        // Support teacher oyligi guruh to'lovlariga bog'liq emas, ya'ni
+        // foiz ham saqlanmaydi — u ko'rsatilmaydigan bo'lsa, yozib
+        // qo'yish keyinchalik noto'g'ri hisob-kitobga olib kelardi.
+        app(CentreMembershipService::class)->attachToCurrent($teacher, $role, [
+            'percent' => $role === 'support' || $percent === null || $percent === ''
+                ? null
+                : (int) $percent,
         ]);
     }
 

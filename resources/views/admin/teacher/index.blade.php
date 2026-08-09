@@ -36,6 +36,7 @@
                     <tr>
                         <th style="width: 3rem;">#</th>
                         <th>O‘qituvchi</th>
+                        <th>Turi</th>
                         <th>Telefon</th>
                         <th>Guruhlar</th>
                         <th class="text-center">Talabalar</th>
@@ -58,6 +59,15 @@
                                         @endif
                                     </div>
                                 </div>
+                            </td>
+                            <td>
+                                @if($teacher->hasRole('support'))
+                                    <span class="badge bg-label-secondary">
+                                        <i class="bx bx-support me-1"></i>Support
+                                    </span>
+                                @else
+                                    <span class="badge bg-label-primary">O‘qituvchi</span>
+                                @endif
                             </td>
                             <td dir="ltr">+{{ $teacher->phone }}</td>
                             <td>

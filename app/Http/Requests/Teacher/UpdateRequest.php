@@ -37,6 +37,8 @@ class UpdateRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:191',
                 Rule::unique('users', 'email')->ignore($this->route('student') ?? $this->route('teacher') ?? $this->user()?->id)],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+            // Xodim turi: oddiy o'qituvchi yoki support teacher.
+            'role' => 'nullable|in:user,support',
             'percent' => 'nullable|integer|min:0|max:100',
         ];
     }

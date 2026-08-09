@@ -120,7 +120,8 @@ Route::middleware(['auth', 'role:user', 'verified.role'])->group(function () {
     Route::controller(TeacherAdminPanel::class)->group(function () {
         Route::get('teacher/groups', 'groups')->name('teacher.groups');
         Route::get('teacher/attendance', 'attendanceGroups')->name('attendance');
-        Route::get('teacher/assessment/groups', 'assessmentGroups')->name('assessment.teacher.groups');
+        // assessment.teacher.groups pastdagi baholash guruhida — support
+        // teacher ham unga kirishi kerak.
         Route::post('teacher/student/{id}/comment', 'studentComment')->name('teacher.student.comment');
     });
 
@@ -145,13 +146,44 @@ Route::middleware(['auth', 'role:user', 'verified.role'])->group(function () {
         Route::post('{homework}/grade', 'storeGrades')->name('grade.store');
     });
 
-    // --- KO'NIKMA BAHOLARI (reading / listening / writing / speaking) ---
+});
+
+/*
+|--------------------------------------------------------------------------
+| BAHOLASH — o'qituvchi VA support teacher
+|--------------------------------------------------------------------------
+| Support teacher'ning butun vazifasi shu: dars jarayonidagi ko'nikmalarni
+| va oylik testni baholash. Davomat, uy vazifasi va talaba boshqaruvi
+| yuqoridagi guruhda qoladi — ular unga tegishli emas.
+|
+| Guruh darajasidagi huquqni AuthorizesGroupAccess `group_teachers` orqali
+| beradi va u rolga qaramaydi, ya'ni support faqat o'ziga biriktirilgan
+| guruhlarni ko'radi.
+*/
+Route::middleware(['auth', 'role:user|support', 'verified.role'])->group(function () {
+    Route::get('teacher/assessment/groups', [TeacherAdminPanel::class, 'assessmentGroups'])
+        ->name('assessment.teacher.groups');
+
+    // --- KO'NIKMA BAHOLARI ---
     Route::controller(LessonSkillGradeController::class)->prefix('teacher/skills')->name('skills.')->group(function () {
         Route::get('/', 'groups')->name('groups');
         Route::get('{group}', 'grade')->whereNumber('group')->name('grade');
         Route::post('{group}', 'store')->whereNumber('group')->name('store');
     });
+
 });
+
+/*
+| Ko'nikma hisoboti — admin, o'qituvchi va support teacher.
+|
+| Guruh ichidagi middleware'da e'lon qilinmagan: bitta URI ikki marta
+| e'lon qilinsa Laravel birinchisini oladi va qolganlari umuman
+| ishlamaydi. Shuning uchun rollar ro'yxati shu yerda, bitta joyda.
+*/
+Route::get('skills/group/{group}', [LessonSkillGradeController::class, 'report'])
+    ->middleware(['auth', 'role:admin|user|support'])
+    ->whereNumber('group')
+    ->name('skills.report');
 Route::delete('attendance/delete/{id}', [ExtraTeacherController::class, 'attendanceDelete'])
     ->middleware('auth', 'role:user|admin')
     ->name('attendance.delete');
@@ -295,10 +327,9 @@ Route::middleware(['auth', 'role:admin|user'])->group(function () {
         Route::get('student/{student}', 'student')->whereNumber('student')->name('student');
     });
 
-    // --- KO'NIKMA HISOBOTI ---
-    Route::get('skills/group/{group}', [LessonSkillGradeController::class, 'report'])
-        ->whereNumber('group')
-        ->name('skills.report');
+    // KO'NIKMA HISOBOTI bu guruhdan chiqarildi — support teacher ham
+    // ko'rishi kerak, va bitta URI'ni ikki marta e'lon qilib bo'lmaydi.
+    // Quyida, `role:admin|user|support` bilan.
 
     // --- TALABANI GURUHDAN GURUHGA KO'CHIRISH ---
     // MUST stay above `student/{student}` or the literal segment is swallowed.
@@ -322,7 +353,8 @@ Route::middleware(['auth', 'role:admin|user'])->group(function () {
 | SHARED ROUTES (Student || Admin || User)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:student|admin|user'])->group(function () {
+// `support` ham bor: oylik testni baholash uning ikkita vazifasidan biri.
+Route::middleware(['auth', 'role:student|admin|user|support'])->group(function () {
     // AssessmentController only implements index/show/update. The other four
     // resource verbs pointed at methods that do not exist, so those URLs were a
     // guaranteed 500; excluded so they 404 instead.

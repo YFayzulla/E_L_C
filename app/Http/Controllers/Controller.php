@@ -299,6 +299,11 @@ class Controller extends BaseController
         return [
             'student' => $student,
             'attendance_rate' => $student->attendanceRate(),
+            // O'zlashtirish bosh sahifada ham ko'rinadi: talaba alohida
+            // bo'limga o'tmasdan holatini ko'ra olsin. forStudent() doimiy
+            // sondagi guruhlangan so'rov qiladi, ya'ni sahifaga qo'shimcha
+            // yuk bermaydi.
+            'progress' => app(\App\Services\ProgressService::class)->forStudent($student->id),
             'absences' => $absences,
             'absences_this_month' => Attendance::where('user_id', $student->id)
                 ->whereIn('status', [0, 2])

@@ -78,6 +78,14 @@
         </div>
     </div>
 
+    {{-- O'zlashtirish: oylik dinamika va ko'rsatkich tarkibi --}}
+    @include('partials.progress-card', [
+        'progress' => $progress ?? [],
+        'chartId'  => 'studentHomeProgress',
+        'title'    => 'O‘zlashtirishim',
+        'link'     => route('student.progress'),
+    ])
+
     <div class="row g-4">
 
         {{-- Groups --}}

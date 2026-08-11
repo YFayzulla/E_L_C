@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\HistoryPayments;
 use App\Models\User;
+use App\Services\ProgressService;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -77,6 +78,10 @@ class ParentPanelController extends Controller
                 'testResults' => $testResults,
                 'payments' => $payments,
                 'attendanceRate' => $child->attendanceRate(),
+                // Ota-onaga farzandining o'zlashtirishi — bu portalning
+                // asosiy savoli. $child resolveChild() dan o'tgan, ya'ni
+                // egalik allaqachon tekshirilgan.
+                'progress' => app(ProgressService::class)->forStudent($child->id),
             ]);
         } catch (NotFoundHttpException $e) {
             throw $e;

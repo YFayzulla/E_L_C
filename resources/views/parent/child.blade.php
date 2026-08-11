@@ -89,6 +89,13 @@
         </div>
     </div>
 
+    {{-- O'zlashtirish: ota-ona portalining asosiy savoli --}}
+    @include('partials.progress-card', [
+        'progress' => $progress ?? [],
+        'chartId'  => 'childProgress' . $child->id,
+        'title'    => 'O‘zlashtirish',
+    ])
+
     <div class="row g-4">
 
         {{-- Groups & teachers --}}

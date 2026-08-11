@@ -172,7 +172,15 @@
                         theme: {mode: mode()},
                         colors: [next.primary],
                         grid: {borderColor: next.border},
-                        xaxis: {labels: {style: {colors: next.muted}}},
+                        // `categories` QAYTA berilishi shart. updateOptions
+                        // xaxis obyektini almashtiradi, ya'ni uni tashlab
+                        // ketsa oy nomlari yo'qolib, o'rniga 1, 2, 3 … indeks
+                        // chiqadi. theme.js `themechange` ni sahifa
+                        // yuklanganda ham yuboradi, shuning uchun bu darrov
+                        // sodir bo'lardi — diagramma har doim indekssiz
+                        // ko'rinardi va buni faqat ranglar o'zgarganda
+                        // sezish mumkin edi.
+                        xaxis: {categories: categories, labels: {style: {colors: next.muted}}},
                         yaxis: {labels: {style: {colors: next.muted}}},
                         tooltip: {theme: mode()},
                         noData: {style: {color: next.muted}}

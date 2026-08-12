@@ -47,7 +47,11 @@ class NewPasswordController extends Controller
 
         // Pre-check so a wrong address gets an Uzbek sentence rather than the
         // broker's English "We can't find a user with that email address."
-        if (! User::where('email', $request->input('email'))->exists()) {
+        //
+        // inCurrentCentre(): havola qaysi markazda so'ralgan bo'lsa, o'sha
+        // markazda tugallanishi kerak. Aks holda boshqa subdomenga
+        // ko'chirilgan havola bilan parol almashtirib bo'lardi.
+        if (! User::inCurrentCentre()->where('email', $request->input('email'))->exists()) {
             return back()->withInput($request->only('email'))
                 ->withErrors(['email' => 'Bu manzil bo‘yicha hisob topilmadi.']);
         }

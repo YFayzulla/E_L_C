@@ -51,6 +51,13 @@ class ResolveCentre
             ]);
             date_default_timezone_set($centre->timezone);
 
+            // Jo'natuvchining nomi ham markazniki. `config/mail.php` uni
+            // MAIL_FROM_NAME dan oladi, ya'ni app.name ni o'zgartirish
+            // yetmaydi — parolni tiklash xati "Laravel" dan kelib qolardi.
+            // Manzil (address) tegilmaydi: u SMTP hisobiga bog'langan va
+            // uni almashtirish xatni spamga tushiradi.
+            config(['mail.from.name' => $centre->name]);
+
             // Markazga xos baholash sozlamalari config ustiga yoziladi.
             //
             // Shu bitta blok tufayli kod bo'ylab tarqalgan 41 ta

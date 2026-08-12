@@ -41,7 +41,13 @@ class PasswordResetLinkController extends Controller
 
         // Pre-check so the user gets an Uzbek sentence instead of the broker's
         // English "We can't find a user with that email address."
-        if (! User::where('email', $request->input('email'))->exists()) {
+        //
+        // inCurrentCentre(): tiklash havolasi shu subdomen uchun imzolanadi,
+        // ya'ni boshqa markazning foydalanuvchisiga yuborilsa u baribir
+        // kira olmasdi — kirishda a'zolik tekshiriladi. Bu yerda to'sish
+        // ikki narsani beradi: chalg'ituvchi oqim bo'lmaydi, va bir markaz
+        // boshqasida qaysi pochta borligini bilib ololmaydi.
+        if (! User::inCurrentCentre()->where('email', $request->input('email'))->exists()) {
             return back()->withInput($request->only('email'))
                 ->withErrors(['email' => 'Bu manzil bo‘yicha hisob topilmadi.']);
         }

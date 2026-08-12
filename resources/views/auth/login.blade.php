@@ -56,7 +56,11 @@
     </form>
 
     <p class="auth-foot mb-0">
-        Parolni unutdingizmi? O'quv markazi administratori bilan bog'laning.
+        <a href="{{ route('password.request') }}">Parolni unutdingizmi?</a>
+        <span class="d-block text-muted mt-1" style="font-size: .8rem;">
+            Tiklash havolasi pochtangizga yuboriladi. Hisobingizda pochta
+            manzili bo‘lmasa, o‘quv markazi administratori bilan bog‘laning.
+        </span>
     </p>
 
     <script>

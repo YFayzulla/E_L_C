@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordUz;
 use App\Notifications\VerifyEmailUz;
 use App\Services\EnrollmentHistoryService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -303,6 +304,21 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         $this->notify(new VerifyEmailUz());
+    }
+
+    /**
+     * Parolni tiklash xati — o'zbekcha.
+     *
+     * Laravel standarti inglizcha keladi; token, uning muddati va marshrut
+     * bog'lanishi o'zgarmaydi, faqat matn almashadi.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        if (blank($this->email)) {
+            return;
+        }
+
+        $this->notify(new ResetPasswordUz($token));
     }
 
     /**

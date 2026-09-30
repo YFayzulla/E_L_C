@@ -54,6 +54,7 @@ class TeacherAdminPanel extends Controller
                 'id' => $id,
                 'today' => $serviceData['today'],
                 'data' => $serviceData['data'],
+                'reasons' => $serviceData['reasons'],
                 'year' => $serviceData['year'],
                 'month' => $serviceData['month'],
                 'date' => $serviceData['date'],
@@ -82,6 +83,8 @@ class TeacherAdminPanel extends Controller
         $request->validate([
             'lesson' => 'nullable|string|max:255',
             'status' => 'required|array',
+            'reason' => 'nullable|array',
+            'reason.*' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
@@ -118,6 +121,7 @@ class TeacherAdminPanel extends Controller
             $checkerId = auth()->id();
             $absent = 0;
             $late = 0;
+            $reasons = (array) $request->input('reason', []);
 
             foreach ($request->input('status', []) as $userId => $statusValue) {
                 if (! is_numeric($userId)) {
@@ -145,12 +149,17 @@ class TeacherAdminPanel extends Controller
                     continue;
                 }
 
+                $reason = trim((string) ($reasons[$userId] ?? ''));
+
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],
                     [
                         'group_id' => $group->id,
                         'who_checked' => $checkerId,
                         'status' => $status,
+                        'reason' => $reason !== '' ? $reason : null,
+                        'reason_written_by' => $reason !== '' ? $checkerId : null,
+                        'reason_written_at' => $reason !== '' ? now() : null,
                     ]
                 );
 

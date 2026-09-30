@@ -99,6 +99,10 @@
                         <span class="fw-semibold">{{ $homework->group->name ?? '—' }}</span>
                     </div>
                     <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+                        <span class="text-muted">Turi</span>
+                        <span class="badge bg-label-secondary">{{ $homework->skillLabel() }}</span>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
                         <span class="text-muted">Muddat</span>
                         @if($homework->due_date)
                             <span class="badge bg-label-{{ $homework->isOverdue() ? 'danger' : 'info' }}">

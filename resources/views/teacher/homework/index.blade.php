@@ -81,6 +81,7 @@
                     <thead>
                     <tr>
                         <th>Sarlavha</th>
+                        <th>Turi</th>
                         <th>Guruh</th>
                         <th>Muddat</th>
                         <th class="text-center">Topshirgan</th>
@@ -109,6 +110,9 @@
                                 <div class="text-muted" style="font-size: .78rem;">
                                     {{ $homework->created_at?->format('d.m.Y') }} · maks. {{ $homework->max_score }} ball
                                 </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-label-secondary">{{ $homework->skillLabel() }}</span>
                             </td>
                             <td>{{ $homework->group->name ?? '—' }}</td>
                             <td>

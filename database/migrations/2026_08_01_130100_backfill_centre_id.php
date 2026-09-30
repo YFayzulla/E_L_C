@@ -4,6 +4,7 @@ use App\Models\Centre;
 use App\Tenancy\TenantTables;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Step 2 of 3: point every existing row at the first centre.
@@ -24,6 +25,10 @@ return new class extends Migration
         }
 
         foreach (TenantTables::all() as $table) {
+            if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'centre_id')) {
+                continue;
+            }
+
             $updated = DB::table($table)->whereNull('centre_id')->update(['centre_id' => $centreId]);
 
             if ($updated > 0) {

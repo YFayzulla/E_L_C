@@ -25,6 +25,7 @@ class StoreRequest extends FormRequest
 
         return [
             'group_id'    => ['required', 'integer', Rule::exists('groups', 'id')],
+            'skill'       => ['nullable', Rule::in(array_keys(config('grading.homework_skills', [])))],
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:10000'],
             'attachment'  => [
@@ -50,6 +51,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'group_id'    => 'guruh',
+            'skill'       => 'vazifa turi',
             'title'       => 'sarlavha',
             'description' => 'topshiriq matni',
             'attachment'  => 'ilova',

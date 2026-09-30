@@ -39,7 +39,7 @@
         <li class="menu-item {{ $isActive('teacher.index', 'teacher.create', 'teacher.edit', 'teacher.show') }}">
             <a href="{{ route('teacher.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                <div>O'qituvchilar</div>
+                <div>Xodimlar</div>
             </a>
         </li>
 
@@ -64,10 +64,24 @@
             </a>
         </li>
 
+        <li class="menu-item {{ $isActive('reception.students.index', 'reception.students.create', 'reception.students.edit') }}">
+            <a href="{{ route('reception.students.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-plus"></i>
+                <div>Reception</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ $isActive('attendance.overview', 'attendance.log') }}">
             <a href="{{ route('attendance.overview') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-calendar-check"></i>
                 <div>Davomat</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('reception.absences.index') }}">
+            <a href="{{ route('reception.absences.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-phone-call"></i>
+                <div>Kelmaganlar</div>
             </a>
         </li>
 
@@ -82,6 +96,13 @@
             <a href="{{ route('homework.admin.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-task"></i>
                 <div>Uy vazifalari</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('assistant.homework.index', 'assistant.homework.grade') }}">
+            <a href="{{ route('assistant.homework.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-check-square"></i>
+                <div>Homework check</div>
             </a>
         </li>
 
@@ -135,6 +156,37 @@
             <a href="{{ route('settings.edit') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div>Sozlamalar</div>
+            </a>
+        </li>
+        @endrole
+
+        {{-- ================= RECEPTION ================= --}}
+        @role('reception')
+        <li class="menu-header small">Reception</li>
+
+        <li class="menu-item {{ $isActive('reception.students.index', 'reception.students.create', 'reception.students.edit') }}">
+            <a href="{{ route('reception.students.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-plus"></i>
+                <div>Yangi kelganlar</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('reception.absences.index') }}">
+            <a href="{{ route('reception.absences.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-phone-call"></i>
+                <div>Kelmaganlar</div>
+            </a>
+        </li>
+        @endrole
+
+        {{-- ================= HOMEWORK ASSISTANT ================= --}}
+        @role('assistant')
+        <li class="menu-header small">Tekshirish</li>
+
+        <li class="menu-item {{ $isActive('assistant.homework.index', 'assistant.homework.grade') }}">
+            <a href="{{ route('assistant.homework.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-check-square"></i>
+                <div>Uy vazifalari</div>
             </a>
         </li>
         @endrole

@@ -34,9 +34,13 @@ return new class extends Migration
     public function up(): void
     {
         $before = [];
+        $tenantTables = array_values(array_filter(
+            TenantTables::all(),
+            fn ($table) => Schema::hasTable($table) && Schema::hasColumn($table, 'centre_id')
+        ));
 
         // Refuse to constrain a column that still has holes, and say how many.
-        foreach (TenantTables::all() as $table) {
+        foreach ($tenantTables as $table) {
             $before[$table] = DB::table($table)->count();
 
             $orphans = DB::table($table)->whereNull('centre_id')->count();
@@ -62,7 +66,7 @@ return new class extends Migration
          */
         Schema::disableForeignKeyConstraints();
 
-        foreach (TenantTables::all() as $table) {
+        foreach ($tenantTables as $table) {
             Schema::table($table, function (Blueprint $blueprint) {
                 $blueprint->unsignedBigInteger('centre_id')->nullable(false)->change();
             });
@@ -101,7 +105,7 @@ return new class extends Migration
 
         // Prove the rebuild kept everything. A silent cascade is the failure
         // mode this migration is most likely to have, so it checks itself.
-        foreach (TenantTables::all() as $table) {
+        foreach ($tenantTables as $table) {
             $after = DB::table($table)->count();
 
             if ($after !== $before[$table]) {

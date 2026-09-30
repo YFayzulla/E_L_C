@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AttendanceAdminController;
+use App\Http\Controllers\AssistantHomeworkController;
 use App\Http\Controllers\CentreChoiceController;
 use App\Http\Controllers\CentreSettingsController;
 use App\Http\Controllers\CertificateController;
@@ -21,6 +22,8 @@ use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\ReceptionAttendanceController;
+use App\Http\Controllers\ReceptionStudentController;
 use App\Http\Controllers\RefreshController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SmsTemplateController;
@@ -105,6 +108,43 @@ Route::middleware('auth')->group(function () {
     Route::get('certificates/{certificate}/download', [CertificateController::class, 'download'])
         ->whereNumber('certificate')
         ->name('certificates.download');
+});
+
+/*
+|--------------------------------------------------------------------------
+| RECEPTION ROUTES
+|--------------------------------------------------------------------------
+| Reception yangi kelganlarni yozadi, test natijalarini belgilaydi, guruhga
+| ajratish tavsiyasini yuritadi va kelmaganlar bo'yicha ota-onaga bog'lanadi.
+*/
+Route::middleware(['auth', 'role:admin|reception'])->prefix('reception')->name('reception.')->group(function () {
+    Route::controller(ReceptionStudentController::class)->prefix('students')->name('students.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('{student}/edit', 'edit')->whereNumber('student')->name('edit');
+        Route::put('{student}', 'update')->whereNumber('student')->name('update');
+        Route::patch('{student}/archive', 'archive')->whereNumber('student')->name('archive');
+    });
+
+    Route::get('absences', [ReceptionAttendanceController::class, 'index'])->name('absences.index');
+    Route::post('absences/{attendance}/follow-ups', [ReceptionAttendanceController::class, 'store'])
+        ->whereNumber('attendance')
+        ->name('absences.followups.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ASSISTANT ROUTES
+|--------------------------------------------------------------------------
+| Speaking/writing assistant faqat shu turdagi uy vazifalarni tekshiradi.
+*/
+Route::middleware(['auth', 'role:admin|assistant'])->prefix('assistant')->name('assistant.')->group(function () {
+    Route::controller(AssistantHomeworkController::class)->prefix('homework')->name('homework.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('{homework}/grade', 'grade')->whereNumber('homework')->name('grade');
+        Route::post('{homework}/grade', 'storeGrades')->whereNumber('homework')->name('grade.store');
+    });
 });
 
 /*

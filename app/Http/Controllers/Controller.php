@@ -105,7 +105,17 @@ class Controller extends BaseController
                 return view('studentPage', $this->studentDashboardData($user));
             }
 
-            // 4. O'QITUVCHI VA SUPPORT TEACHER UCHUN DASHBOARD
+            // 4. RECEPTION UCHUN ISH STOLI
+            if ($user->hasRole('reception')) {
+                return redirect()->route('reception.students.index');
+            }
+
+            // 5. HOMEWORK ASSISTANT UCHUN ISH STOLI
+            if ($user->hasRole('assistant')) {
+                return redirect()->route('assistant.homework.index');
+            }
+
+            // 6. O'QITUVCHI VA SUPPORT TEACHER UCHUN DASHBOARD
             //
             // Bir xil ma'lumot: ikkalasi ham `group_teachers` orqali
             // biriktiriladi, ya'ni "mening guruhlarim" ikkovi uchun ham

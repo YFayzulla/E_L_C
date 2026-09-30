@@ -1,10 +1,9 @@
 @extends('template.master')
 
-@section('title', 'Baholash — ' . $homework->title)
-@section('subtitle', ($homework->group->name ?? 'Guruh') . ' · maksimal ' . $homework->max_score . ' ball')
+@section('title', 'Tekshirish — ' . $homework->title)
+@section('subtitle', ($homework->group->name ?? 'Guruh') . ' · ' . $homework->skillLabel())
 
 @section('content')
-
     @php
         $statusOptions = config('grading.homework_status');
         $submittedCount = $submissions->whereNotNull('submitted_at')->count();
@@ -13,22 +12,13 @@
 
     <div class="page-head">
         <div class="page-sub">
+            <span class="badge bg-label-secondary me-1">{{ $homework->skillLabel() }}</span>
             <span class="badge bg-label-success me-1">Topshirgan: {{ $submittedCount }} / {{ $students->count() }}</span>
             <span class="badge bg-label-info me-1">Baholangan: {{ $gradedCount }} / {{ $students->count() }}</span>
-            <span class="badge bg-label-secondary me-1">{{ $homework->skillLabel() }}</span>
-            @if($homework->due_date)
-                <span class="badge bg-label-{{ $homework->isOverdue() ? 'danger' : 'secondary' }}">
-                    Muddat: {{ $homework->due_date->format('d.m.Y') }} · {{ $homework->dueLabel() }}
-                </span>
-            @else
-                <span class="badge bg-label-secondary">Muddatsiz</span>
-            @endif
         </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('homework.show', $homework->id) }}" class="btn btn-outline-secondary">
-                <i class="bx bx-arrow-back me-1"></i> Vazifa
-            </a>
-        </div>
+        <a href="{{ route('assistant.homework.index') }}" class="btn btn-outline-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Ro‘yxat
+        </a>
     </div>
 
     @if($students->isEmpty())
@@ -40,14 +30,14 @@
             </div>
         </div>
     @else
-        <form action="{{ route('homework.grade.store', $homework->id) }}" method="POST">
+        <form action="{{ route('assistant.homework.grade.store', $homework->id) }}" method="POST">
             @csrf
 
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <span>Talabalar javoblari</span>
                     <span class="text-muted" style="font-size: .82rem;">
-                        Ball 0 dan {{ $homework->max_score }} gacha. Bo‘sh qoldirilsa — baholanmagan hisoblanadi.
+                        Ball 0 dan {{ $homework->max_score }} gacha.
                     </span>
                 </div>
 
@@ -72,7 +62,6 @@
                             @endphp
                             <tr>
                                 <td>
-                                    {{-- The photo was missing here entirely: only initials. --}}
                                     <x-avatar :user="$student"
                                               label
                                               :meta="$sub?->submitted_at?->format('d.m.Y H:i') ?? 'Topshirmagan'"
@@ -94,11 +83,11 @@
                                         </div>
                                         @if($isLong)
                                             <a class="d-inline-block mt-1 text-decoration-none" style="font-size: .8rem;"
-                                               data-bs-toggle="collapse" href="#hwText{{ $student->id }}"
-                                               role="button" aria-expanded="false" aria-controls="hwText{{ $student->id }}">
+                                               data-bs-toggle="collapse" href="#assistantHwText{{ $student->id }}"
+                                               role="button" aria-expanded="false" aria-controls="assistantHwText{{ $student->id }}">
                                                 <i class="bx bx-chevron-down"></i> To‘liq ko‘rish
                                             </a>
-                                            <div class="collapse mt-2" id="hwText{{ $student->id }}">
+                                            <div class="collapse mt-2" id="assistantHwText{{ $student->id }}">
                                                 <div class="p-2 rounded" style="white-space: pre-line; background: var(--app-surface-2); border: 1px solid var(--app-border);">
                                                     {{ $text }}
                                                 </div>
@@ -148,7 +137,7 @@
                                     <input type="text" name="comment[{{ $student->id }}]" maxlength="500"
                                            class="form-control form-control-sm @error('comment.' . $student->id) is-invalid @enderror"
                                            value="{{ old('comment.' . $student->id, $sub?->comment) }}"
-                                           placeholder="Talabaga izoh…">
+                                           placeholder="Talabaga izoh...">
                                     @error('comment.' . $student->id)
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -160,7 +149,7 @@
                 </div>
 
                 <div class="card-footer d-flex justify-content-end gap-2">
-                    <a href="{{ route('homework.show', $homework->id) }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('assistant.homework.index') }}" class="btn btn-outline-secondary">
                         Bekor qilish
                     </a>
                     <button type="submit" class="btn btn-primary">
@@ -170,5 +159,4 @@
             </div>
         </form>
     @endif
-
 @endsection

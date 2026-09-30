@@ -1,12 +1,12 @@
 @extends('template.master')
 
-@section('title', 'O‘qituvchilar')
-@section('subtitle', 'O‘qituvchilar, ularning guruhlari va talabalari')
+@section('title', 'Xodimlar')
+@section('subtitle', 'O‘qituvchi, support, reception va assistant rollari')
 
 @section('content')
 
     <div class="page-head">
-        <div class="page-sub">Jami {{ $teachers->count() }} ta o‘qituvchi</div>
+        <div class="page-sub">Jami {{ $teachers->count() }} ta xodim</div>
         <div class="d-flex gap-2 flex-wrap">
             @role('admin')
             <a href="{{ url('/teacher/pdf') }}" class="btn btn-outline-secondary">
@@ -14,7 +14,7 @@
             </a>
             @endrole
             <a href="{{ route('teacher.create') }}" class="btn btn-primary">
-                <i class="bx bx-plus me-1"></i> Yangi o‘qituvchi
+                <i class="bx bx-plus me-1"></i> Yangi xodim
             </a>
         </div>
     </div>
@@ -23,10 +23,10 @@
         @if($teachers->isEmpty())
             <div class="empty-state">
                 <i class="bx bx-user-voice"></i>
-                <h6>O‘qituvchilar yo‘q</h6>
-                <p class="mb-3">Birinchi o‘qituvchini qo‘shing va unga guruh biriktiring.</p>
+                <h6>Xodimlar yo‘q</h6>
+                <p class="mb-3">Birinchi xodimni qo‘shing va kerakli rolni tanlang.</p>
                 <a href="{{ route('teacher.create') }}" class="btn btn-primary btn-sm">
-                    <i class="bx bx-plus me-1"></i> Yangi o‘qituvchi
+                    <i class="bx bx-plus me-1"></i> Yangi xodim
                 </a>
             </div>
         @else
@@ -35,7 +35,7 @@
                     <thead>
                     <tr>
                         <th style="width: 3rem;">#</th>
-                        <th>O‘qituvchi</th>
+                        <th>Xodim</th>
                         <th>Turi</th>
                         <th>Telefon</th>
                         <th>Guruhlar</th>
@@ -46,6 +46,14 @@
                     </thead>
                     <tbody id="myTable">
                     @foreach($teachers as $teacher)
+                        @php
+                            $roleMeta = match (true) {
+                                $teacher->hasRole('reception') => ['Reception', 'success', 'bx-user-plus'],
+                                $teacher->hasRole('assistant') => ['Assistant', 'info', 'bx-check-square'],
+                                $teacher->hasRole('support') => ['Support', 'secondary', 'bx-support'],
+                                default => ['O‘qituvchi', 'primary', 'bx-chalkboard'],
+                            };
+                        @endphp
                         <tr>
                             <td class="text-muted">{{ $loop->iteration }}</td>
                             <td>
@@ -61,13 +69,9 @@
                                 </div>
                             </td>
                             <td>
-                                @if($teacher->hasRole('support'))
-                                    <span class="badge bg-label-secondary">
-                                        <i class="bx bx-support me-1"></i>Support
-                                    </span>
-                                @else
-                                    <span class="badge bg-label-primary">O‘qituvchi</span>
-                                @endif
+                                <span class="badge bg-label-{{ $roleMeta[1] }}">
+                                    <i class="bx {{ $roleMeta[2] }} me-1"></i>{{ $roleMeta[0] }}
+                                </span>
                             </td>
                             <td dir="ltr">+{{ $teacher->phone }}</td>
                             <td>

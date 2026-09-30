@@ -1,7 +1,7 @@
 @extends('template.master')
 
 @section('title', $teacher->name)
-@section('subtitle', 'O‘qituvchi kartochkasi')
+@section('subtitle', 'Xodim kartochkasi')
 
 @section('content')
 
@@ -32,7 +32,7 @@
         </div>
 
         <div class="d-flex gap-2 flex-wrap">
-            {{-- O'qituvchi nimani ko'rayotganini aynan o'z ko'zi bilan ko'rish --}}
+            {{-- Xodim nimani ko'rayotganini aynan o'z ko'zi bilan ko'rish --}}
             <form method="POST" action="{{ route('impersonate.start', $teacher->id) }}"
                   onsubmit="return confirm('{{ $teacher->name }} hisobiga kirasizmi? Barcha amallar shu foydalanuvchi nomidan bajariladi.');">
                 @csrf
@@ -153,7 +153,7 @@
                                         <div class="d-flex justify-content-end">
                                             {{-- {id} = group_teachers QATOR id si, guruh id emas --}}
                                             <form action="{{ route('teacher_group.delete', $link->id) }}" method="post"
-                                                  onsubmit="return confirm('{{ $link->group->name }} guruhi bu o‘qituvchidan ajratilsinmi?');">
+                                                  onsubmit="return confirm('{{ $link->group->name }} guruhi bu xodimdan ajratilsinmi?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"

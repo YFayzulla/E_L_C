@@ -94,6 +94,10 @@ class TeacherApiController extends ApiController
             ? Attendance::where('lesson_id', $lesson->id)
                 ->pluck('status', 'user_id')
             : collect();
+        $reasons = $lesson
+            ? Attendance::where('lesson_id', $lesson->id)
+                ->pluck('reason', 'user_id')
+            : collect();
 
         return $this->ok([
             'group'  => ['id' => $model->id, 'name' => $model->name],
@@ -106,6 +110,7 @@ class TeacherApiController extends ApiController
                 'photo'  => $s->photo ? asset('storage/' . $s->photo) : null,
                 // 1 = present (default), 0 = absent, 2 = late
                 'status' => (int) ($marked[$s->id] ?? 1),
+                'reason' => $reasons[$s->id] ?? null,
             ]),
         ]);
     }
@@ -121,6 +126,8 @@ class TeacherApiController extends ApiController
         $data = $request->validate([
             'statuses'   => ['required', 'array', 'min:1'],
             'statuses.*' => ['required', 'integer', Rule::in([0, 1, 2])],
+            'reasons'    => ['nullable', 'array'],
+            'reasons.*'  => ['nullable', 'string', 'max:500'],
             'lesson'     => ['nullable', 'string', 'max:255'],
         ], [
             'statuses.required' => 'Davomat ma’lumoti yuborilmadi.',
@@ -155,6 +162,7 @@ class TeacherApiController extends ApiController
 
             $absent = 0;
             $late = 0;
+            $reasons = (array) ($data['reasons'] ?? []);
 
             foreach ($data['statuses'] as $userId => $status) {
                 $userId = (int) $userId;
@@ -171,12 +179,17 @@ class TeacherApiController extends ApiController
                     continue;
                 }
 
+                $reason = trim((string) ($reasons[$userId] ?? ''));
+
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],
                     [
-                        'group_id'    => $group,
-                        'who_checked' => auth()->id(),
-                        'status'      => (int) $status,
+                        'group_id'          => $group,
+                        'who_checked'       => auth()->id(),
+                        'status'            => (int) $status,
+                        'reason'            => $reason !== '' ? $reason : null,
+                        'reason_written_by' => $reason !== '' ? auth()->id() : null,
+                        'reason_written_at' => $reason !== '' ? now() : null,
                     ]
                 );
 
@@ -217,6 +230,8 @@ class TeacherApiController extends ApiController
             'id'          => $h->id,
             'title'       => $h->title,
             'description' => $h->description,
+            'skill'       => $h->skill,
+            'skill_label' => $h->skillLabel(),
             'group'       => ['id' => $h->group_id, 'name' => $h->group?->name],
             'due_date'    => $h->due_date?->format('Y-m-d'),
             'due_label'   => $h->dueLabel(),
@@ -231,6 +246,7 @@ class TeacherApiController extends ApiController
     {
         $data = $request->validate([
             'group_id'    => ['required', 'integer', 'exists:groups,id'],
+            'skill'       => ['nullable', Rule::in(array_keys(config('grading.homework_skills', [])))],
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'due_date'    => ['nullable', 'date'],
@@ -245,6 +261,7 @@ class TeacherApiController extends ApiController
         try {
             $homework = Homework::create([
                 'group_id'    => $data['group_id'],
+                'skill'       => $data['skill'] ?? null,
                 'title'       => $data['title'],
                 'description' => $data['description'] ?? null,
                 'due_date'    => $data['due_date'] ?? null,

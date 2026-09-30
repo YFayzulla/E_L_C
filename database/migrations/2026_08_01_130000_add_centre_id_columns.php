@@ -24,7 +24,7 @@ return new class extends Migration
     public function up(): void
     {
         foreach (TenantTables::all() as $table) {
-            if (Schema::hasColumn($table, 'centre_id')) {
+            if (! Schema::hasTable($table) || Schema::hasColumn($table, 'centre_id')) {
                 continue;
             }
 
@@ -38,7 +38,7 @@ return new class extends Migration
     public function down(): void
     {
         foreach (TenantTables::all() as $table) {
-            if (! Schema::hasColumn($table, 'centre_id')) {
+            if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'centre_id')) {
                 continue;
             }
 

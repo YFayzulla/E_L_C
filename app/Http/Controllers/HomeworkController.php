@@ -127,6 +127,7 @@ class HomeworkController extends Controller
         try {
             $homework = Homework::create([
                 'group_id'    => (int) $request->input('group_id'),
+                'skill'       => $request->input('skill') ?: null,
                 'title'       => $request->input('title'),
                 'description' => $request->input('description'),
                 'attachment'  => $attachment,
@@ -226,6 +227,7 @@ class HomeworkController extends Controller
         try {
             $homework->update([
                 'group_id'    => (int) $request->input('group_id'),
+                'skill'       => $request->input('skill') ?: null,
                 'title'       => $request->input('title'),
                 'description' => $request->input('description'),
                 'attachment'  => $newAttachment,

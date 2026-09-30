@@ -18,10 +18,10 @@ return [
         'dashboard' => ['Boshqaruv paneli', null],
 
         // Teachers
-        'teacher.index'  => ["O'qituvchilar", "O'quv markazi o'qituvchilari"],
-        'teacher.create' => ["Yangi o'qituvchi", null],
-        'teacher.edit'   => ["O'qituvchini tahrirlash", null],
-        'teacher.show'   => ["O'qituvchi ma'lumotlari", null],
+        'teacher.index'  => ['Xodimlar', "O'quv markazi xodimlari"],
+        'teacher.create' => ['Yangi xodim', null],
+        'teacher.edit'   => ['Xodimni tahrirlash', null],
+        'teacher.show'   => ['Xodim ma’lumotlari', null],
         'teacher.groups' => ['Mening guruhlarim', null],
 
         // Groups
@@ -42,6 +42,12 @@ return [
         'attendance'       => ['Davomat', "Guruhni tanlab davomat oling"],
         'attendance.check' => ['Davomat olish', null],
         'attendance.index' => ['Davomatim', "Qoldirilgan va kechikilgan darslar"],
+
+        // Reception
+        'reception.students.index'  => ['Reception', 'Yangi kelganlar va test topshirganlar'],
+        'reception.students.create' => ['Yangi kelgan', null],
+        'reception.students.edit'   => ['Reception yozuvi', null],
+        'reception.absences.index'  => ['Kelmaganlar bilan ishlash', "Ota-onalar bilan bog'lanish"],
 
         // Assessment
         'assessment.index'          => ['Oylik test natijalari', null],
@@ -71,6 +77,10 @@ return [
         'homework.show'        => ['Uy vazifasi', null],
         'homework.grade'       => ['Vazifani tekshirish', "Har bir talabaga baho qo'ying"],
         'homework.admin.index' => ['Uy vazifalari', "Barcha guruhlar bo'yicha"],
+
+        // Assistant homework checking
+        'assistant.homework.index' => ['Uy vazifalarni tekshirish', 'Writing va Speaking'],
+        'assistant.homework.grade' => ['Vazifani tekshirish', null],
 
         // Skills
         'skills.groups' => ["Ko'nikma baholari", 'Guruhni tanlang'],
@@ -102,7 +112,7 @@ return [
         'student.progress'      => ["O'zlashtirishim", "Oylar bo'yicha dinamika"],
 
         // Misc
-        'teacher.show'          => ["O'qituvchi", null],
+        'teacher.show'          => ['Xodim', null],
         'waiters.index'         => ['Kutish xonasi', "Guruh kutayotgan talabalar"],
         'student.search'        => ["To'lovlar tarixi", null],
         'profile.edit'          => ['Profil', "Hisob ma'lumotlari va xavfsizlik"],

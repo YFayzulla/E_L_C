@@ -20,6 +20,7 @@
         // yozuvlar sanoqsiz o'chib ketardi.
         $isCurrentMonth = $selectedMonth === $currentMonth;
         $markedToday = $isCurrentMonth && in_array($todayDay, $lessonDays, true);
+        $reasons = $reasons ?? [];
 
         $rateTone = $rate === null ? 'secondary' : ($rate >= 90 ? 'success' : ($rate >= 75 ? 'warning' : 'danger'));
 
@@ -167,13 +168,14 @@
                         <tr>
                             <th style="width: 3rem;">#</th>
                             <th>Talaba</th>
-                            <th class="text-end">Holat</th>
+                            <th class="text-end">Holat va sabab</th>
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($students as $student)
                             @php
                                 $current = $markedToday ? (int) ($data[$student->id][$todayDay] ?? 1) : 1;
+                                $currentReason = old('reason.' . $student->id, $markedToday ? ($reasons[$student->id][$todayDay] ?? '') : '');
                             @endphp
                             <tr>
                                 <td class="text-muted">{{ $loop->iteration }}</td>
@@ -203,6 +205,15 @@
                                                id="st-2-{{ $student->id }}" value="2" @checked($current === 2)>
                                         <label class="btn btn-outline-warning" for="st-2-{{ $student->id }}">Kechikdi</label>
                                     </div>
+                                    <input type="text"
+                                           name="reason[{{ $student->id }}]"
+                                           class="form-control form-control-sm mt-2 @error('reason.' . $student->id) is-invalid @enderror"
+                                           value="{{ $currentReason }}"
+                                           maxlength="500"
+                                           placeholder="Sabab (kelmagan yoki kechikkan bo‘lsa)">
+                                    @error('reason.' . $student->id)
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </td>
                             </tr>
                         @endforeach
@@ -300,6 +311,7 @@
                         <th>Talaba</th>
                         <th>Dars</th>
                         <th>Kim belgilagan</th>
+                        <th>Sabab</th>
                         <th>Holat</th>
                         <th class="text-end">Amal</th>
                     </tr>
@@ -311,6 +323,16 @@
                             <td class="fw-semibold">{{ $attendance->user?->name ?? '—' }}</td>
                             <td class="text-muted">{{ $attendance->lesson?->name ?? '—' }}</td>
                             <td class="text-muted">{{ $attendance->teacher?->name ?? '—' }}</td>
+                            <td>
+                                @if(filled($attendance->reason))
+                                    <div>{{ $attendance->reason }}</div>
+                                    @if($attendance->reasonWriter)
+                                        <small class="text-muted">{{ $attendance->reasonWriter->name }}</small>
+                                    @endif
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                             <td>
                                 @if((int) $attendance->status === 2)
                                     <span class="badge bg-label-warning">Kechikdi</span>

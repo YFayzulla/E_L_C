@@ -73,12 +73,14 @@ class AttendanceService
         // 5. Overlay the absences / lates.
         $absentCount = 0;
         $lateCount = 0;
+        $reasons = [];
         foreach ($absentLateRecords as $record) {
             $day = (int) $record->created_at->format('d');
             $status = (int) $record->status;
 
             if (isset($data[$record->user_id])) {
                 $data[$record->user_id][$day] = $status;
+                $reasons[$record->user_id][$day] = $record->reason;
             }
 
             $status === 2 ? $lateCount++ : $absentCount++;
@@ -89,7 +91,7 @@ class AttendanceService
             ->whereIn('status', [0, 2])
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->with(['user:id,name', 'teacher:id,name', 'lesson:id,name'])
+            ->with(['user:id,name', 'teacher:id,name', 'lesson:id,name', 'reasonWriter:id,name'])
             ->orderByDesc('created_at')
             ->paginate(15)
             ->appends(request()->only('date'));
@@ -101,6 +103,7 @@ class AttendanceService
             'studentNames' => $studentNames,
             'today' => now()->day,
             'data' => $data,
+            'reasons' => $reasons,
             'year' => $year,
             'month' => $month,
             'date' => $date,

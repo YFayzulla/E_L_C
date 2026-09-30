@@ -3,6 +3,7 @@
     $homework = $homework ?? null;
     $upload = config('grading.homework_upload');
     $selectedGroup = old('group_id', $homework?->group_id ?? request('group_id'));
+    $selectedSkill = old('skill', $homework?->skill ?? 'general');
     $allowFile = (bool) old('allow_file', $homework ? $homework->allow_file : true);
 @endphp
 
@@ -32,6 +33,18 @@
                                value="{{ old('title', $homework?->title) }}"
                                placeholder="Masalan: Unit 5 — Present Perfect" required>
                         @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="skill">Vazifa turi</label>
+                        <select id="skill" name="skill" class="form-select @error('skill') is-invalid @enderror">
+                            @foreach(\App\Models\Homework::skillOptions() as $value => $label)
+                                <option value="{{ $value }}" @selected((string) $selectedSkill === (string) $value)>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('skill') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="col-12">

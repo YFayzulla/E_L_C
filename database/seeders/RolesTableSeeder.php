@@ -15,12 +15,15 @@ class RolesTableSeeder extends Seeder
      * user    — teacher
      * student — learner portal
      * parent  — read-only guardian portal over their own children
+     * support — support teacher for assessments and skills
+     * reception — front desk workflow
+     * assistant — speaking/writing homework checker
      *
      * Idempotent, so it is safe to re-run on an existing database.
      */
     public function run()
     {
-        foreach (['admin', 'user', 'student', 'parent'] as $name) {
+        foreach (['admin', 'user', 'student', 'parent', 'support', 'reception', 'assistant'] as $name) {
             Role::findOrCreate($name, 'web');
         }
 

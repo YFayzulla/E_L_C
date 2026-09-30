@@ -40,7 +40,7 @@ class TeacherGroupController extends Controller
         $groupIds = array_values(array_unique(array_map('intval', $validated['group_id'])));
 
         // Tranzaksiyadan TASHQARIDA: abort() ham \Exception, catch uni yutib yuboradi.
-        $target = User::role('user')->find($teacher);
+        $target = User::role(TeacherController::STAFF_ROLES)->find($teacher);
 
         if (! $target) {
             return redirect()->route('teacher.index')->with('error', 'O\'qituvchi topilmadi.');

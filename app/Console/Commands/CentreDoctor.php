@@ -150,7 +150,7 @@ class CentreDoctor extends Command
         $table = config('permission.table_names.roles', 'roles');
         $roles = DB::table($table)->orderBy('name')->get();
 
-        $expected = ['admin', 'user', 'student', 'parent'];
+        $expected = ['admin', 'user', 'student', 'parent', 'support', 'reception', 'assistant'];
         $found = $roles->pluck('name')->unique()->all();
 
         foreach ($expected as $name) {
@@ -170,7 +170,7 @@ class CentreDoctor extends Command
         }
 
         if ($this->problems === 0) {
-            $this->line('  <info>4 ta rol joyida, takror yo‘q.</info>');
+            $this->line('  <info>' . count($expected) . ' ta rol joyida, takror yo‘q.</info>');
         }
     }
 
@@ -462,7 +462,7 @@ class CentreDoctor extends Command
         $first = $centres->first();
 
         Centre::for($first, function () use ($first) {
-            foreach (['admin', 'user', 'student', 'parent'] as $role) {
+            foreach (['admin', 'user', 'student', 'parent', 'support', 'reception', 'assistant'] as $role) {
                 $n = \App\Models\User::role($role)->count();
                 $total = DB::table(config('permission.table_names.model_has_roles', 'model_has_roles') . ' as mr')
                     ->join(config('permission.table_names.roles', 'roles') . ' as r', 'r.id', '=', 'mr.role_id')

@@ -55,7 +55,16 @@
 
                     @php
                         // Mavjud xodimning turi: hozirgi roli bo'yicha.
-                        $currentRole = old('role', $teacher && $teacher->hasRole('support') ? 'support' : 'user');
+                        $currentRole = old('role');
+                        if (! $currentRole) {
+                            $currentRole = 'user';
+                            foreach (['assistant', 'reception', 'support', 'user'] as $role) {
+                                if ($teacher && $teacher->hasRole($role)) {
+                                    $currentRole = $role;
+                                    break;
+                                }
+                            }
+                        }
                     @endphp
 
                     <div class="col-md-6">
@@ -63,18 +72,19 @@
                         <select id="role" name="role" class="form-select @error('role') is-invalid @enderror">
                             <option value="user" @selected($currentRole === 'user')>O‘qituvchi</option>
                             <option value="support" @selected($currentRole === 'support')>Support teacher</option>
+                            <option value="reception" @selected($currentRole === 'reception')>Reception</option>
+                            <option value="assistant" @selected($currentRole === 'assistant')>Homework assistant</option>
                         </select>
                         @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         <div class="form-text">
-                            Support teacher faqat oylik test va dars jarayonidagi
-                            ko‘nikmalarni baholaydi.
+                            Reception yangi kelganlar va kelmaganlar bilan ishlaydi,
+                            assistant esa writing/speaking uy vazifalarini tekshiradi.
                         </div>
                     </div>
 
-                    {{-- Ulush faqat oddiy o'qituvchida: support teacher oyligi
-                         guruh tushumiga bog'liq emas. JS uni yashiradi, server
-                         esa baribir support uchun foizni saqlamaydi. --}}
-                    <div class="col-md-6" id="percent-field" @style(['display: none' => $currentRole === 'support'])>
+                    {{-- Ulush faqat oddiy o'qituvchida: qolgan staff rollarda
+                         server baribir foizni saqlamaydi. --}}
+                    <div class="col-md-6" id="percent-field" @style(['display: none' => $currentRole !== 'user'])>
                         <label class="form-label" for="percent">Ulush (foiz)</label>
                         <div class="input-group">
                             <input type="number" id="percent" name="percent" min="0" max="100" step="1"
@@ -187,7 +197,7 @@
                 <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div>
                 @enderror
                 <div class="form-text mt-2">
-                    O‘qituvchi faqat shu guruhlarning davomati va baholarini yurita oladi.
+                    O‘qituvchi/support uchun guruh biriktirish kerak. Reception va assistant uchun bu majburiy emas.
                 </div>
 
                 <div class="mt-auto pt-4 d-grid gap-2">
@@ -203,16 +213,14 @@
 </div>
 
 <script>
-    // Support teacher oyligi guruh tushumiga bog'liq emas — foiz maydoni
-    // unga ko'rsatilmaydi. Server ham baribir uni saqlamaydi, bu shunchaki
-    // formani chalg'ituvchi maydondan tozalaydi.
+    // Foiz faqat oddiy o'qituvchi uchun ko'rsatiladi.
     (function () {
         const role = document.getElementById('role');
         const field = document.getElementById('percent-field');
 
         if (!role || !field) { return; }
 
-        const sync = () => { field.style.display = role.value === 'support' ? 'none' : ''; };
+        const sync = () => { field.style.display = role.value !== 'user' ? 'none' : ''; };
 
         role.addEventListener('change', sync);
         sync();

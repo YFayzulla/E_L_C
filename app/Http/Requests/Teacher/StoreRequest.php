@@ -37,8 +37,8 @@ class StoreRequest extends FormRequest
             // surfacing as the misleading "telefon raqami yoki passport" error.
             'email' => ['nullable', 'email', 'max:191', Rule::unique('users', 'email')],
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
-            // Xodim turi: oddiy o'qituvchi yoki support teacher.
-            'role' => 'nullable|in:user,support',
+            // Xodim turi: oddiy o'qituvchi, support, reception yoki assistant.
+            'role' => 'nullable|in:user,support,reception,assistant',
             'percent' => 'nullable|integer|min:0|max:100',
         ];
     }

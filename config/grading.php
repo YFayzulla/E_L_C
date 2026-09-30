@@ -74,6 +74,17 @@ return [
         2 => 'Kech topshirgan',
     ],
 
+    'homework_skills' => [
+        'general'  => 'Umumiy',
+        'grammar'  => 'Grammar',
+        'reading'  => 'Reading',
+        'listening'=> 'Listening',
+        'writing'  => 'Writing',
+        'speaking' => 'Speaking',
+    ],
+
+    'assistant_homework_skills' => ['writing', 'speaking'],
+
     'homework_upload' => [
         'disk'       => 'public',
         'directory'  => 'homework',

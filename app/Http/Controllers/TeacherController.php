@@ -23,11 +23,11 @@ class TeacherController extends Controller
     /**
      * Bu ekran boshqaradigan rollar.
      *
-     * `support` — vazifasi tor xodim: faqat oylik testni va dars
-     * jarayonidagi ko'nikmalarni baholaydi. Guruhga oddiy o'qituvchi kabi
-     * biriktiriladi, lekin oyligi guruh to'lovlaridan hisoblanmaydi.
+     * `support` — oylik test va ko'nikmalar bahosi.
+     * `reception` — yangi kelganlar va kelmaganlar bilan ishlash.
+     * `assistant` — writing/speaking uy vazifalarini tekshirish.
      */
-    public const STAFF_ROLES = ['user', 'support'];
+    public const STAFF_ROLES = ['user', 'support', 'reception', 'assistant'];
 
     /**
      * O'qituvchilar ro'yxati.
@@ -268,8 +268,9 @@ class TeacherController extends Controller
                 $teacher->unsetRelation('roles');
             }
 
-            // Support uchun foiz saqlanmaydi — oyligi guruhga bog'liq emas.
-            $this->syncPercent($teacher, $role === 'support' ? null : $request->input('percent'));
+            // Foiz faqat oddiy o'qituvchida: qolgan staff rollar guruh
+            // tushumidan oylik hisoblamaydi.
+            $this->syncPercent($teacher, $role !== 'user' ? null : $request->input('percent'));
 
             // Multi-select hech narsa yubormasa, sync([]) BARCHA guruhni uzib yuboradi.
             if ($this->groupsWereSubmitted($request)) {
@@ -380,11 +381,11 @@ class TeacherController extends Controller
 
     private function attachToCurrentCentre(User $teacher, $percent, string $role = 'user'): void
     {
-        // Support teacher oyligi guruh to'lovlariga bog'liq emas, ya'ni
+        // Faqat oddiy o'qituvchi oyligi guruh to'lovlariga bog'liq, ya'ni
         // foiz ham saqlanmaydi — u ko'rsatilmaydigan bo'lsa, yozib
         // qo'yish keyinchalik noto'g'ri hisob-kitobga olib kelardi.
         app(CentreMembershipService::class)->attachToCurrent($teacher, $role, [
-            'percent' => $role === 'support' || $percent === null || $percent === ''
+            'percent' => $role !== 'user' || $percent === null || $percent === ''
                 ? null
                 : (int) $percent,
         ]);

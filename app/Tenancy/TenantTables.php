@@ -23,6 +23,7 @@ final class TenantTables
     public const WEAKLY_LINKED = [
         'lesson_and_histories', 'history_payments', 'student_information',
         'assessments', 'dept_students', 'active_students', 'certificates',
+        'reception_students',
     ];
 
     /**
@@ -33,6 +34,7 @@ final class TenantTables
     public const DENORMALISED = [
         'group_user', 'group_teachers', 'attendances',
         'homeworks', 'homework_submissions', 'lesson_skill_grades',
+        'absence_follow_ups',
     ];
 
     /**
@@ -69,6 +71,7 @@ final class TenantTables
             'homeworks'            => ['groups', 'group_id'],
             'lesson_skill_grades'  => ['groups', 'group_id'],
             'homework_submissions' => ['homeworks', 'homework_id'],
+            'absence_follow_ups'   => ['attendances', 'attendance_id'],
         ];
     }
 }

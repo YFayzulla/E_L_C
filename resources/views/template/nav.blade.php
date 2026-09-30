@@ -4,6 +4,9 @@
     $roleLabels = [
         'admin'   => 'Administrator',
         'user'    => "O'qituvchi",
+        'support' => 'Support teacher',
+        'reception' => 'Reception',
+        'assistant' => 'Homework assistant',
         'student' => 'Talaba',
         'parent'  => 'Ota-ona',
     ];

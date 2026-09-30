@@ -27,6 +27,7 @@ class Homework extends Model
     protected $fillable = [
         'group_id',
         'lesson_id',
+        'skill',
         'title',
         'description',
         'attachment',
@@ -41,6 +42,21 @@ class Homework extends Model
         'allow_file' => 'boolean',
         'max_score'  => 'integer',
     ];
+
+    public static function skillOptions(): array
+    {
+        return config('grading.homework_skills', []);
+    }
+
+    public static function assistantSkills(): array
+    {
+        return (array) config('grading.assistant_homework_skills', ['writing', 'speaking']);
+    }
+
+    public function skillLabel(): string
+    {
+        return self::skillOptions()[$this->skill] ?? 'Umumiy';
+    }
 
     public function group(): BelongsTo
     {

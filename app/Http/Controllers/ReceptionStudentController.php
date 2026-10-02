@@ -12,9 +12,11 @@ use Illuminate\Validation\Rule;
 
 class ReceptionStudentController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         try {
+            $request = request();
+
             $filters = [
                 'status' => $request->query('status'),
                 'level'  => $request->query('level'),

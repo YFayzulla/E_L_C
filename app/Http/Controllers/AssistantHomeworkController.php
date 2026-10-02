@@ -7,16 +7,17 @@ use App\Models\Group;
 use App\Models\Homework;
 use App\Models\HomeworkSubmission;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AssistantHomeworkController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         try {
+            $request = request();
+
             $filters = [
                 'skill'  => $request->query('skill'),
                 'status' => $request->query('status'),

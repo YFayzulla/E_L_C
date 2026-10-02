@@ -13,9 +13,11 @@ use Illuminate\Validation\Rule;
 
 class ReceptionAttendanceController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         try {
+            $request = request();
+
             $from = $this->parseDay($request->query('from')) ?? now()->startOfMonth();
             $to = $this->parseDay($request->query('to')) ?? now();
 

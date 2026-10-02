@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\LessonAndHistory;
+use App\Models\ReceptionStudent;
 use App\Models\User;
 
 class AttendanceService
@@ -91,12 +92,17 @@ class AttendanceService
             ->whereIn('status', [0, 2])
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->with(['user:id,name', 'teacher:id,name', 'lesson:id,name', 'reasonWriter:id,name'])
+            ->with(['user:id,name', 'teacher:id,name', 'lesson:id,name', 'reasonWriter:id,name', 'latestFollowUp.recorder:id,name'])
             ->orderByDesc('created_at')
             ->paginate(15)
             ->appends(request()->only('date'));
 
         $slots = $lessonDays->count() * $students->count();
+        $receptionStudents = ReceptionStudent::query()
+            ->where('recommended_group_id', $group->id)
+            ->whereNotNull('test_image_path')
+            ->orderByDesc('created_at')
+            ->get(['id', 'name', 'level', 'score', 'test_taken_at', 'test_image_path', 'recommended_group_id', 'status']);
 
         return [
             'students' => $students,
@@ -109,6 +115,7 @@ class AttendanceService
             'date' => $date,
             'lessonDays' => $lessonDays->toArray(),
             'attendances' => $recentAttendances,
+            'receptionStudents' => $receptionStudents,
             'group' => $group,
             'absentCount' => $absentCount,
             'lateCount' => $lateCount,

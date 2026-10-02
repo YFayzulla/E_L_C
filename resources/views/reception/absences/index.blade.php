@@ -73,7 +73,7 @@
                     <tr>
                         <th>Sana</th>
                         <th>Talaba</th>
-                        <th>Ota-ona telefoni</th>
+                        <th>Telefonlar</th>
                         <th>Guruh</th>
                         <th>Sabab</th>
                         <th>Aloqa</th>
@@ -84,7 +84,8 @@
                     @foreach($records as $record)
                         @php
                             $latest = $record->latestFollowUp;
-                            $phone = $record->user?->parents_tel ?: $record->user?->phone;
+                            $studentPhone = $record->user?->phone;
+                            $parentPhone = $record->user?->parents_tel;
                             $contactName = $record->user?->parents_name ?: 'Ota-ona';
                         @endphp
                         <tr>
@@ -105,8 +106,12 @@
                                 </div>
                             </td>
                             <td>
-                                <div>{{ $contactName }}</div>
-                                <div class="text-muted" style="font-size: .78rem;" dir="ltr">{{ $phone ?: '—' }}</div>
+                                <div>{{ $record->user?->name ?? 'O‘quvchi' }}:
+                                    @if($studentPhone)<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $studentPhone) }}" class="text-reset">{{ $studentPhone }}</a>@else<span>—</span>@endif
+                                </div>
+                                <div>{{ $contactName }}:
+                                    @if($parentPhone)<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $parentPhone) }}" class="text-reset">{{ $parentPhone }}</a>@else<span>—</span>@endif
+                                </div>
                             </td>
                             <td><span class="badge bg-label-info">{{ $record->group?->name ?? '—' }}</span></td>
                             <td>
@@ -125,15 +130,25 @@
                                     <div class="text-muted" style="font-size: .78rem;">
                                         {{ $latest->contacted_at?->format('d.m.Y H:i') ?? '—' }}
                                     </div>
+                                    @if(filled($latest->note))
+                                        <div class="mt-2 text-wrap"><span class="fw-semibold">Izoh:</span> {{ $latest->note }}</div>
+                                    @endif
+                                    @if($latest->recorder)
+                                        <small class="text-muted">{{ $latest->recorder->name }}</small>
+                                    @endif
                                 @else
                                     <span class="badge bg-label-secondary">Kutilmoqda</span>
                                 @endif
                             </td>
                             <td class="text-end">
-                                <button type="button" class="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal" data-bs-target="#followUp{{ $record->id }}">
-                                    <i class="bx bx-phone-call me-1"></i> Yozish
-                                </button>
+                                @unless($latest)
+                                    <button type="button" class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal" data-bs-target="#followUp{{ $record->id }}">
+                                        <i class="bx bx-phone-call me-1"></i> Yozish
+                                    </button>
+                                @else
+                                    <span class="text-muted small">Yozilgan</span>
+                                @endunless
                             </td>
                         </tr>
                     @endforeach
@@ -145,6 +160,7 @@
                 @php
                     $contactName = $record->user?->parents_name ?: 'Ota-ona';
                 @endphp
+                @if(!$record->latestFollowUp)
                 <div class="modal fade" id="followUp{{ $record->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <form class="modal-content" method="POST"
@@ -197,6 +213,7 @@
                         </form>
                     </div>
                 </div>
+                @endif
             @endforeach
 
             @if($records->hasPages())

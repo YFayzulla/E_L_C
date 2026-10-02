@@ -167,7 +167,14 @@ class AttendanceAdminController extends Controller
                 ->first();
 
             $records = $base
-                ->with(['user:id,name', 'group:id,name', 'teacher:id,name', 'lesson:id,name'])
+                ->with([
+                    'user:id,name,phone,parents_name,parents_tel',
+                    'group:id,name',
+                    'teacher:id,name',
+                    'lesson:id,name',
+                    'reasonWriter:id,name',
+                    'latestFollowUp.recorder:id,name',
+                ])
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->paginate(25)

@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ReceptionAttendanceController extends Controller
@@ -76,6 +77,10 @@ class ReceptionAttendanceController extends Controller
     {
         abort_unless(in_array((int) $attendance->status, [0, 2], true), 404);
 
+        if ($attendance->followUps()->exists()) {
+            return redirect()->back()->with('error', 'Bu davomat uchun aloqa yozuvi avval saqlangan. Holatni qayta o‘zgartirib bo‘lmaydi.');
+        }
+
         $data = $request->validate([
             'status'            => ['required', Rule::in(array_keys(AbsenceFollowUp::statuses()))],
             'contact_person'    => ['nullable', 'string', 'max:255'],
@@ -87,19 +92,29 @@ class ReceptionAttendanceController extends Controller
         ]);
 
         try {
-            $attendance->followUps()->create([
-                'student_id'        => $attendance->user_id,
-                'group_id'          => $attendance->group_id,
-                'contacted_by'      => auth()->id(),
-                'contacted_at'      => $data['contacted_at'] ?? now(),
-                'contact_person'    => $data['contact_person'] ?? null,
-                'status'            => $data['status'],
-                'note'              => $data['note'] ?? null,
-                'next_follow_up_at' => $data['next_follow_up_at'] ?? null,
-            ]);
+            DB::transaction(function () use ($attendance, $data) {
+                $lockedAttendance = Attendance::query()->whereKey($attendance->id)->lockForUpdate()->firstOrFail();
+                if ($lockedAttendance->followUps()->exists()) {
+                    throw new \DomainException('follow-up-already-recorded');
+                }
+
+                $lockedAttendance->followUps()->create([
+                    'student_id'        => $lockedAttendance->user_id,
+                    'group_id'          => $lockedAttendance->group_id,
+                    'contacted_by'      => auth()->id(),
+                    'contacted_at'      => $data['contacted_at'] ?? now(),
+                    'contact_person'    => $data['contact_person'] ?? null,
+                    'status'            => $data['status'],
+                    'note'              => $data['note'] ?? null,
+                    'next_follow_up_at' => $data['next_follow_up_at'] ?? null,
+                ]);
+            });
 
             return redirect()->back()->with('success', 'Ota-ona bilan aloqa yozuvi saqlandi.');
         } catch (\Exception $e) {
+            if ($e instanceof \DomainException && $e->getMessage() === 'follow-up-already-recorded') {
+                return redirect()->back()->with('error', 'Bu davomat uchun aloqa yozuvi avval saqlangan. Holatni qayta o‘zgartirib bo‘lmaydi.');
+            }
             Log::error('ReceptionAttendanceController@store error: ' . $e->getMessage());
 
             return redirect()->back()->withInput()->with('error', 'Aloqa yozuvini saqlashda xatolik.');

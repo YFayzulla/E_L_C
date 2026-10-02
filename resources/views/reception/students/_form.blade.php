@@ -83,6 +83,17 @@
                         @error('score') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label" for="test_image">Ishlangan test rasmi</label>
+                        <input type="file" id="test_image" name="test_image" accept="image/jpeg,image/png,image/webp"
+                               class="form-control @error('test_image') is-invalid @enderror">
+                        @error('test_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @if($student?->test_image_path)
+                            <a class="d-inline-block mt-2" target="_blank" rel="noopener"
+                               href="{{ route('reception.students.test-image', $student->id) }}">Biriktirilgan test rasmini ko‘rish</a>
+                        @endif
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label" for="notes">Izoh</label>
                         <textarea id="notes" name="notes" rows="4"

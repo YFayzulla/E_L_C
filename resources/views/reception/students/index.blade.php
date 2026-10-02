@@ -5,7 +5,7 @@
 
 @section('content')
     @php
-        $hasFilters = filled($filters['status']) || filled($filters['level']) || filled($filters['q']);
+        $hasFilters = $filters['status'] !== 'active' || filled($filters['level']) || filled($filters['q']);
     @endphp
 
     <div class="page-head">
@@ -20,7 +20,7 @@
             <div class="col-md-3">
                 <label class="form-label" for="status">Holat</label>
                 <select id="status" name="status" class="form-select">
-                    <option value="">Barchasi</option>
+                    <option value="active" @selected($filters['status'] === 'active')>Faol yozuvlar</option>
                     @foreach($statuses as $value => $label)
                         <option value="{{ $value }}" @selected($filters['status'] === $value)>{{ $label }}</option>
                     @endforeach
@@ -104,6 +104,9 @@
                                         · {{ $item->test_taken_at->format('d.m.Y') }}
                                     @endif
                                 </div>
+                                @if($item->test_image_path)
+                                    <a href="{{ route('reception.students.test-image', $item->id) }}" target="_blank" rel="noopener" class="small">Test rasmi</a>
+                                @endif
                             </td>
                             <td><span class="badge bg-label-info">{{ $item->levelLabel() }}</span></td>
                             <td>{{ $item->recommendedGroup?->name ?? '—' }}</td>

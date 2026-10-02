@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <form action="{{ route('reception.students.update', $student->id) }}" method="POST">
+    <form action="{{ route('reception.students.update', $student->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         @include('reception.students._form')

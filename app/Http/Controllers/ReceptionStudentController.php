@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Centre;
 use App\Models\Group;
 use App\Models\ReceptionStudent;
+use App\Tenancy\TenantStorage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ReceptionStudentController extends Controller
@@ -16,16 +18,22 @@ class ReceptionStudentController extends Controller
     {
         try {
             $request = request();
+            $requestedStatus = $request->query('status', 'active');
+            $requestedStatus = is_string($requestedStatus) ? $requestedStatus : 'active';
 
             $filters = [
-                'status' => $request->query('status'),
+                'status' => $requestedStatus,
                 'level'  => $request->query('level'),
                 'q'      => $request->query('q'),
             ];
+            if ($filters['status'] !== 'active' && ! array_key_exists($filters['status'], ReceptionStudent::statuses())) {
+                $filters['status'] = 'active';
+            }
 
             $students = ReceptionStudent::query()
                 ->with(['recommendedGroup:id,name', 'registrar:id,name', 'assigner:id,name'])
-                ->when(filled($filters['status']), fn (Builder $q) => $q->where('status', $filters['status']))
+                ->when($filters['status'] === 'active', fn (Builder $q) => $q->where('status', '!=', ReceptionStudent::STATUS_ARCHIVED))
+                ->when($filters['status'] !== 'active', fn (Builder $q) => $q->where('status', $filters['status']))
                 ->when(filled($filters['level']), fn (Builder $q) => $q->where('level', $filters['level']))
                 ->when(filled($filters['q']), function (Builder $q) use ($filters) {
                     $needle = '%' . $filters['q'] . '%';
@@ -70,13 +78,22 @@ class ReceptionStudentController extends Controller
         $data['registered_by'] = auth()->id();
 
         $this->stampAssignment($data);
+        $imagePath = null;
 
         try {
+            $imagePath = $request->file('test_image')?->store(TenantStorage::path('reception-tests'), 'local');
+            if ($request->hasFile('test_image') && ! $imagePath) {
+                return redirect()->back()->withInput()->with('error', 'Test rasmini saqlab bo‘lmadi.');
+            }
+            $data['test_image_path'] = $imagePath;
             ReceptionStudent::create($data);
 
             return redirect()->route('reception.students.index')
                 ->with('success', 'Yangi kelgan talaba reception daftariga qo‘shildi.');
         } catch (\Exception $e) {
+            if ($imagePath) {
+                Storage::disk('local')->delete($imagePath);
+            }
             Log::error('ReceptionStudentController@store error: ' . $e->getMessage());
 
             return redirect()->back()->withInput()->with('error', 'Ma’lumotni saqlashda xatolik.');
@@ -97,13 +114,28 @@ class ReceptionStudentController extends Controller
     {
         $data = $this->validated($request);
         $this->stampAssignment($data, $student);
+        $oldImagePath = $student->test_image_path;
+        $newImagePath = null;
 
         try {
+            $newImagePath = $request->file('test_image')?->store(TenantStorage::path('reception-tests'), 'local');
+            if ($request->hasFile('test_image') && ! $newImagePath) {
+                return redirect()->back()->withInput()->with('error', 'Test rasmini saqlab bo‘lmadi.');
+            }
+            if ($newImagePath) {
+                $data['test_image_path'] = $newImagePath;
+            }
             $student->update($data);
+            if ($newImagePath && $oldImagePath) {
+                Storage::disk('local')->delete($oldImagePath);
+            }
 
             return redirect()->route('reception.students.index')
                 ->with('success', 'Reception yozuvi yangilandi.');
         } catch (\Exception $e) {
+            if ($newImagePath) {
+                Storage::disk('local')->delete($newImagePath);
+            }
             Log::error('ReceptionStudentController@update error: ' . $e->getMessage());
 
             return redirect()->back()->withInput()->with('error', 'Ma’lumotni yangilashda xatolik.');
@@ -115,6 +147,26 @@ class ReceptionStudentController extends Controller
         $student->update(['status' => ReceptionStudent::STATUS_ARCHIVED]);
 
         return redirect()->back()->with('success', 'Yozuv arxivlandi.');
+    }
+
+    public function testImage(ReceptionStudent $student)
+    {
+        abort_unless($student->test_image_path, 404);
+
+        $viewer = auth()->user();
+        $isOfficeStaff = $viewer->hasRole('admin') || $viewer->hasRole('reception');
+        $isAssignedTeacher = $student->recommended_group_id
+            && Group::query()->whereKey($student->recommended_group_id)
+                ->whereHas('teachers', fn (Builder $q) => $q->where('users.id', $viewer->id))
+                ->exists();
+
+        abort_unless($isOfficeStaff || $isAssignedTeacher, 403);
+        abort_unless(Storage::disk('local')->exists($student->test_image_path), 404);
+
+        return response()->file(Storage::disk('local')->path($student->test_image_path), [
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     private function validated(Request $request): array
@@ -130,6 +182,7 @@ class ReceptionStudentController extends Controller
             'test_taken_at'        => ['nullable', 'date'],
             'test_type'            => ['nullable', 'string', 'max:100'],
             'score'                => ['nullable', 'string', 'max:100'],
+            'test_image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'level'                => ['nullable', Rule::in(array_keys(ReceptionStudent::levels()))],
             'recommended_group_id' => [
                 'nullable',
@@ -141,6 +194,9 @@ class ReceptionStudentController extends Controller
         ], [
             'name.required' => 'Ism familiyani kiriting.',
             'status.required' => 'Holatni tanlang.',
+            'test_image.image' => 'Test rasmi rasm fayli bo‘lishi kerak.',
+            'test_image.mimes' => 'Test rasmi JPG, PNG yoki WEBP bo‘lishi kerak.',
+            'test_image.max' => 'Test rasmi 5 MB dan oshmasligi kerak.',
         ]);
     }
 

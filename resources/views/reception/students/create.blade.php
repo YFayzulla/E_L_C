@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <form action="{{ route('reception.students.store') }}" method="POST">
+    <form action="{{ route('reception.students.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @include('reception.students._form')
     </form>

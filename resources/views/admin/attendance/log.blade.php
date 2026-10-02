@@ -99,8 +99,11 @@
                     <tr>
                         <th>Sana</th>
                         <th>Talaba</th>
+                        <th>Telefonlar</th>
                         <th>Guruh</th>
                         <th>Dars</th>
+                        <th>Sabab</th>
+                        <th>Ota-ona bilan aloqa</th>
                         <th>Holat</th>
                         <th>Kim belgilagan</th>
                     </tr>
@@ -111,10 +114,33 @@
                             <td class="text-muted">{{ $record->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                             <td class="fw-semibold">{{ $record->user?->name ?? '—' }}</td>
                             <td>
+                                <div>{{ $record->user?->name ?? 'O‘quvchi' }}: {{ $record->user?->phone ?? '—' }}</div>
+                                <div>{{ $record->user?->parents_name ?: 'Ota-ona' }}: {{ $record->user?->parents_tel ?? '—' }}</div>
+                            </td>
+                            <td>
                                 <a href="{{ route('group.attendance', $record->group_id) }}"
                                    class="badge bg-label-info">{{ $record->group?->name ?? '—' }}</a>
                             </td>
                             <td class="text-muted">{{ $record->lesson?->name ?? '—' }}</td>
+                            <td>
+                                @if(filled($record->reason))
+                                    <div>{{ $record->reason }}</div>
+                                    <small class="text-muted">{{ $record->reasonWriter?->name ?? '—' }}</small>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($record->latestFollowUp)
+                                    <span class="badge bg-label-{{ $record->latestFollowUp->statusTone() }}">{{ $record->latestFollowUp->statusLabel() }}</span>
+                                    @if(filled($record->latestFollowUp->note))
+                                        <div class="mt-1 text-wrap">{{ $record->latestFollowUp->note }}</div>
+                                    @endif
+                                    <small class="text-muted">{{ $record->latestFollowUp->recorder?->name ?? '—' }}</small>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                             <td>
                                 @if((int) $record->status === 2)
                                     <span class="badge bg-label-warning">Kechikdi</span>

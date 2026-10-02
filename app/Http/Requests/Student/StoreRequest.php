@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Student;
 
+use App\Models\Centre;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -48,8 +49,8 @@ class StoreRequest extends FormRequest
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             
             'description' => 'nullable|string',
-            'group_id' => 'required|array',
-            'group_id.*' => 'exists:groups,id',
+            'group_id' => ['required', 'array', 'min:1'],
+            'group_id.*' => ['required', 'integer', Rule::exists('groups', 'id')->where('centre_id', Centre::currentId())],
             'group_payment' => 'nullable|array',
             'group_payment.*' => 'nullable|numeric|min:0',
         ];
@@ -73,6 +74,8 @@ class StoreRequest extends FormRequest
             'photo.max' => 'The image size must not exceed 2MB.',
             'group_id.required' => 'The group field is required.',
             'group_id.array' => 'The group field must be an array.',
+            'group_id.min' => 'Kamida bitta guruh tanlang.',
+            'group_id.*.integer' => 'Guruh tanlovi noto‘g‘ri.',
             'group_id.*.exists' => 'One of the selected groups does not exist.',
             'email.email' => 'Pochta manzili noto‘g‘ri kiritilgan.',
             'email.max' => 'Pochta manzili 191 belgidan oshmasligi kerak.',

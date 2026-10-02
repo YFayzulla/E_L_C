@@ -312,6 +312,7 @@
                         <th>Dars</th>
                         <th>Kim belgilagan</th>
                         <th>Sabab</th>
+                        <th>Ota-ona bilan aloqa</th>
                         <th>Holat</th>
                         <th class="text-end">Amal</th>
                     </tr>
@@ -329,6 +330,17 @@
                                     @if($attendance->reasonWriter)
                                         <small class="text-muted">{{ $attendance->reasonWriter->name }}</small>
                                     @endif
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($attendance->latestFollowUp)
+                                    <span class="badge bg-label-{{ $attendance->latestFollowUp->statusTone() }}">{{ $attendance->latestFollowUp->statusLabel() }}</span>
+                                    @if(filled($attendance->latestFollowUp->note))
+                                        <div class="mt-1 text-wrap">{{ $attendance->latestFollowUp->note }}</div>
+                                    @endif
+                                    <small class="text-muted">{{ $attendance->latestFollowUp->recorder?->name ?? '—' }}</small>
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif
@@ -362,5 +374,40 @@
             @endif
         @endif
     </div>
+
+    @if($receptionStudents->isNotEmpty())
+        <div class="card">
+            <div class="card-header">Reception testlari</div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>O‘quvchi</th>
+                        <th>Daraja</th>
+                        <th>Natija</th>
+                        <th>Test sanasi</th>
+                        <th class="text-end">Rasm</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($receptionStudents as $prospect)
+                        <tr>
+                            <td>{{ $prospect->name }}</td>
+                            <td>{{ $prospect->levelLabel() }}</td>
+                            <td>{{ $prospect->score ?: '—' }}</td>
+                            <td>{{ $prospect->test_taken_at?->format('d.m.Y') ?? '—' }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"
+                                   href="{{ route('reception.students.test-image', $prospect->id) }}" title="Test rasmini ko‘rish">
+                                    <i class="bx bx-image"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
 @endsection

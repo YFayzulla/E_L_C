@@ -29,6 +29,7 @@ class ReceptionStudent extends Model
         'test_taken_at',
         'test_type',
         'score',
+        'test_image_path',
         'level',
         'recommended_group_id',
         'status',

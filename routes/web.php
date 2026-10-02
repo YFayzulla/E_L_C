@@ -133,6 +133,11 @@ Route::middleware(['auth', 'role:admin|reception'])->prefix('reception')->name('
         ->name('absences.followups.store');
 });
 
+Route::middleware(['auth', 'role:admin|reception|user'])->get(
+    'reception/students/{student}/test-image',
+    [ReceptionStudentController::class, 'testImage']
+)->whereNumber('student')->name('reception.students.test-image');
+
 /*
 |--------------------------------------------------------------------------
 | ASSISTANT ROUTES

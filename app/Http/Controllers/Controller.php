@@ -214,57 +214,65 @@ class Controller extends BaseController
             $weekIncome  += $income;
         }
 
-        // --- teachers, in TWO queries rather than 3 per teacher --------------
-        //
-        // TenantQuery, DB::table emas: xom so'rov global scope'dan tashqarida
-        // qoladi va bu panel aynan shu sababdan boshqa markazning
-        // o'qituvchilarini ko'rsatardi. `group_user` join'i ham alohida
-        // cheklanadi — join qilingan jadvalga scope tegmaydi.
-        $teacherRows = TenantQuery::table('group_teachers')
-            ->join('users', 'users.id', '=', 'group_teachers.teacher_id')
+        // Include every current-centre teacher, even if no group is attached yet.
+        $teacherRows = User::role(['user', 'support'])
+            ->inCurrentCentre()
+            ->orderBy('name')
+            ->get(['id', 'name', 'photo', 'percent']);
+        $teacherIds = $teacherRows->pluck('id')->all();
+
+        $teacherGroups = TenantQuery::table('group_teachers')
+            ->whereIn('teacher_id', $teacherIds ?: [0])
+            ->get(['teacher_id', 'group_id'])
+            ->groupBy('teacher_id');
+
+        $teacherStats = TenantQuery::table('group_teachers')
             ->leftJoin('group_user', function (JoinClause $join) {
                 $join->on('group_user.group_id', '=', 'group_teachers.group_id');
                 TenantQuery::constrain($join, 'group_user');
             })
-            ->select(
-                'users.id',
-                'users.name',
-                'users.photo',
-                'users.percent',
-                DB::raw('COUNT(DISTINCT group_teachers.group_id) as groups_count'),
-                DB::raw('COUNT(DISTINCT group_user.user_id) as students_count'),
-                DB::raw('COALESCE(SUM(group_user.payment), 0) as gross')
-            )
-            ->groupBy('users.id', 'users.name', 'users.photo', 'users.percent')
-            ->orderBy('users.name')
-            ->get();
+            ->whereIn('group_teachers.teacher_id', $teacherIds ?: [0])
+            ->select('group_teachers.teacher_id')
+            ->selectRaw('COUNT(DISTINCT group_teachers.group_id) as groups_count')
+            ->selectRaw('COUNT(DISTINCT group_user.user_id) as students_count')
+            ->groupBy('group_teachers.teacher_id')
+            ->get()
+            ->keyBy('teacher_id');
 
-        // SUM over the join double-counts when a teacher has several groups, so
-        // the payout is recomputed from a clean per-group sum.
         $groupTotals = TenantQuery::table('group_user')
             ->select('group_id', DB::raw('SUM(payment) as total'))
             ->groupBy('group_id')
             ->pluck('total', 'group_id');
 
-        $teacherGroups = TenantQuery::table('group_teachers')
-            ->get(['teacher_id', 'group_id'])
-            ->groupBy('teacher_id');
+        $centrePercentages = collect();
+        $centreId = Centre::currentId();
+        if ($centreId !== null && $teacherIds !== []) {
+            $centrePercentages = DB::table('centre_user')
+                ->where('centre_id', $centreId)
+                ->where('status', Centre::MEMBER_ACTIVE)
+                ->whereIn('user_id', $teacherIds)
+                ->pluck('percent', 'user_id');
+        }
 
-        $teacherPanel = $teacherRows->map(function ($row) use ($groupTotals, $teacherGroups) {
+        $teacherPanel = $teacherRows->map(function ($row) use ($groupTotals, $teacherGroups, $teacherStats, $centrePercentages) {
             $gross = 0;
 
             foreach ($teacherGroups->get($row->id, collect()) as $link) {
                 $gross += (int) ($groupTotals[$link->group_id] ?? 0);
             }
 
+            $membershipPercent = $centrePercentages->get($row->id);
+            $percent = $membershipPercent !== null ? (int) $membershipPercent : (int) $row->percent;
+            $stats = $teacherStats->get($row->id);
+
             return [
                 'id'       => (int) $row->id,
                 'name'     => $row->name,
                 'photo'    => $row->photo,
-                'percent'  => (int) $row->percent,
-                'groups'   => (int) $row->groups_count,
-                'students' => (int) $row->students_count,
-                'salary'   => (int) round($gross * ((int) $row->percent) / 100),
+                'percent'  => $percent,
+                'groups'   => (int) ($stats->groups_count ?? 0),
+                'students' => (int) ($stats->students_count ?? 0),
+                'salary'   => (int) round($gross * $percent / 100),
             ];
         })->values();
 

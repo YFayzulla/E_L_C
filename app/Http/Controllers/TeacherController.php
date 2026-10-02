@@ -147,7 +147,8 @@ class TeacherController extends Controller
         DB::beginTransaction();
 
         try {
-            $payload = $this->commonPayload($request);
+            $role = $this->staffRole($request);
+            $payload = $this->commonPayload($request, $role);
             $payload['photo'] = $uploadedFilePath;
             // Parol berilmasa - eski xulq: telefon raqami parol bo'ladi.
             $payload['password'] = Hash::make(
@@ -162,7 +163,7 @@ class TeacherController extends Controller
             $this->attachToCurrentCentre(
                 $teacher,
                 $request->input('percent'),
-                $this->staffRole($request)
+                $role
             );
 
             if ($this->groupsWereSubmitted($request)) {
@@ -242,7 +243,8 @@ class TeacherController extends Controller
                 $newPhotoPath = $oldPhotoPath;
             }
 
-            $updateData = $this->commonPayload($request);
+            $role = $this->staffRole($request);
+            $updateData = $this->commonPayload($request, $role);
             $updateData['photo'] = $newPhotoPath;
 
             if ($request->filled('password')) {
@@ -261,8 +263,6 @@ class TeacherController extends Controller
             // Xodim turi o'zgargan bo'lsa rolni almashtiramiz. setRole()
             // eskisini olib tashlab yangisini beradi, ya'ni odam bir vaqtda
             // ham o'qituvchi, ham support bo'lib qolmaydi.
-            $role = $this->staffRole($request);
-
             if ($request->has('role') && ! $teacher->hasRole($role)) {
                 app(CentreMembershipService::class)->setRole(Centre::current(), $teacher, $role);
                 $teacher->unsetRelation('roles');
@@ -410,8 +410,10 @@ class TeacherController extends Controller
         );
     }
 
-    private function commonPayload(Request $request): array
+    private function commonPayload(Request $request, ?string $role = null): array
     {
+        $role ??= $this->staffRole($request);
+
         $payload = [
             'name' => $request->input('name'),
             'phone' => '998' . preg_replace('/[^0-9]/', '', (string) $request->input('phone')),
@@ -419,7 +421,7 @@ class TeacherController extends Controller
             'passport' => $request->filled('passport') ? trim((string) $request->input('passport')) : null,
             'location' => $request->input('location') ?: null,
             'description' => $request->input('description') ?: null,
-            'percent' => $request->input('percent'),
+            'percent' => $role === 'user' ? $request->input('percent') : null,
         ];
 
         // E-pochta maydoni (partials.email-field) mavjud bo'lsagina tegamiz.

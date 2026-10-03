@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\CentreMembershipService;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
+use App\Services\StudentPaymentSummaryService;
 use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -335,16 +336,8 @@ class StudentController extends Controller
                 ]);
             }
 
-            // Update user's should_pay to the sum of group payments
-            $student->update([
-                'should_pay' => $sumPayments,
-            ]);
-
-            // Update or create DeptStudent record with new dept sum
-            $student->deptStudent()->updateOrCreate(
-                ['user_id' => $student->id],
-                ['dept' => $sumPayments]
-            );
+            // Update the monthly base while preserving paid months/partial credit.
+            app(StudentPaymentSummaryService::class)->changeMonthlyPayment($student, $sumPayments);
 
             // Keep the guardian link in step with the phone number on the form:
             // drop links that no longer match, then (re)create the current one.

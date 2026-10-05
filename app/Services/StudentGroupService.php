@@ -29,10 +29,6 @@ use Illuminate\Support\Facades\DB;
  */
 class StudentGroupService
 {
-    public function __construct(private StudentPaymentSummaryService $payments)
-    {
-    }
-
     /** student_information.action — talaba guruhga qo'shildi */
     public const ACTION_JOINED = 0;
 
@@ -122,8 +118,13 @@ class StudentGroupService
                 ]);
             }
 
-            // d) money follows membership, but already-paid credit must remain.
-            $this->payments->changeMonthlyPayment($student, $sum);
+            // d) money follows membership
+            $student->update(['should_pay' => $sum]);
+
+            $student->deptStudent()->updateOrCreate(
+                ['user_id' => $student->id],
+                ['dept' => $sum]
+            );
 
             // e) attendances are intentionally left alone.
 

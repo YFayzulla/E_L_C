@@ -15,15 +15,12 @@ use App\Models\User;
 use App\Services\CentreMembershipService;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
-use App\Services\StudentPaymentSummaryService;
 use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
@@ -230,145 +227,14 @@ class StudentController extends Controller
                 ->get();
 
             $progress = app(ProgressService::class)->forStudent((int) $id);
-            $paymentCyclesAvailable = auth()->user()?->hasRole('admin')
-                && Schema::hasTable('student_payment_cycles');
-            $paymentCycles = $paymentCyclesAvailable
-                ? $this->paymentCycleRows($student)
-                : collect();
-            $paidMergeTargets = $paymentCycles
-                ->filter(fn($cycle) => (int) ($cycle->amount ?? 0) > 0
-                    && (int) ($cycle->paid_amount ?? 0) > 0
-                    && (int) ($cycle->lesson_count ?? 0) < 12)
-                ->values();
 
             return view('admin.student.show', compact(
-                'student',
-                'attendances',
-                'groupHistory',
-                'testResults',
-                'progress',
-                'paymentCyclesAvailable',
-                'paymentCycles',
-                'paidMergeTargets'
+                'student', 'attendances', 'groupHistory', 'testResults', 'progress'
             ));
         } catch (\Exception $e) {
             Log::error('StudentController@show error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talaba ma\'lumotlarini yuklashda xatolik.');
         }
-    }
-
-    public function mergePaymentCycles(Request $request, int $id)
-    {
-        $data = $request->validate([
-            'source_cycle_id' => 'required|integer|different:target_cycle_id',
-            'target_cycle_id' => 'required|integer',
-        ], [
-            'source_cycle_id.different' => 'Bir xil siklni o‘ziga birlashtirib bo‘lmaydi.',
-        ]);
-
-        if (! Schema::hasTable('student_payment_cycles')) {
-            return redirect()->back()->with('error', 'To‘lov sikllari jadvali topilmadi.');
-        }
-
-        $student = User::inCurrentCentre()->findOrFail($id);
-
-        try {
-            DB::transaction(function () use ($student, $data) {
-                $source = DB::table('student_payment_cycles')
-                    ->where('id', (int) $data['source_cycle_id'])
-                    ->where('user_id', $student->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                $target = DB::table('student_payment_cycles')
-                    ->where('id', (int) $data['target_cycle_id'])
-                    ->where('user_id', $student->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $source || ! $target) {
-                    throw ValidationException::withMessages([
-                        'source_cycle_id' => 'Tanlangan sikllardan biri topilmadi.',
-                    ]);
-                }
-
-                if ((int) $source->id === (int) $target->id) {
-                    throw ValidationException::withMessages([
-                        'source_cycle_id' => 'Bir xil siklni o‘ziga birlashtirib bo‘lmaydi.',
-                    ]);
-                }
-
-                if ((int) ($source->paid_amount ?? 0) > 0) {
-                    throw ValidationException::withMessages([
-                        'source_cycle_id' => 'To‘lovi bor siklni manba sifatida birlashtirish xavfli. Avval qo‘lda tekshiring.',
-                    ]);
-                }
-
-                if ((int) ($target->paid_amount ?? 0) <= 0) {
-                    throw ValidationException::withMessages([
-                        'target_cycle_id' => 'Birlashtirish uchun to‘langan asosiy siklni tanlang.',
-                    ]);
-                }
-
-                $targetLessons = max(0, (int) ($target->lesson_count ?? 0));
-                $sourceLessons = max(0, (int) ($source->lesson_count ?? 0));
-                $mergedLessons = $targetLessons + $sourceLessons;
-
-                if ($mergedLessons > 12) {
-                    throw ValidationException::withMessages([
-                        'source_cycle_id' => "Birlashtirilsa {$mergedLessons}/12 bo‘ladi. 12 darsdan oshadigan siklni qo‘lda tekshiring.",
-                    ]);
-                }
-
-                $targetPaid = min(
-                    max(0, (int) ($target->amount ?? 0)),
-                    max(0, (int) ($target->paid_amount ?? 0)) + max(0, (int) ($source->paid_amount ?? 0))
-                );
-
-                $targetUpdate = [
-                    'paid_amount' => $targetPaid,
-                    'lesson_count' => $mergedLessons,
-                    'status' => $this->cycleStatus($targetPaid, (int) ($target->amount ?? 0)),
-                    'closed_at' => $mergedLessons >= 12 ? now() : null,
-                ];
-
-                $sourceUpdate = [
-                    'amount' => 0,
-                    'paid_amount' => 0,
-                    'lesson_count' => 0,
-                    'status' => 2,
-                    'closed_at' => now(),
-                ];
-
-                if (Schema::hasColumn('student_payment_cycles', 'closed_lesson_id')) {
-                    $targetUpdate['closed_lesson_id'] = $mergedLessons >= 12
-                        ? ($source->closed_lesson_id ?? $target->closed_lesson_id ?? null)
-                        : null;
-                    $sourceUpdate['closed_lesson_id'] = null;
-                }
-
-                if (Schema::hasColumn('student_payment_cycles', 'updated_at')) {
-                    $targetUpdate['updated_at'] = now();
-                    $sourceUpdate['updated_at'] = now();
-                }
-
-                DB::table('student_payment_cycles')->where('id', $target->id)->update($targetUpdate);
-                DB::table('student_payment_cycles')->where('id', $source->id)->update($sourceUpdate);
-
-                if (class_exists(\App\Services\StudentPaymentLedgerService::class)) {
-                    app(\App\Services\StudentPaymentLedgerService::class)
-                        ->syncStudentSummary($student->fresh(['groups', 'deptStudent']));
-                }
-            });
-        } catch (ValidationException $e) {
-            throw $e;
-        } catch (\Throwable $e) {
-            Log::error('StudentController@mergePaymentCycles error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Sikllarni birlashtirishda xatolik yuz berdi.');
-        }
-
-        return redirect()->route('student.show', $student->id)
-            ->with('success', 'To‘lov sikllari birlashtirildi.');
     }
 
     /**
@@ -469,8 +335,16 @@ class StudentController extends Controller
                 ]);
             }
 
-            // Update the monthly base while preserving paid months/partial credit.
-            app(StudentPaymentSummaryService::class)->changeMonthlyPayment($student, $sumPayments);
+            // Update user's should_pay to the sum of group payments
+            $student->update([
+                'should_pay' => $sumPayments,
+            ]);
+
+            // Update or create DeptStudent record with new dept sum
+            $student->deptStudent()->updateOrCreate(
+                ['user_id' => $student->id],
+                ['dept' => $sumPayments]
+            );
 
             // Keep the guardian link in step with the phone number on the form:
             // drop links that no longer match, then (re)create the current one.
@@ -556,31 +430,6 @@ class StudentController extends Controller
         } catch (\Throwable $e) {
             Log::error('StudentController@sendVerificationMail error: ' . $e->getMessage());
         }
-    }
-
-    private function paymentCycleRows(User $student)
-    {
-        if (! Schema::hasTable('student_payment_cycles')) {
-            return collect();
-        }
-
-        return DB::table('student_payment_cycles as cycles')
-            ->leftJoin('groups', 'groups.id', '=', 'cycles.group_id')
-            ->where('cycles.user_id', $student->id)
-            ->select('cycles.*', 'groups.name as group_name')
-            ->orderByRaw('CASE WHEN cycles.closed_at IS NULL THEN 0 ELSE 1 END')
-            ->orderBy('cycles.cycle_number')
-            ->orderBy('cycles.id')
-            ->get();
-    }
-
-    private function cycleStatus(int $paidAmount, int $amount): int
-    {
-        if ($amount <= 0 || $paidAmount >= $amount) {
-            return 2;
-        }
-
-        return $paidAmount > 0 ? 1 : 0;
     }
 
     /**

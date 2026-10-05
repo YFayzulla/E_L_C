@@ -286,9 +286,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // --- STUDENTS & DEPT ---
     // Removed 'show' from resource to define it separately for shared access
     Route::resource('student', StudentController::class)->except(['show']);
-    Route::post('student/{id}/payment-cycles/merge', [StudentController::class, 'mergePaymentCycles'])
-        ->whereNumber('id')
-        ->name('student.payment-cycles.merge');
     Route::post('student/dept', [Controller::class, 'search'])->name('student.search');
 
     // --- STUDENT EXPORT ROUTES ---

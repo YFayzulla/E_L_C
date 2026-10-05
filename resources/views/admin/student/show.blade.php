@@ -181,6 +181,174 @@
         </div>
     @endisset
 
+    @role('admin')
+    @if($paymentCyclesAvailable ?? false)
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header d-flex align-items-start justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h5 class="mb-1">To‘lov sikllari</h5>
+                            <div class="text-muted" style="font-size: .85rem;">
+                                Guruh almashganda eski darslarni to‘langan siklga ehtiyotkor birlashtirish uchun.
+                            </div>
+                        </div>
+                        <span class="badge bg-label-primary">12 dars = 1 sikl</span>
+                    </div>
+
+                    <div class="card-body pt-0">
+                        @if($errors->has('source_cycle_id') || $errors->has('target_cycle_id'))
+                            <div class="alert alert-warning mt-3 mb-3">
+                                {{ $errors->first('source_cycle_id') ?: $errors->first('target_cycle_id') }}
+                            </div>
+                        @endif
+
+                        <div class="alert alert-info d-flex gap-2 align-items-start mt-3" role="alert">
+                            <i class="bx bx-info-circle fs-5 mt-1"></i>
+                            <div>
+                                Birlashtirish eski noto‘g‘ri qarzdor siklni o‘chirmaydi, faqat uning to‘lov ta’sirini nolga tushiradi.
+                                Dars soni tanlangan to‘langan siklga qo‘shiladi.
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th>Guruh</th>
+                                    <th>Sikl</th>
+                                    <th>Dars</th>
+                                    <th>Holat</th>
+                                    <th>To‘lov</th>
+                                    <th>Qoldiq</th>
+                                    <th class="text-end">O‘zgartirish</th>
+                                </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                @forelse($paymentCycles as $cycle)
+                                    @php
+                                        $lessonCount = max(0, min(12, (int) ($cycle->lesson_count ?? 0)));
+                                        $amount = max(0, (int) ($cycle->amount ?? 0));
+                                        $paid = max(0, (int) ($cycle->paid_amount ?? 0));
+                                        $left = max(0, $amount - $paid);
+                                        $percent = (int) round(($lessonCount / 12) * 100);
+                                        $status = (int) ($cycle->status ?? 0);
+                                        $isMerged = $amount === 0 && $paid === 0 && !empty($cycle->closed_at);
+                                        $statusTone = $isMerged ? 'secondary' : ($status === 2 ? 'success' : ($paid > 0 ? 'warning' : 'danger'));
+                                        $statusLabel = $isMerged ? 'Birlashtirilgan' : ($status === 2 ? 'To‘langan' : ($paid > 0 ? 'Qisman' : 'To‘lanmagan'));
+                                        $mergeTargets = ($paidMergeTargets ?? collect())
+                                            ->reject(fn($target) => (int) $target->id === (int) $cycle->id)
+                                            ->values();
+                                        $canMerge = $paid <= 0 && $lessonCount > 0 && $mergeTargets->isNotEmpty();
+                                        $modalId = 'mergePaymentCycleModal' . $cycle->id;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ $cycle->group_name ?? 'Guruhsiz sikl' }}</div>
+                                            <div class="text-muted" style="font-size: .78rem;">
+                                                Ochilgan: {{ $cycle->opened_at ? \Carbon\Carbon::parse($cycle->opened_at)->format('d.m.Y') : '—' }}
+                                            </div>
+                                        </td>
+                                        <td>#{{ (int) ($cycle->cycle_number ?? 1) }}</td>
+                                        <td style="min-width: 170px;">
+                                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                                <span class="fw-semibold">{{ $lessonCount }}/12</span>
+                                                <span class="text-muted" style="font-size: .78rem;">
+                                                    {{ max(0, 12 - $lessonCount) }} dars qoldi
+                                                </span>
+                                            </div>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-label-{{ $statusTone }}">{{ $statusLabel }}</span>
+                                            @if($cycle->paid_at)
+                                                <div class="text-muted mt-1" style="font-size: .78rem;">
+                                                    {{ \Carbon\Carbon::parse($cycle->paid_at)->format('d.m.Y') }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">{{ number_format($paid, 0, '.', ' ') }}</div>
+                                            <div class="text-muted" style="font-size: .78rem;">
+                                                /{{ number_format($amount, 0, '.', ' ') }}
+                                            </div>
+                                        </td>
+                                        <td class="fw-semibold">{{ number_format($left, 0, '.', ' ') }}</td>
+                                        <td class="text-end">
+                                            @if($canMerge)
+                                                <button type="button"
+                                                        class="btn btn-sm btn-warning"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#{{ $modalId }}">
+                                                    Birlashtirish
+                                                </button>
+
+                                                <div class="modal fade text-start" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <form method="POST"
+                                                              action="{{ route('student.payment-cycles.merge', $student->id) }}"
+                                                              class="modal-content border-0 shadow">
+                                                            @csrf
+                                                            <input type="hidden" name="source_cycle_id" value="{{ $cycle->id }}">
+
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Siklni birlashtirish</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+
+                                                            <div class="modal-body">
+                                                                <div class="alert alert-warning">
+                                                                    <b>{{ $cycle->group_name ?? 'Guruhsiz sikl' }}</b> dagi
+                                                                    {{ $lessonCount }} ta dars tanlangan to‘langan siklga qo‘shiladi.
+                                                                    Bu amal noto‘g‘ri qarzdorlikni yopadi, lekin tarixni o‘chirmaydi.
+                                                                </div>
+
+                                                                <label class="form-label">Qaysi to‘langan siklga qo‘shilsin?</label>
+                                                                <select name="target_cycle_id" class="form-select" required>
+                                                                    @foreach($mergeTargets as $target)
+                                                                        <option value="{{ $target->id }}">
+                                                                            {{ $target->group_name ?? 'Guruhsiz sikl' }}
+                                                                            — #{{ (int) ($target->cycle_number ?? 1) }}
+                                                                            — {{ (int) ($target->lesson_count ?? 0) }}/12
+                                                                            — {{ number_format((int) ($target->paid_amount ?? 0), 0, '.', ' ') }} so‘m
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+
+                                                                <p class="text-muted mt-3 mb-0" style="font-size: .85rem;">
+                                                                    Xavfsizlik uchun to‘lovi bor manba siklni yoki 12 darsdan oshadigan birlashtirishni backend rad etadi.
+                                                                </p>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+                                                                <button type="submit" class="btn btn-warning">Ha, birlashtirish</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">To‘lov sikli topilmadi.</td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+    @endrole
+
     <div class="row">
         @role('admin')
         <div class="col-md-6 mt-4">

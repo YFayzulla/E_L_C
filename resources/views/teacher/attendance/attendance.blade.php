@@ -375,7 +375,7 @@
         @endif
     </div>
 
-    @if($receptionStudents->isNotEmpty())
+    @if(($receptionStudents ?? collect())->isNotEmpty())
         <div class="card">
             <div class="card-header">Reception testlari</div>
             <div class="table-responsive">
@@ -390,7 +390,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach($receptionStudents as $prospect)
+                    @foreach(($receptionStudents ?? collect()) as $prospect)
                         <tr>
                             <td>{{ $prospect->name }}</td>
                             <td>{{ $prospect->levelLabel() }}</td>

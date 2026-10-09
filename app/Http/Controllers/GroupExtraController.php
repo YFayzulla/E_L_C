@@ -145,6 +145,7 @@ class GroupExtraController extends Controller
                 'date' => $serviceData['date'],
                 'lessonDays' => $serviceData['lessonDays'],
                 'attendances' => $serviceData['attendances'],
+                'receptionStudents' => $serviceData['receptionStudents'] ?? collect(),
                 'group' => $serviceData['group'],
                 'students' => $serviceData['students'],
                 'studentNames' => $serviceData['studentNames'],

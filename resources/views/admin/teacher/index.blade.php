@@ -40,7 +40,7 @@
                         <th>Guruhlar</th>
                         <th class="text-center">Talabalar</th>
                         <th class="text-center">Ulush</th>
-                        <th class="text-end">Oylik</th>
+                        <th class="text-end text-nowrap">Oylik</th>
                         <th class="text-end">Amallar</th>
                     </tr>
                     </thead>
@@ -85,7 +85,7 @@
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
-                            <td class="text-end fw-semibold">
+                            <td class="text-end fw-semibold text-nowrap">
                                 @if($payroll)
                                     {{ number_format($payroll['salary'], 0, '.', ' ') }} so‘m
                                 @else

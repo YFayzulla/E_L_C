@@ -136,23 +136,9 @@ class GroupExtraController extends Controller
             $serviceData = $this->serviceAttendance->attendance($id);
 
             // Return the TEACHER view instead of the admin view
-            return view('teacher.attendance.attendance', [
+            return view('teacher.attendance.attendance', array_merge($serviceData, [
                 'id' => $id,
-                'today' => $serviceData['today'],
-                'data' => $serviceData['data'],
-                'year' => $serviceData['year'],
-                'month' => $serviceData['month'],
-                'date' => $serviceData['date'],
-                'lessonDays' => $serviceData['lessonDays'],
-                'attendances' => $serviceData['attendances'],
-                'receptionStudents' => $serviceData['receptionStudents'] ?? collect(),
-                'group' => $serviceData['group'],
-                'students' => $serviceData['students'],
-                'studentNames' => $serviceData['studentNames'],
-                'absentCount' => $serviceData['absentCount'],
-                'lateCount' => $serviceData['lateCount'],
-                'rate' => $serviceData['rate'],
-            ]);
+            ]));
 
         } catch (\Exception $e) {
             Log::error('GroupExtraController@attendance error: ' . $e->getMessage());

@@ -67,7 +67,101 @@
                 <p class="mb-0">Tanlangan davrda kelmagan yoki kechikkan talaba topilmadi.</p>
             </div>
         @else
-            <div class="table-responsive">
+            <div class="d-xl-none">
+                @foreach($records as $record)
+                    @php
+                        $latest = $record->latestFollowUp;
+                        $studentPhone = $record->user?->phone;
+                        $parentPhone = $record->user?->parents_tel;
+                        $contactName = $record->user?->parents_name ?: 'Ota-ona';
+                    @endphp
+                    <article class="border-bottom p-3">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div class="min-w-0">
+                                <div class="fw-semibold">{{ $record->user?->name ?? '—' }}</div>
+                                <div class="small text-muted">{{ $record->created_at?->format('d.m.Y H:i') ?? '—' }}</div>
+                            </div>
+                            @if((int) $record->status === 2)
+                                <span class="badge bg-label-warning">Kechikdi</span>
+                            @else
+                                <span class="badge bg-label-danger">Kelmadi</span>
+                            @endif
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="small text-muted">Guruh / dars</div>
+                            <div>{{ $record->group?->name ?? '—' }} · {{ $record->lesson?->name ?? '—' }}</div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="small text-muted">Sabab</div>
+                            <div class="text-wrap">{{ filled($record->reason) ? $record->reason : 'Sabab kiritilmagan' }}</div>
+                            @if($record->reasonWriter || $record->reason_written_at)
+                                <small class="text-muted">
+                                    Sababni {{ $record->reasonWriter?->name ?? '—' }} yozgan
+                                    @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif
+                                </small>
+                            @endif
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="small text-muted">Telefonlar</div>
+                            <div>{{ $record->user?->name ?? 'O‘quvchi' }}:
+                                @if($studentPhone)
+                                    <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $studentPhone) }}">{{ $studentPhone }}</a>
+                                @else
+                                    —
+                                @endif
+                            </div>
+                            <div>{{ $contactName }}:
+                                @if($parentPhone)
+                                    <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $parentPhone) }}">{{ $parentPhone }}</a>
+                                @else
+                                    —
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="small text-muted">Davomatni belgilagan</div>
+                            <div>{{ $record->teacher?->name ?? '—' }}</div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="small text-muted">Ota-ona bilan aloqa</div>
+                            @if($latest)
+                                <span class="badge bg-label-{{ $latest->statusTone() }}">{{ $latest->statusLabel() }}</span>
+                                @if(filled($latest->contact_person))
+                                    <div>Gaplashilgan: {{ $latest->contact_person }}</div>
+                                @endif
+                                <div class="small text-muted">
+                                    {{ $latest->contacted_at?->format('d.m.Y H:i') ?? 'Vaqt ko‘rsatilmagan' }}
+                                    @if($latest->next_follow_up_at)
+                                        · Qayta: {{ $latest->next_follow_up_at->format('d.m.Y H:i') }}
+                                    @endif
+                                </div>
+                                @if(filled($latest->note))
+                                    <div class="mt-1 text-wrap">Izoh: {{ $latest->note }}</div>
+                                @endif
+                                <small class="text-muted">Yozgan: {{ $latest->recorder?->name ?? '—' }}</small>
+                            @else
+                                <span class="badge bg-label-secondary">Kutilmoqda</span>
+                            @endif
+                        </div>
+
+                        @unless($latest)
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal" data-bs-target="#followUp{{ $record->id }}">
+                                    <i class="bx bx-phone-call me-1"></i> Yozish
+                                </button>
+                            </div>
+                        @endunless
+                    </article>
+                @endforeach
+            </div>
+
+            <div class="d-none d-xl-block table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
                     <tr>
@@ -75,6 +169,7 @@
                         <th>Talaba</th>
                         <th>Telefonlar</th>
                         <th>Guruh</th>
+                        <th>Davomatni belgilagan</th>
                         <th>Sabab</th>
                         <th>Aloqa</th>
                         <th class="text-end">Amal</th>
@@ -114,11 +209,15 @@
                                 </div>
                             </td>
                             <td><span class="badge bg-label-info">{{ $record->group?->name ?? '—' }}</span></td>
+                            <td>{{ $record->teacher?->name ?? '—' }}</td>
                             <td>
                                 @if(filled($record->reason))
                                     <div>{{ $record->reason }}</div>
-                                    @if($record->reasonWriter)
-                                        <small class="text-muted">{{ $record->reasonWriter->name }}</small>
+                                    @if($record->reasonWriter || $record->reason_written_at)
+                                        <small class="text-muted">
+                                            {{ $record->reasonWriter?->name ?? '—' }}
+                                            @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif
+                                        </small>
                                     @endif
                                 @else
                                     <span class="text-muted">—</span>
@@ -130,8 +229,14 @@
                                     <div class="text-muted" style="font-size: .78rem;">
                                         {{ $latest->contacted_at?->format('d.m.Y H:i') ?? '—' }}
                                     </div>
+                                    @if(filled($latest->contact_person))
+                                        <div class="small">Gaplashilgan: {{ $latest->contact_person }}</div>
+                                    @endif
                                     @if(filled($latest->note))
                                         <div class="mt-2 text-wrap"><span class="fw-semibold">Izoh:</span> {{ $latest->note }}</div>
+                                    @endif
+                                    @if($latest->next_follow_up_at)
+                                        <small class="text-muted">Qayta: {{ $latest->next_follow_up_at->format('d.m.Y H:i') }}</small>
                                     @endif
                                     @if($latest->recorder)
                                         <small class="text-muted">{{ $latest->recorder->name }}</small>

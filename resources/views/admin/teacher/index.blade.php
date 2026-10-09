@@ -36,7 +36,6 @@
                     <tr>
                         <th style="width: 3rem;">#</th>
                         <th>Xodim</th>
-                        <th>Turi</th>
                         <th>Telefon</th>
                         <th>Guruhlar</th>
                         <th class="text-center">Talabalar</th>
@@ -49,12 +48,6 @@
                     @foreach($teachers as $teacher)
                         @php
                             $payroll = $payrollData[$teacher->id] ?? null;
-                            $roleMeta = match (true) {
-                                $teacher->hasRole('reception') => ['Reception', 'success', 'bx-user-plus'],
-                                $teacher->hasRole('assistant') => ['Assistant', 'info', 'bx-check-square'],
-                                $teacher->hasRole('support') => ['Support', 'secondary', 'bx-support'],
-                                default => ['O‘qituvchi', 'primary', 'bx-chalkboard'],
-                            };
                         @endphp
                         <tr>
                             <td class="text-muted">{{ $loop->iteration }}</td>
@@ -69,11 +62,6 @@
                                         @endif
                                     </div>
                                 </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-label-{{ $roleMeta[1] }}">
-                                    <i class="bx {{ $roleMeta[2] }} me-1"></i>{{ $roleMeta[0] }}
-                                </span>
                             </td>
                             <td dir="ltr">+{{ $teacher->phone }}</td>
                             <td>

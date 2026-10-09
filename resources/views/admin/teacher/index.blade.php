@@ -41,12 +41,14 @@
                         <th>Guruhlar</th>
                         <th class="text-center">Talabalar</th>
                         <th class="text-center">Ulush</th>
+                        <th class="text-end">Oylik</th>
                         <th class="text-end">Amallar</th>
                     </tr>
                     </thead>
                     <tbody id="myTable">
                     @foreach($teachers as $teacher)
                         @php
+                            $payroll = $payrollData[$teacher->id] ?? null;
                             $roleMeta = match (true) {
                                 $teacher->hasRole('reception') => ['Reception', 'success', 'bx-user-plus'],
                                 $teacher->hasRole('assistant') => ['Assistant', 'info', 'bx-check-square'],
@@ -89,8 +91,15 @@
                                 <span class="badge bg-label-warning">{{ $studentCounts[$teacher->id] ?? 0 }}</span>
                             </td>
                             <td class="text-center">
-                                @if($teacher->percent !== null && $teacher->percent !== '')
-                                    <span class="badge bg-label-info">{{ $teacher->percent }}%</span>
+                                @if($payroll)
+                                    <span class="badge bg-label-info">{{ $payroll['percent'] }}%</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="text-end fw-semibold">
+                                @if($payroll)
+                                    {{ number_format($payroll['salary'], 0, '.', ' ') }} so‘m
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif

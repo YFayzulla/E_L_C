@@ -10,6 +10,7 @@ use App\Models\GroupTeacher;
 use App\Models\LessonAndHistory;
 use App\Models\User;
 use App\Services\CentreMembershipService;
+use App\Tenancy\TenantQuery;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
@@ -39,15 +40,16 @@ class TeacherController extends Controller
     {
         try {
             $teachers = User::role(self::STAFF_ROLES)
-                ->with('teacherGroups:id,name')
+                ->with(['teacherGroups:id,name', 'roles'])
                 ->withCount(['teacherGroups as groups_count'])
                 ->orderBy('name')
                 ->get();
 
             // Bitta guruhlangan so'rov - qator boshiga teacherHasStudents() chaqirmaymiz.
             $studentCounts = $this->studentCountsByTeacher($teachers->pluck('id')->all());
+            $payrollData = $this->payrollData($teachers);
 
-            return view('admin.teacher.index', compact('teachers', 'studentCounts'));
+            return view('admin.teacher.index', compact('teachers', 'studentCounts', 'payrollData'));
         } catch (\Exception $e) {
             Log::error('TeacherController@index error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'qituvchilar ro\'yxatini yuklashda xatolik.');
@@ -503,5 +505,53 @@ class TeacherController extends Controller
             ->selectRaw('group_teachers.teacher_id as teacher_id, COUNT(DISTINCT group_user.user_id) as students_total')
             ->pluck('students_total', 'teacher_id')
             ->all();
+    }
+
+    /** Monthly salary and centre-specific share, aggregated for the full list. */
+    private function payrollData($teachers): array
+    {
+        $payableTeachers = $teachers->filter(fn (User $teacher) =>
+            $teacher->hasRole('user') || $teacher->hasRole('support')
+        );
+        $teacherIds = $payableTeachers->pluck('id')->all();
+        $grossByTeacher = collect();
+
+        if ($teacherIds !== []) {
+            $grossByTeacher = TenantQuery::table('group_teachers')
+                ->leftJoin('group_user', function ($join) {
+                    $join->on('group_user.group_id', '=', 'group_teachers.group_id');
+                    TenantQuery::constrain($join, 'group_user');
+                })
+                ->whereIn('group_teachers.teacher_id', $teacherIds)
+                ->select('group_teachers.teacher_id')
+                ->selectRaw('COALESCE(SUM(group_user.payment), 0) as gross')
+                ->groupBy('group_teachers.teacher_id')
+                ->get()
+                ->keyBy('teacher_id');
+        }
+
+        $centreId = Centre::currentId();
+        $centrePercentages = $centreId !== null && $teacherIds !== []
+            ? DB::table('centre_user')
+                ->where('centre_id', $centreId)
+                ->where('status', Centre::MEMBER_ACTIVE)
+                ->whereIn('user_id', $teacherIds)
+                ->pluck('percent', 'user_id')
+            : collect();
+
+        return $teachers->mapWithKeys(function (User $teacher) use ($grossByTeacher, $centrePercentages) {
+            if (! $teacher->hasRole('user') && ! $teacher->hasRole('support')) {
+                return [$teacher->id => null];
+            }
+
+            $membershipPercent = $centrePercentages->get($teacher->id);
+            $percent = $membershipPercent !== null ? (int) $membershipPercent : (int) $teacher->percent;
+            $gross = (int) ($grossByTeacher->get($teacher->id)->gross ?? 0);
+
+            return [$teacher->id => [
+                'percent' => $percent,
+                'salary' => (int) round($gross * $percent / 100),
+            ]];
+        })->all();
     }
 }

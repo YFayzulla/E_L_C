@@ -377,7 +377,7 @@
 
     @if(($receptionStudents ?? collect())->isNotEmpty())
         <div class="card">
-            <div class="card-header">Reception testlari</div>
+            <div class="card-header">Reception tavsiyalari — guruhga olinmaganlar</div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
@@ -386,7 +386,7 @@
                         <th>Daraja</th>
                         <th>Natija</th>
                         <th>Test sanasi</th>
-                        <th class="text-end">Rasm</th>
+                        <th class="text-end">Amal</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -396,10 +396,16 @@
                             <td>{{ $prospect->levelLabel() }}</td>
                             <td>{{ $prospect->score ?: '—' }}</td>
                             <td>{{ $prospect->test_taken_at?->format('d.m.Y') ?? '—' }}</td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"
-                                   href="{{ route('reception.students.test-image', $prospect->id) }}" title="Test rasmini ko‘rish">
-                                    <i class="bx bx-image"></i>
+                            <td class="text-end text-nowrap">
+                                @if($prospect->test_image_path)
+                                    <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"
+                                       href="{{ route('reception.students.test-image', $prospect->id) }}" title="Test faylini ko‘rish">
+                                        <i class="bx bx-file"></i>
+                                    </a>
+                                @endif
+                                <a class="btn btn-sm btn-primary" href="{{ route('reception.students.enroll', $prospect->id) }}"
+                                   title="Guruhga olish">
+                                    <i class="bx bx-user-check"></i>
                                 </a>
                             </td>
                         </tr>

@@ -22,7 +22,12 @@
                     <div>
                         <div class="stat-label">Talabalar</div>
                         <div class="stat-value">{{ $number_of_students }}</div>
-                        <small class="text-muted">Jami faol</small>
+                        <small class="text-muted">
+                            Guruhda o‘qiyotgan
+                            @if($number_of_waiting > 0)
+                                · <a href="{{ route('waiters.index') }}">{{ $number_of_waiting }} kutmoqda</a>
+                            @endif
+                        </small>
                     </div>
                     <span class="stat-icon"><i class="bx bx-user-voice"></i></span>
                 </div>
@@ -440,7 +445,12 @@
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Guruhlarim</span>
-                    <a href="{{ route('teacher.groups') }}" class="btn btn-sm btn-outline-secondary">Barchasi</a>
+                    <div class="d-flex gap-1">
+                        <a href="{{ route('teacher.students.create') }}" class="btn btn-sm btn-primary">
+                            <i class="bx bx-user-plus me-1"></i> Talaba qo‘shish
+                        </a>
+                        <a href="{{ route('teacher.groups') }}" class="btn btn-sm btn-outline-secondary">Barchasi</a>
+                    </div>
                 </div>
                 @if($groups->isEmpty())
                     <div class="empty-state">

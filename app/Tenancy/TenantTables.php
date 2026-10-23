@@ -23,7 +23,7 @@ final class TenantTables
     public const WEAKLY_LINKED = [
         'lesson_and_histories', 'history_payments', 'student_information',
         'assessments', 'dept_students', 'active_students', 'certificates',
-        'reception_students',
+        'reception_students', 'staff_notifications',
     ];
 
     /**

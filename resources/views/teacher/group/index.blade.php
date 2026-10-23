@@ -2,6 +2,15 @@
 @section('content')
 
 <div class="container mt-4">
+    <div class="d-flex justify-content-end gap-2 mb-3 flex-wrap">
+        <a href="{{ route('teacher.reception.index') }}" class="btn btn-outline-primary">
+            <i class="bx bx-user-check me-1"></i> Reception’dan olish
+        </a>
+        <a href="{{ route('teacher.students.create') }}" class="btn btn-primary">
+            <i class="bx bx-user-plus me-1"></i> Talaba qo‘shish
+        </a>
+    </div>
+
     <div class="accordion" id="groupsAccordion">
         @forelse($groups as $groupTeacher)
             <div class="accordion-item">
@@ -13,6 +22,12 @@
                 </h2>
                 <div id="collapse{{ $groupTeacher->group->id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $groupTeacher->group->id }}" data-bs-parent="#groupsAccordion">
                     <div class="accordion-body">
+                        <div class="d-flex justify-content-end mb-2">
+                            <a href="{{ route('teacher.students.create', ['group' => $groupTeacher->group->id]) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bx bx-user-plus me-1"></i> Shu guruhga talaba qo‘shish
+                            </a>
+                        </div>
                         @if($groupTeacher->group->students->isNotEmpty())
                             <ul class="list-group">
                                 @foreach($groupTeacher->group->students as $student)

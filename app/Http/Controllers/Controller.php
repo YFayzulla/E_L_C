@@ -60,8 +60,14 @@ class Controller extends BaseController
                 $teachers = User::role('user') // Changed from 'user' to 'teacher'
                 ->get();
 
-                // get()->count() emas, to'g'ridan-to'g'ri count() ishlatamiz
-                $numberOfStudents = User::role('student')->count();
+                // Talabalar va To'lovlar sahifalari bilan bir xil sanoq:
+                // Kutish zalidagilar va bitirganlar "faol talaba" emas.
+                $numberOfStudents = User::role('student')->billable()->count();
+                $waitingStudents = User::role('student')
+                    ->where(fn($q) => $q->whereNull('users.study_status')->orWhere('users.study_status', User::STUDY_ACTIVE))
+                    // Haqiqiy guruhi yo'qlar: faqat Kutish zalida yoki umuman guruhsiz.
+                    ->whereDoesntHave('groups', fn($g) => $g->teaching())
+                    ->count();
 
                 $dailyIncome = HistoryPayments::whereDate('created_at', $today)->sum('payment');
 
@@ -70,6 +76,7 @@ class Controller extends BaseController
                     ->get();
 
                 $debtorStudents = User::role('student')
+                    ->billable()
                     ->where('status', '<', 0)
                     ->select('id', 'name', 'status') // Kerakli ustunlar
                     ->get();
@@ -83,6 +90,7 @@ class Controller extends BaseController
                 return view('dashboard', array_merge([
                     'teachers' => $teachers,
                     'number_of_students' => $numberOfStudents,
+                    'number_of_waiting' => $waitingStudents,
                     'number_of_parents' => User::role('parent')->count(),
                     'daily_income' => $dailyIncome,
                     'daily_transactions' => $dailyTransactions,
@@ -221,8 +229,13 @@ class Controller extends BaseController
             ->get(['id', 'name', 'photo', 'percent']);
         $teacherIds = $teacherRows->pluck('id')->all();
 
+        // Kutish zali o'quv guruhi emas: unga biriktirilgan o'qituvchining
+        // talabalar soni va oyligiga kirmasligi kerak.
+        $waitingRoomId = Group::waitingRoomId();
+
         $teacherGroups = TenantQuery::table('group_teachers')
             ->whereIn('teacher_id', $teacherIds ?: [0])
+            ->when($waitingRoomId, fn($q) => $q->where('group_id', '!=', $waitingRoomId))
             ->get(['teacher_id', 'group_id'])
             ->groupBy('teacher_id');
 
@@ -232,6 +245,7 @@ class Controller extends BaseController
                 TenantQuery::constrain($join, 'group_user');
             })
             ->whereIn('group_teachers.teacher_id', $teacherIds ?: [0])
+            ->when($waitingRoomId, fn($q) => $q->where('group_teachers.group_id', '!=', $waitingRoomId))
             ->select('group_teachers.teacher_id')
             ->selectRaw('COUNT(DISTINCT group_teachers.group_id) as groups_count')
             ->selectRaw('COUNT(DISTINCT group_user.user_id) as students_count')

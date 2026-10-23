@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Validation for moving a student between groups.
@@ -48,7 +49,10 @@ class StudentTransferRequest extends FormRequest
         return [
             'group_id' => 'required|array|min:1',
             'group_id.*' => 'required|integer|exists:groups,id',
-            'group_payment' => 'nullable|array',
+            // Summani faqat admin yozadi. O'qituvchining formasida bu maydon
+            // yo'q; qo'lda qo'shib yuborilsa — jimgina e'tiborsiz qoldirilmaydi,
+            // rad etiladi.
+            'group_payment' => [Rule::prohibitedIf(fn () => ! $this->user()?->hasRole('admin')), 'nullable', 'array'],
             'group_payment.*' => 'nullable|numeric|min:0',
         ];
     }
@@ -66,6 +70,7 @@ class StudentTransferRequest extends FormRequest
             'group_id.*.integer' => 'Guruh identifikatori noto‘g‘ri.',
             'group_id.*.exists' => 'Tanlangan guruhlardan biri mavjud emas.',
             'group_payment.array' => 'To‘lov ma’lumotlari noto‘g‘ri yuborildi.',
+            'group_payment.prohibited' => 'Oylik to‘lovni faqat administrator belgilaydi.',
             'group_payment.*.numeric' => 'Oylik to‘lov raqam bo‘lishi kerak.',
             'group_payment.*.min' => 'Oylik to‘lov manfiy bo‘lishi mumkin emas.',
         ];

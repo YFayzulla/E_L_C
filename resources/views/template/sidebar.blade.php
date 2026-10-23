@@ -205,12 +205,21 @@
         {{-- "Mening guruhlarim" olib tashlandi: Davomat, Oylik test va
              Ko'nikmalar bo'limlarining har biri baribir guruh tanlashdan
              boshlanadi, ya'ni u takroriy qadam edi. Marshrutning o'zi
-             (teacher.groups) joyida qoldi — unga havolalar bor. --}}
+             (teacher.groups) joyida qoldi — unga havolalar bor. Endi u
+             "Talabalarim" sifatida qaytdi: talaba qo'shish va reception'dan
+             olish shu sahifadan boshlanadi. --}}
 
         <li class="menu-item {{ $isActive('attendance', 'attendance.check', 'group.attendance') }}">
             <a href="{{ route('attendance') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-calendar-check"></i>
                 <div>Davomat</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('teacher.groups', 'teacher.students.create', 'teacher.reception.index', 'reception.students.enroll') }}">
+            <a href="{{ route('teacher.groups') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-plus"></i>
+                <div>Talabalarim</div>
             </a>
         </li>
 

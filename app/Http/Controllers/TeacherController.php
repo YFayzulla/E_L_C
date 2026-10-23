@@ -95,8 +95,23 @@ class TeacherController extends Controller
                 fn($link) => [(int) $link->group_id => $link->group->name]
             );
 
+            // "Guruhga talaba qo'shish" formasi uchun. Kutish zalidagilar
+            // tepada — odatda aynan ular guruhga joylanadi.
+            $waitingRoomId = (int) Group::waitingRoomId();
+            $candidateStudents = $groupLinks->isEmpty()
+                ? collect()
+                : User::role('student')
+                    ->inCurrentCentre()
+                    ->where(fn($q) => $q->whereNull('study_status')->orWhere('study_status', User::STUDY_ACTIVE))
+                    ->with('groups:id,name')
+                    ->orderBy('name')
+                    ->get(['users.id', 'users.name', 'users.phone'])
+                    ->sortBy(fn($s) => $s->groups->reject(fn($g) => (int) $g->id === $waitingRoomId)->isEmpty() ? 0 : 1)
+                    ->values();
+
             return view('admin.teacher.show', [
                 'teacher' => $teacher,
+                'candidateStudents' => $candidateStudents,
                 'groupLinks' => $groupLinks,
                 'availableGroups' => $availableGroups,
                 'recentLessons' => $recentLessons,

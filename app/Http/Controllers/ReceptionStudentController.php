@@ -83,7 +83,7 @@ class ReceptionStudentController extends Controller
         try {
             $imagePath = $request->file('test_image')?->store(TenantStorage::path('reception-tests'), 'local');
             if ($request->hasFile('test_image') && ! $imagePath) {
-                return redirect()->back()->withInput()->with('error', 'Test rasmini saqlab bo‘lmadi.');
+                return redirect()->back()->withInput()->with('error', 'Test faylini saqlab bo‘lmadi.');
             }
             $data['test_image_path'] = $imagePath;
             ReceptionStudent::create($data);
@@ -120,7 +120,7 @@ class ReceptionStudentController extends Controller
         try {
             $newImagePath = $request->file('test_image')?->store(TenantStorage::path('reception-tests'), 'local');
             if ($request->hasFile('test_image') && ! $newImagePath) {
-                return redirect()->back()->withInput()->with('error', 'Test rasmini saqlab bo‘lmadi.');
+                return redirect()->back()->withInput()->with('error', 'Test faylini saqlab bo‘lmadi.');
             }
             if ($newImagePath) {
                 $data['test_image_path'] = $newImagePath;
@@ -160,7 +160,13 @@ class ReceptionStudentController extends Controller
                 ->whereHas('teachers', fn (Builder $q) => $q->where('users.id', $viewer->id))
                 ->exists();
 
-        abort_unless($isOfficeStaff || $isAssignedTeacher, 403);
+        // Tavsiyasiz yozuv har bir o'qituvchining "Reception'dan olish"
+        // ro'yxatida turadi — guruhga olishdan oldin testini ko'ra olishi kerak.
+        $isClaimableByTeacher = $viewer->hasRole('user')
+            && $student->recommended_group_id === null
+            && $student->canEnroll();
+
+        abort_unless($isOfficeStaff || $isAssignedTeacher || $isClaimableByTeacher, 403);
         abort_unless(Storage::disk('local')->exists($student->test_image_path), 404);
 
         return response()->file(Storage::disk('local')->path($student->test_image_path), [
@@ -182,7 +188,9 @@ class ReceptionStudentController extends Controller
             'test_taken_at'        => ['nullable', 'date'],
             'test_type'            => ['nullable', 'string', 'max:100'],
             'score'                => ['nullable', 'string', 'max:100'],
-            'test_image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            // Rasm yoki PDF: ko'p sahifali testni skaner qilganlar bitta PDF
+            // qilib yuklaydi. `image` qoidasi PDF'ni rad etardi.
+            'test_image'           => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
             'level'                => ['nullable', Rule::in(array_keys(ReceptionStudent::levels()))],
             'recommended_group_id' => [
                 'nullable',
@@ -194,9 +202,9 @@ class ReceptionStudentController extends Controller
         ], [
             'name.required' => 'Ism familiyani kiriting.',
             'status.required' => 'Holatni tanlang.',
-            'test_image.image' => 'Test rasmi rasm fayli bo‘lishi kerak.',
-            'test_image.mimes' => 'Test rasmi JPG, PNG yoki WEBP bo‘lishi kerak.',
-            'test_image.max' => 'Test rasmi 5 MB dan oshmasligi kerak.',
+            'test_image.file' => 'Test faylini yuklab bo‘lmadi.',
+            'test_image.mimes' => 'Test fayli JPG, PNG, WEBP yoki PDF bo‘lishi kerak.',
+            'test_image.max' => 'Test fayli 10 MB dan oshmasligi kerak.',
         ]);
     }
 

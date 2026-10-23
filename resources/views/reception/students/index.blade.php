@@ -105,14 +105,33 @@
                                     @endif
                                 </div>
                                 @if($item->test_image_path)
-                                    <a href="{{ route('reception.students.test-image', $item->id) }}" target="_blank" rel="noopener" class="small">Test rasmi</a>
+                                    <a href="{{ route('reception.students.test-image', $item->id) }}" target="_blank" rel="noopener" class="small">Test fayli</a>
                                 @endif
                             </td>
                             <td><span class="badge bg-label-info">{{ $item->levelLabel() }}</span></td>
                             <td>{{ $item->recommendedGroup?->name ?? '—' }}</td>
-                            <td><span class="badge bg-label-{{ $item->statusTone() }}">{{ $item->statusLabel() }}</span></td>
+                            <td>
+                                <span class="badge bg-label-{{ $item->statusTone() }}">{{ $item->statusLabel() }}</span>
+                                @if($item->isEnrolled())
+                                    <div class="text-success" style="font-size: .75rem;">
+                                        <i class="bx bx-check"></i> Talaba hisobi ochilgan
+                                    </div>
+                                @endif
+                            </td>
                             <td>
                                 <div class="d-flex justify-content-end gap-1">
+                                    @if($item->canEnroll())
+                                        <a href="{{ route('reception.students.enroll', $item->id) }}"
+                                           class="btn btn-sm btn-primary" title="Talaba hisobini ochib, guruhga yozish">
+                                            <i class="bx bx-user-check"></i>
+                                            <span class="d-none d-xl-inline ms-1">Guruhga yozish</span>
+                                        </a>
+                                    @elseif($item->isEnrolled() && auth()->user()->hasRole('admin'))
+                                        <a href="{{ route('student.show', $item->student_id) }}"
+                                           class="btn btn-sm btn-outline-success" title="Talaba sahifasi">
+                                            <i class="bx bx-user"></i>
+                                        </a>
+                                    @endif
                                     <a href="{{ route('reception.students.edit', $item->id) }}"
                                        class="btn btn-sm btn-outline-secondary" title="Tahrirlash">
                                         <i class="bx bx-edit-alt"></i>

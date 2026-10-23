@@ -51,7 +51,9 @@ class StoreRequest extends FormRequest
             'description' => 'nullable|string',
             'group_id' => ['required', 'array', 'min:1'],
             'group_id.*' => ['required', 'integer', Rule::exists('groups', 'id')->where('centre_id', Centre::currentId())],
-            'group_payment' => 'nullable|array',
+            // O'qituvchi ham shu formadan talaba qo'shadi, lekin summa yubora
+            // olmaydi — hisob-kitob adminda.
+            'group_payment' => [Rule::prohibitedIf(fn () => ! $this->user()?->hasRole('admin')), 'nullable', 'array'],
             'group_payment.*' => 'nullable|numeric|min:0',
         ];
     }
@@ -80,6 +82,7 @@ class StoreRequest extends FormRequest
             'email.email' => 'Pochta manzili noto‘g‘ri kiritilgan.',
             'email.max' => 'Pochta manzili 191 belgidan oshmasligi kerak.',
             'email.unique' => 'Bu pochta manzili boshqa hisobga biriktirilgan.',
+            'group_payment.prohibited' => 'Oylik to‘lovni faqat administrator belgilaydi.',
         ];
     }
 

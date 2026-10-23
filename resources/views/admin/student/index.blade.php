@@ -7,8 +7,21 @@
             use Illuminate\Support\Carbon;
         @endphp
 
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <h5 class="mb-0">Students</h5>
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0">Talabalar <span class="badge bg-label-primary ms-1">{{ $students->count() }}</span></h5>
+                @if(! $showAll && $hidden > 0)
+                    <small class="text-muted">
+                        {{ $hidden }} ta talaba ko‘rsatilmadi — kutish zalida yoki bitirgan.
+                        <a href="{{ route('student.index', ['all' => 1]) }}">Hammasini ko‘rsatish</a>
+                    </small>
+                @elseif($showAll)
+                    <small class="text-muted">
+                        Kutish zalidagilar va bitirganlar ham ko‘rsatilmoqda.
+                        <a href="{{ route('student.index') }}">Faqat faol talabalar</a>
+                    </small>
+                @endif
+            </div>
             <div class="dt-action-buttons text-end pt-3 pt-md-0">
                 <div class="dt-buttons btn-group flex-wrap">
                     @role('admin')
@@ -37,45 +50,54 @@
             </div>
         </div>
 
-        <div class="table-responsive text-nowrap">
-            <table class="table">
+        {{-- Ustunlar tor ekranda yashiriladi: "Amal" ustuni doim ko'rinib
+             turishi va jadval yonga surilmasligi kerak. --}}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                 <tr>
-                    <th>id</th>
-                    <th>name</th>
-                    <th>tel</th>
-                    <th>Parents tel</th>
-                    <th>group</th>
-                    <th class="text-center">action</th>
+                    <th class="d-none d-sm-table-cell" style="width: 1%;">#</th>
+                    <th>Ism</th>
+                    <th class="d-none d-md-table-cell">Telefon</th>
+                    <th class="d-none d-xl-table-cell">Ota-ona tel.</th>
+                    <th class="d-none d-sm-table-cell">Guruh</th>
+                    <th class="text-end" style="width: 1%;">Amal</th>
                 </tr>
                 </thead>
                 <tbody id="myTable" class="table-border-bottom-0">
                 @forelse($students as $student)
                     <tr>
-                        <th>{{$loop->index+1}}</th>
-                        <th><x-avatar :user="$student" label /></th>
-                        <th>+{{$student->phone}}</th>
-                        <th>{{$student->parents_tel}}</th>
-                        <th>{{$student->studentsGroup()}}</th>
-                        <th class="d-flex">
-                            <a href="{{route('student.edit',$student->id)}}" class="btn-outline-warning btn m-1">
-                                <i class='bx bx-edit-alt'></i>
-                            </a>
-                            <a class="btn btn-outline-primary m-1" href="{{ route('student.show',$student->id) }}"><i
-                                        class="bx bx-show-alt"></i></a>
-                            <form action="{{route('student.destroy',$student->id)}}" method="post"
-                                  onsubmit="return confirm('are you sure for deleting ');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="" class="btn-outline-danger btn m-1">
-                                    <i class='bx bx-trash-alt'></i>
-                                </button>
-                            </form>
-                        </th>
+                        <td class="d-none d-sm-table-cell text-muted">{{ $loop->iteration }}</td>
+                        {{-- max-width:0 + width:100%: uzun ism kesiladi (…), jadvalni kengaytirmaydi. --}}
+                        <td style="max-width: 0; width: 100%;"><x-avatar :user="$student" label /></td>
+                        <td class="d-none d-md-table-cell text-nowrap" dir="ltr">+{{ $student->phone }}</td>
+                        <td class="d-none d-xl-table-cell text-nowrap" dir="ltr">{{ $student->parents_tel }}</td>
+                        <td class="d-none d-sm-table-cell" style="font-size: .85rem;">{{ $student->studentsGroup() }}</td>
+                        <td class="text-end ps-1">
+                            <div class="d-inline-flex flex-nowrap gap-1">
+                                <a href="{{ route('student.show', $student->id) }}" class="btn btn-sm btn-outline-primary px-2"
+                                   title="Ko‘rish" aria-label="Ko‘rish">
+                                    <i class="bx bx-show-alt"></i>
+                                </a>
+                                <a href="{{ route('student.edit', $student->id) }}" class="btn btn-sm btn-outline-warning px-2"
+                                   title="Tahrirlash" aria-label="Tahrirlash">
+                                    <i class="bx bx-edit-alt"></i>
+                                </a>
+                                <form action="{{ route('student.destroy', $student->id) }}" method="post" class="m-0"
+                                      onsubmit="return confirm({{ \Illuminate\Support\Js::from($student->name . ' o‘chirilsinmi?') }});">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger px-2"
+                                            title="O‘chirish" aria-label="O‘chirish">
+                                        <i class="bx bx-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">No students found.</td>
+                        <td colspan="6" class="text-center text-muted py-4">Talaba topilmadi.</td>
                     </tr>
                 @endforelse
                 </tbody>

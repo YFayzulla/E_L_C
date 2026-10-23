@@ -15,6 +15,9 @@ use App\Models\User;
 use App\Services\CentreMembershipService;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
+use App\Services\StaffNotificationService;
+use App\Services\StudentEnrollmentService;
+use App\Models\StaffNotification;
 use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +30,11 @@ class StudentController extends Controller
 {
     use AuthorizesGroupAccess;
 
-    public function __construct(private ParentAccountService $parents)
-    {
+    public function __construct(
+        private ParentAccountService $parents,
+        private StudentEnrollmentService $enrollment,
+        private StaffNotificationService $notifications
+    ) {
     }
 
     /**
@@ -37,12 +43,22 @@ class StudentController extends Controller
     public function index()
     {
         try {
+            // To'lovlar ro'yxati bilan bir xil qoida: Kutish zalidagilar va
+            // bitirganlar asosiy ro'yxatga va sanoqqa kirmaydi. ?all=1 bilan
+            // hammasi ko'rinadi.
+            $showAll = request()->boolean('all');
+
             $students = User::role('student')
                 ->with('groups')
+                ->when(! $showAll, fn($q) => $q->billable())
                 ->orderBy("name")
                 ->get();
 
-            return view('admin.student.index', compact('students'));
+            $hidden = $showAll
+                ? 0
+                : User::role('student')->count() - $students->count();
+
+            return view('admin.student.index', compact('students', 'showAll', 'hidden'));
         } catch (\Exception $e) {
             Log::error('StudentController@index error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talabalar ro\'yxatini yuklashda xatolik.');
@@ -55,8 +71,16 @@ class StudentController extends Controller
     public function create()
     {
         try {
-            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
-            return view('admin.student.create', compact('groups'));
+            $isAdmin = auth()->user()->hasRole('admin');
+
+            // O'qituvchi faqat o'z (faol) guruhlarini ko'radi.
+            $groups = $isAdmin
+                ? Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get()
+                : Group::whereIn('id', $this->accessibleGroupIds())->teaching()->active()->orderBy('name')->get();
+
+            $selectedGroupId = (int) request()->query('group');
+
+            return view('admin.student.create', compact('groups', 'isAdmin', 'selectedGroupId'));
         } catch (\Exception $e) {
             Log::error('StudentController@create error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Sahifani yuklashda xatolik.');
@@ -79,82 +103,56 @@ class StudentController extends Controller
             }
         }
 
-        DB::beginTransaction();
+        // O'qituvchi ham shu formadan foydalanadi (teacher.students.*), lekin
+        // faqat o'z guruhlariga yozadi va summani belgilamaydi — guruh narxi
+        // qo'yiladi, hisob-kitobni admin qiladi.
+        $isAdmin = auth()->user()->hasRole('admin');
+
+        if (! $isAdmin) {
+            $this->assertTeachesGroups(array_map('intval', (array) $request->group_id));
+        }
 
         try {
-            $user = User::create([
-                'name' => $request->name,
-                'password' => Hash::make($request->phone),
-                'date_born' => $request->birth_date,
-                'phone' => '998' . preg_replace('/[^0-9]/', '', $request->phone),
-                // Blank must be stored as NULL — `users.email` is uniquely indexed.
-                'email' => $request->email ?: null,
-                'parents_name' => $request->parents_name,
-                'parents_tel' => $request->parents_tel,
-                'location' => $request->location,
-                'photo' => $uploadedFilePath,
-                'description' => $request->description,
-            ]);
-
-            // attachToCurrent, assignRole emas: yalang'och assignRole rol
-            // beradi, lekin centre_user qatorini yozmaydi — talaba
-            // yaratiladi, ro'yxatda ko'rinadi, lekin KIRA OLMAYDI.
-            app(CentreMembershipService::class)->attachToCurrent($user, 'student');
-
-            $groupIds = $request->group_id; // This is now an array
-
-            // Build attach array with per-group payments (pivot `payment`).
-            $submittedPayments = $request->input('group_payment', []);
-            $groups = Group::whereIn('id', $groupIds)->get();
-            $attachData = [];
-            $sumPayments = 0;
-            foreach ($groups as $group) {
-                $raw = $submittedPayments[$group->id] ?? $group->monthly_payment;
-                $paymentValue = (int)str_replace([' ', ','], '', $raw);
-                $attachData[$group->id] = ['payment' => $paymentValue];
-                $sumPayments += $paymentValue;
-
-                StudentInformation::create([
-                    'user_id' => $user->id,
-                    'group_id' => $group->id,
-                    'group' => $group->name,
-                    'actor_id' => auth()->id(),
-                ]);
-            }
-
-            $user->groups()->attach($attachData);
-
-            // Set user's should_pay to the sum of group payments (role preserved but no UI input).
-            $user->should_pay = $sumPayments;
-            $user->save();
-
-            DeptStudent::create([
-                'user_id' => $user->id,
-                'payed' => 0,
-                'dept' => $sumPayments,
-                'status_month' => 0
-            ]);
-
-            // Guardian details create (or reuse) a parent account so the family
-            // can follow this student from the ota-ona portal.
-            // Ota / ona (va ixtiyoriy vasiy) hisoblari bir yo'la yaratiladi va
-            // parent_student.relation orqali bog'lanadi. Bu ham
-            // users.parents_name / parents_tel ustunlarini birlamchi vasiy
-            // bo'yicha yangilab qo'yadi.
-            $this->parents->syncGuardians($user, $this->guardianInput($request));
-
-            DB::commit();
+            $user = $this->enrollment->enroll(
+                [
+                    'name' => $request->name,
+                    'phone' => $request->phone,
+                    'date_born' => $request->birth_date,
+                    'email' => $request->email,
+                    'parents_name' => $request->parents_name,
+                    'parents_tel' => $request->parents_tel,
+                    'location' => $request->location,
+                    'photo' => $uploadedFilePath,
+                    'description' => $request->description,
+                ],
+                (array) $request->group_id,
+                $isAdmin ? (array) $request->input('group_payment', []) : [],
+                $this->guardianInput($request)
+            );
 
             // Mail is deliberately sent AFTER the commit: QUEUE_CONNECTION=sync and an
             // unreachable MAIL_HOST would otherwise throw inside the transaction and roll
             // the whole student back. A failed e-mail must never lose the record.
             $this->sendVerificationMail($user);
 
+            if (! $isAdmin) {
+                $groupNames = $user->groups()->pluck('groups.name')->implode(', ');
+
+                $this->notifications->notifyAdmins(
+                    StaffNotification::TYPE_STUDENT_ENROLLED,
+                    auth()->user()->name . ' yangi talaba qo‘shdi: ' . $user->name,
+                    "Guruh: {$groupNames}. Standart narx yozildi — oylik to‘lovni tekshiring.",
+                    route('student.edit', $user->id),
+                    ['student_id' => $user->id]
+                );
+
+                return redirect()->route('teacher.groups')
+                    ->with('success', 'Talaba guruhingizga qo‘shildi. Oylik to‘lovni administrator belgilaydi.');
+            }
+
             return redirect()->route('student.index')->with('success', 'Talaba muvaffaqiyatli qo\'shildi.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
             if ($uploadedFilePath && Storage::disk('public')->exists($uploadedFilePath)) {
                 Storage::disk('public')->delete($uploadedFilePath);
             }

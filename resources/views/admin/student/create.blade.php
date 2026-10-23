@@ -5,13 +5,20 @@
 
 @section('content')
 
+    @php
+        $backUrl = $isAdmin ? route('student.index') : route('teacher.groups');
+        $preselected = is_array(old('group_id'))
+            ? array_map('intval', old('group_id'))
+            : ($selectedGroupId ? [$selectedGroupId] : []);
+    @endphp
+
     <div class="page-head justify-content-end">
-        <a href="{{ route('student.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ $backUrl }}" class="btn btn-outline-secondary">
             <i class="bx bx-arrow-back me-1"></i> Ro‘yxatga qaytish
         </a>
     </div>
 
-    <form action="{{ route('student.store') }}" method="POST" enctype="multipart/form-data" id="studentForm">
+    <form action="{{ $isAdmin ? route('student.store') : route('teacher.students.store') }}" method="POST" enctype="multipart/form-data" id="studentForm">
         @csrf
 
         <div class="row g-4">
@@ -57,7 +64,7 @@
                                         data-placeholder="Guruh tanlang…">
                                     @foreach($groups as $group)
                                         <option value="{{ $group->id }}" data-payment="{{ $group->monthly_payment }}"
-                                                @if(is_array(old('group_id')) && in_array($group->id, old('group_id'))) selected @endif>
+                                                @selected(in_array((int) $group->id, $preselected, true))>
                                             {{ $group->name }}
                                         </option>
                                     @endforeach
@@ -110,6 +117,12 @@
                 <div class="card h-100">
                     <div class="card-header">Oylik to‘lov</div>
                     <div class="card-body d-flex flex-column">
+                        @if(! $isAdmin)
+                            <div class="alert alert-info mb-0">
+                                Oylik to‘lovni administrator belgilaydi. Guruhning standart narxi yoziladi
+                                va administratorga xabar boradi.
+                            </div>
+                        @else
                         <div id="group_payments_container">
                             {{-- Per-group payment inputs are injected here by JS --}}
                         </div>
@@ -123,12 +136,13 @@
                             Har bir guruh uchun to‘lov guruhning standart narxidan olinadi, kerak bo‘lsa
                             o‘zgartiring.
                         </div>
+                        @endif
 
                         <div class="mt-auto pt-4 d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-save me-1"></i> Saqlash
                             </button>
-                            <a href="{{ route('student.index') }}" class="btn btn-outline-secondary">Bekor qilish</a>
+                            <a href="{{ $backUrl }}" class="btn btn-outline-secondary">Bekor qilish</a>
                         </div>
                     </div>
                 </div>
@@ -143,6 +157,10 @@
             var totalEl = document.getElementById('paymentsTotal');
             var formEl = document.getElementById('studentForm');
             var oldGroupPayments = {!! json_encode(old('group_payment', [])) !!};
+
+            if (!paymentsContainer) {
+                return;
+            }
 
             function formatNumberWithSpaces(value) {
                 if (value === null || value === undefined || value === '') return '';

@@ -78,6 +78,10 @@
             </li>
             @endrole
 
+            @role('admin')
+            @include('template.partials.notification-bell')
+            @endrole
+
             {{-- Light / dark switch --}}
             <li class="nav-item">
                 <button type="button" class="theme-toggle" aria-label="Mavzuni almashtirish" aria-pressed="false">

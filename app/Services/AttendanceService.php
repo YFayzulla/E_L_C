@@ -100,12 +100,15 @@ class AttendanceService
 
         $slots = $lessonDays->count() * $students->count();
         $receptionStudents = collect();
-        if (Schema::hasTable('reception_students') && Schema::hasColumn('reception_students', 'test_image_path')) {
+        if (Schema::hasTable('reception_students') && Schema::hasColumn('reception_students', 'student_id')) {
+            // Guruhga tavsiya qilingan, lekin hali yozilmaganlar — o'qituvchi
+            // shu yerning o'zidan "Guruhga olish" qila oladi.
             $receptionStudents = ReceptionStudent::query()
                 ->where('recommended_group_id', $group->id)
-                ->whereNotNull('test_image_path')
+                ->whereNull('student_id')
+                ->where('status', '!=', ReceptionStudent::STATUS_ARCHIVED)
                 ->orderByDesc('created_at')
-                ->get(['id', 'name', 'level', 'score', 'test_taken_at', 'test_image_path', 'recommended_group_id', 'status']);
+                ->get(['id', 'name', 'level', 'score', 'test_taken_at', 'test_image_path', 'recommended_group_id', 'status', 'student_id']);
         }
 
         return [

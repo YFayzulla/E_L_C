@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\AuthorizesGroupAccess;
 use App\Http\Requests\StudentTransferRequest;
 use App\Models\Group;
+use App\Models\StaffNotification;
 use App\Models\User;
+use App\Services\StaffNotificationService;
 use App\Services\StudentGroupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -24,8 +26,10 @@ class StudentTransferController extends Controller
 {
     use AuthorizesGroupAccess;
 
-    public function __construct(private StudentGroupService $membership)
-    {
+    public function __construct(
+        private StudentGroupService $membership,
+        private StaffNotificationService $notifications
+    ) {
     }
 
     public function create(Request $request, int $student)
@@ -120,10 +124,17 @@ class StudentTransferController extends Controller
             $targets = array_values(array_unique(array_merge($targets, $invisible)));
         }
 
+        // Pul — adminning ishi. O'qituvchi summa yubora olmaydi
+        // (StudentTransferRequest uni rad etadi): saqlanib qolgan guruhlarda
+        // eski summa qoladi, yangisiga guruhning standart narxi yoziladi,
+        // admin esa bildirishnoma oladi.
+        $isAdmin = auth()->user()->hasRole('admin');
+        $payments = $isAdmin ? $request->payments() : [];
+
         try {
             $change = $this->membership->preview($model, $targets);
 
-            $this->membership->transfer($model, $targets, $request->payments(), auth()->id());
+            $this->membership->transfer($model, $targets, $payments, auth()->id());
         } catch (\Exception $e) {
             Log::error('StudentTransferController@store error: ' . $e->getMessage());
 
@@ -131,8 +142,40 @@ class StudentTransferController extends Controller
                 ->with('error', 'Talabani ko‘chirishda xatolik yuz berdi. O‘zgarishlar saqlanmadi.');
         }
 
+        if (! $isAdmin && ($change['joined'] || $change['left'])) {
+            $this->notifyAdmins($model, $change);
+        }
+
         return redirect()->to($this->destinationAfter($model))
-            ->with('success', $this->summary($model, $change));
+            ->with('success', $this->summary($model, $change, $isAdmin));
+    }
+
+    /**
+     * @param  array{joined: array<int, int>, left: array<int, int>}  $change
+     */
+    private function notifyAdmins(User $model, array $change): void
+    {
+        $names = Group::whereIn('id', array_merge($change['joined'], $change['left']))
+            ->pluck('name', 'id');
+
+        $label = fn (array $ids) => collect($ids)
+            ->map(fn ($id) => $names[$id] ?? ('#' . $id))
+            ->implode(', ');
+
+        $from = $change['left'] ? $label($change['left']) : '—';
+        $to = $change['joined'] ? $label($change['joined']) : '—';
+
+        $this->notifications->notifyAdmins(
+            StaffNotification::TYPE_STUDENT_TRANSFERRED,
+            auth()->user()->name . ' talabani ko‘chirdi: ' . $model->name,
+            "{$from} → {$to}. Yangi guruhga standart narx yozildi — oylik to‘lov va qarzdorlikni tekshiring.",
+            route('student.edit', $model->id),
+            [
+                'student_id' => $model->id,
+                'joined'     => $change['joined'],
+                'left'       => $change['left'],
+            ]
+        );
     }
 
     /**
@@ -166,7 +209,7 @@ class StudentTransferController extends Controller
      *
      * @param  array{joined: array<int, int>, left: array<int, int>}  $change
      */
-    private function summary(User $model, array $change): string
+    private function summary(User $model, array $change, bool $isAdmin = true): string
     {
         $names = Group::whereIn('id', array_merge($change['joined'], $change['left']))
             ->pluck('name', 'id');
@@ -190,6 +233,8 @@ class StudentTransferController extends Controller
         }
 
         return $model->name . ': ' . implode('; ', $parts)
-            . '. Oylik to‘lov va qarzdorlik qayta hisoblandi.';
+            . ($isAdmin
+                ? '. Oylik to‘lov va qarzdorlik qayta hisoblandi.'
+                : '. Oylik to‘lovni administrator tekshiradi — unga xabar yuborildi.');
     }
 }

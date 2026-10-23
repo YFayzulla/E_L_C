@@ -44,14 +44,21 @@
         <div>
             <strong>Diqqat.</strong> Tanlangan guruhlar talabaning <u>yakuniy</u> ro‘yxati bo‘ladi:
             ro‘yxatga kirmagan har bir guruhdan talaba chiqariladi.
-            Saqlaganingizdan so‘ng <strong>oylik to‘lov va qarzdorlik qayta hisoblanadi</strong>.
+            @if($isAdmin)
+                Saqlaganingizdan so‘ng <strong>oylik to‘lov va qarzdorlik qayta hisoblanadi</strong>.
+            @else
+                Oylik to‘lov va hisob-kitobni <strong>administrator</strong> qiladi — ko‘chirganingizdan
+                so‘ng unga xabar boradi.
+            @endif
             Eski davomat yozuvlari o‘z guruhida qoladi va o‘zgarmaydi.
         </div>
     </div>
 
     @php
         $confirmText = $student->name . ' uchun guruhlar yangilansinmi?'
-            . "\n\nOylik to‘lov va qarzdorlik qayta hisoblanadi.";
+            . ($isAdmin
+                ? "\n\nOylik to‘lov va qarzdorlik qayta hisoblanadi."
+                : "\n\nAdministratorga xabar yuboriladi.");
     @endphp
 
     <form action="{{ route('student.transfer', $student->id) }}" method="post" id="transferForm"
@@ -70,10 +77,12 @@
                                 <span class="stat-icon"><i class="bx bx-group"></i></span>
                                 <div class="flex-grow-1 min-w-0">
                                     <h6 class="mb-1">{{ $group->name }}</h6>
-                                    <div class="text-muted" style="font-size: .82rem;">
-                                        <i class="bx bx-wallet me-1"></i>
-                                        {{ number_format((int) ($group->pivot->payment ?? 0), 0, '.', ' ') }} so‘m
-                                    </div>
+                                    @if($isAdmin)
+                                        <div class="text-muted" style="font-size: .82rem;">
+                                            <i class="bx bx-wallet me-1"></i>
+                                            {{ number_format((int) ($group->pivot->payment ?? 0), 0, '.', ' ') }} so‘m
+                                        </div>
+                                    @endif
                                 </div>
                                 @if(in_array((int) $group->id, $selectableIds, true))
                                     <span class="badge bg-label-info">O‘zgartirish mumkin</span>
@@ -93,12 +102,14 @@
                     </div>
 
                     <div class="card-footer">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="stat-label mb-0">Hozirgi oylik to‘lov</span>
-                            <span class="fw-semibold">
-                                {{ number_format((int) $student->should_pay, 0, '.', ' ') }} so‘m
-                            </span>
-                        </div>
+                        @if($isAdmin)
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="stat-label mb-0">Hozirgi oylik to‘lov</span>
+                                <span class="fw-semibold">
+                                    {{ number_format((int) $student->should_pay, 0, '.', ' ') }} so‘m
+                                </span>
+                            </div>
+                        @endif
                         {{-- Odatda bo'sh: ro'yxatda markazning barcha guruhi bor.
                              Faqat talaba ro'yxatda yo'q guruhga (masalan o'chirilganiga)
                              a'zo bo'lib qolgan holatda ko'rinadi. --}}
@@ -107,8 +118,7 @@
                                 <i class="bx bx-lock-alt me-1"></i>
                                 Ro‘yxatda yo‘q {{ $lockedGroups->count() }} ta guruh
                                 ({{ $lockedGroups->pluck('name')->implode(', ') }})
-                                o‘zgarishsiz saqlanadi —
-                                {{ number_format($lockedTotal, 0, '.', ' ') }} so‘m.
+                                o‘zgarishsiz saqlanadi{{ $isAdmin ? ' — ' . number_format($lockedTotal, 0, '.', ' ') . ' so‘m' : '' }}.
                             </div>
                         @endif
                     </div>
@@ -155,6 +165,15 @@
 
                             <hr class="my-4">
 
+                            @if(! $isAdmin)
+                                <div class="alert alert-info d-flex align-items-start gap-2 mb-0">
+                                    <i class="bx bx-info-circle" style="font-size: 1.2rem; line-height: 1.4;"></i>
+                                    <div>
+                                        Oylik to‘lovni administrator belgilaydi. Yangi guruhga guruhning
+                                        standart narxi yoziladi, administrator kerak bo‘lsa tuzatadi.
+                                    </div>
+                                </div>
+                            @else
                             <div class="stat-label mb-2">Oylik to‘lov (guruh bo‘yicha)</div>
 
                             <div id="paymentRows">
@@ -192,6 +211,7 @@
                                 <div class="metric-label">Yangi oylik to‘lov (jami)</div>
                                 <div class="metric-value" id="paymentTotal">0 so‘m</div>
                             </div>
+                            @endif
 
                             <div class="mt-auto pt-4 d-flex gap-2 flex-wrap">
                                 <button type="submit" class="btn btn-primary">

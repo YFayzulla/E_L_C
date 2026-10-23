@@ -23,10 +23,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\ReceptionAttendanceController;
+use App\Http\Controllers\ReceptionEnrollmentController;
 use App\Http\Controllers\ReceptionStudentController;
 use App\Http\Controllers\RefreshController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SmsTemplateController;
+use App\Http\Controllers\StaffNotificationController;
 use App\Http\Controllers\StudentSmsController;
 use App\Http\Controllers\StudentTransferController;
 use App\Http\Controllers\TeacherAdminPanel;
@@ -102,6 +104,14 @@ Route::middleware('auth')->group(function () {
     Route::post('impersonate/stop', [ImpersonationController::class, 'stop'])
         ->name('impersonate.stop');
 
+    // Ichki bildirishnomalar. Har kim faqat o'zinikini ko'radi
+    // (StaffNotificationController), shuning uchun rol bo'yicha cheklanmagan.
+    Route::controller(StaffNotificationController::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('read-all', 'readAll')->name('read-all');
+        Route::get('{notification}', 'open')->whereNumber('notification')->name('open');
+    });
+
     // Sertifikatni yuklab olish. Rol bo'yicha emas, EGALIK bo'yicha tekshiriladi
     // (CertificateController::authorizeAccess): talaba faqat o'zinikini,
     // ota-ona faqat farzandinikini, o'qituvchi faqat o'z guruhidagini oladi.
@@ -138,6 +148,22 @@ Route::middleware(['auth', 'role:admin|reception|user'])->get(
     [ReceptionStudentController::class, 'testImage']
 )->whereNumber('student')->name('reception.students.test-image');
 
+// Reception yozuvidan talaba hisobi ochib, guruhga yozish. O'qituvchi ham
+// kiradi — o'z guruhiga "tortib olish" uchun; qaysi yozuv va qaysi guruh
+// mumkinligini ReceptionEnrollmentController tekshiradi.
+Route::middleware(['auth', 'role:admin|reception|user'])
+    ->controller(ReceptionEnrollmentController::class)
+    ->group(function () {
+        Route::get('reception/students/{student}/enroll', 'create')
+            ->whereNumber('student')->name('reception.students.enroll');
+        Route::post('reception/students/{student}/enroll', 'store')
+            ->whereNumber('student')->name('reception.students.enroll.store');
+    });
+
+Route::middleware(['auth', 'role:user'])
+    ->get('teacher/reception', [ReceptionEnrollmentController::class, 'teacherIndex'])
+    ->name('teacher.reception.index');
+
 /*
 |--------------------------------------------------------------------------
 | ASSISTANT ROUTES
@@ -169,6 +195,12 @@ Route::middleware(['auth', 'role:user', 'verified.role'])->group(function () {
         // teacher ham unga kirishi kerak.
         Route::post('teacher/student/{id}/comment', 'studentComment')->name('teacher.student.comment');
     });
+
+    // O'qituvchi o'z guruhiga yangi talaba qo'shadi. Admin formasining o'zi:
+    // StudentController guruhlarni o'qituvchiniki bilan cheklaydi va
+    // summani yozdirmaydi — hisob-kitob adminda.
+    Route::get('teacher/students/create', [StudentController::class, 'create'])->name('teacher.students.create');
+    Route::post('teacher/students', [StudentController::class, 'store'])->name('teacher.students.store');
 
     // O'qituvchilar davomatni tekshirishi va yuborishi mumkin
     Route::post('attendance/submit/{id}', [TeacherAdminPanel::class, 'attendance_submit'])->name('attendance.submit');
@@ -333,6 +365,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::controller(TeacherGroupController::class)->prefix('teacher/group')->name('teacher_group.')->group(function () {
         Route::delete('delete/{id}', 'detach')->whereNumber('id')->name('delete');
         Route::put('{teacher}/store', 'attach')->name('store');
+        Route::post('{teacher}/students', 'addStudent')->name('students.store');
     });
     Route::resource('teacher', TeacherController::class);
 

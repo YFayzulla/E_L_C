@@ -37,11 +37,14 @@ class ReceptionStudent extends Model
         'registered_by',
         'assigned_by',
         'assigned_at',
+        'student_id',
+        'enrolled_at',
     ];
 
     protected $casts = [
         'test_taken_at' => 'datetime',
         'assigned_at'   => 'datetime',
+        'enrolled_at'   => 'datetime',
     ];
 
     public static function levels(): array
@@ -96,5 +99,30 @@ class ReceptionStudent extends Model
     public function assigner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    /** Shu yozuvdan ochilgan talaba hisobi. */
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function isEnrolled(): bool
+    {
+        return $this->student_id !== null;
+    }
+
+    /** Talaba hisobini ochib, guruhga yozish mumkinmi. */
+    public function canEnroll(): bool
+    {
+        return ! $this->isEnrolled() && $this->status !== self::STATUS_ARCHIVED;
+    }
+
+    /** Telefonni talaba formasi kutgan 9 xonali ko'rinishga keltiradi. */
+    public static function localPhone(?string $phone): string
+    {
+        $digits = preg_replace('/[^0-9]/', '', (string) $phone);
+
+        return strlen($digits) >= 9 ? substr($digits, -9) : $digits;
     }
 }

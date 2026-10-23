@@ -112,7 +112,7 @@
 
         {{-- Guruhlar --}}
         <div class="col-lg-7">
-            <div class="card h-100">
+            <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span>Biriktirilgan guruhlar</span>
                     <span class="badge bg-label-primary">{{ $groupCount }}</span>
@@ -206,6 +206,74 @@
                     @endif
                 </div>
             </div>
+
+            @if($groupLinks->isNotEmpty())
+                <div class="card mt-4">
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span>Guruhga talaba qo‘shish</span>
+                        <a href="{{ route('student.create', ['group' => $groupLinks->first()->group_id]) }}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bx bx-user-plus me-1"></i> Yangi talaba yaratish
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('teacher_group.students.store', $teacher->id) }}" method="post">
+                            @csrf
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="add_student_id">Talaba</label>
+                                    <select id="add_student_id" name="student_id" class="choices form-select"
+                                            data-placeholder="Ism yoki telefon bo‘yicha qidiring…">
+                                        <option value="">— Talabani tanlang —</option>
+                                        @foreach($candidateStudents as $candidate)
+                                            @php
+                                                $candidateGroups = $candidate->groups->pluck('name')->implode(', ');
+                                            @endphp
+                                            <option value="{{ $candidate->id }}" @selected((int) old('student_id') === (int) $candidate->id)>
+                                                {{ $candidate->name }} · +{{ $candidate->phone }}
+                                                ({{ $candidateGroups ?: 'guruhsiz' }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('student_id')
+                                    <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="add_group_id">Guruh</label>
+                                    <select id="add_group_id" name="group_id" class="form-select">
+                                        @foreach($groupLinks as $link)
+                                            <option value="{{ $link->group_id }}" @selected((int) old('group_id') === (int) $link->group_id)>
+                                                {{ $link->group->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="add_payment">Oylik to‘lov</label>
+                                    <div class="input-group">
+                                        <input type="text" id="add_payment" name="payment" inputmode="numeric"
+                                               class="form-control" value="{{ old('payment') }}" placeholder="Guruh narxi">
+                                        <span class="input-group-text">so‘m</span>
+                                    </div>
+                                    @error('payment')
+                                    <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 d-grid align-items-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bx bx-user-plus me-1"></i> Guruhga qo‘shish
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">
+                                Talabaning boshqa guruhlari saqlanadi, Kutish zalidan esa chiqariladi.
+                                To‘lov bo‘sh bo‘lsa guruhning standart narxi yoziladi.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Shaxsiy ma'lumotlar --}}

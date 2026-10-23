@@ -96,7 +96,8 @@ Route::middleware('auth')->group(function () {
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
         Route::get('/', 'edit')->name('edit');
         Route::patch('/', 'update')->name('update');
-        Route::delete('/', 'destroy')->name('destroy');
+        // `destroy` ataylab yo'q: foydalanuvchi o'z hisobini o'chira olmaydi —
+        // u bilan birga davomat, baho va to'lov yozuvlari ham ketardi.
     });
 
     // Boshqa hisobdan chiqish. `auth` guruhida, chunki chaqiruvchi o'sha paytda

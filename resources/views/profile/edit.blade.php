@@ -71,13 +71,8 @@
                 </div>
             </div>
 
-            {{-- Visible to every role, matching the previous behaviour. --}}
-            <div class="card">
-                <div class="card-header text-danger">Xavfli hudud</div>
-                <div class="card-body">
-                    @include('profile.partials.delete-user-form')
-                </div>
-            </div>
+            {{-- "Hisobni o'chirish" ataylab yo'q: hisob o'chsa davomat, baho va
+                 to'lov yozuvlari ham yo'qoladi. Hisobni faqat admin boshqaradi. --}}
         </div>
     </div>
 

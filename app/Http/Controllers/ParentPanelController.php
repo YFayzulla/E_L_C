@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Assessment;
 use App\Models\Attendance;
-use App\Models\HistoryPayments;
 use App\Models\User;
 use App\Services\ProgressService;
 use Illuminate\Support\Facades\Log;
@@ -67,16 +66,10 @@ class ParentPanelController extends Controller
                 ->limit(20)
                 ->get();
 
-            $payments = HistoryPayments::where('user_id', $child->id)
-                ->orderByDesc('created_at')
-                ->limit(20)
-                ->get();
-
             return view('parent.child', [
                 'child' => $child,
                 'attendances' => $attendances,
                 'testResults' => $testResults,
-                'payments' => $payments,
                 'attendanceRate' => $child->attendanceRate(),
                 // Ota-onaga farzandining o'zlashtirishi — bu portalning
                 // asosiy savoli. $child resolveChild() dan o'tgan, ya'ni
@@ -115,19 +108,15 @@ class ParentPanelController extends Controller
     }
 
     /**
-     * Payment history across all children.
+     * Har bir farzandning shu oydagi to'lov holati: to'langan yoki qancha
+     * qarz. To'lovlar tarixi ota-onaga ko'rsatilmaydi.
      */
     public function payments()
     {
         try {
             $children = auth()->user()->children()->with('deptStudent')->orderBy('name')->get();
 
-            $payments = HistoryPayments::whereIn('user_id', $children->pluck('id'))
-                ->with('user')
-                ->orderByDesc('created_at')
-                ->paginate(20);
-
-            return view('parent.payments', compact('children', 'payments'));
+            return view('parent.payments', compact('children'));
         } catch (\Exception $e) {
             Log::error('ParentPanelController@payments error: ' . $e->getMessage());
 

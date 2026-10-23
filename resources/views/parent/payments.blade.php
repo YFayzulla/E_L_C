@@ -12,70 +12,33 @@
         </a>
     </div>
 
-    {{-- Current status per child --}}
-    <div class="row g-3 mb-4">
-        @foreach($children as $child)
-            @php $paid = $child->isPaidThisMonth(); @endphp
+    {{-- Faqat shu oyning holati. To'lovlar tarixi ota-onaga ko'rsatilmaydi. --}}
+    <div class="row g-3">
+        @forelse($children as $child)
             <div class="col-md-6 col-xl-4">
                 <div class="card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between gap-3">
-                        <div class="min-w-0">
-                            <h6 class="mb-1 text-truncate">{{ $child->name }}</h6>
-                            <span class="badge bg-label-{{ $paid ? 'success' : 'danger' }}">
-                                {{ $paid ? 'To‘langan' : 'To‘lanmagan' }}
-                            </span>
-                            @if($child->deptStudent && $child->deptStudent->dept > 0)
-                                <div class="text-danger fw-semibold mt-2" style="font-size: .875rem;">
-                                    Qarz: {{ number_format($child->deptStudent->dept, 0, '.', ' ') }} so‘m
-                                </div>
-                            @endif
-                        </div>
-                        <span class="stat-icon is-{{ $paid ? 'success' : 'danger' }}">
+                    <div class="card-header d-flex align-items-center justify-content-between gap-2">
+                        <span class="fw-semibold text-truncate">{{ $child->name }}</span>
+                        <span class="stat-icon is-{{ $child->currentDebt() > 0 ? 'danger' : 'success' }}">
                             <i class="bx bx-wallet"></i>
                         </span>
                     </div>
+                    <div class="card-body py-2">
+                        @include('partials.payment-status', ['student' => $child])
+                    </div>
                 </div>
             </div>
-        @endforeach
-    </div>
-
-    <div class="card">
-        <div class="card-header">To‘lovlar tarixi</div>
-        @if($payments->isEmpty())
-            <div class="empty-state">
-                <i class="bx bx-receipt"></i>
-                <h6>To‘lov yo‘q</h6>
-                <p class="mb-0">Hozircha to‘lov qayd etilmagan.</p>
+        @empty
+            <div class="col-12">
+                <div class="card">
+                    <div class="empty-state">
+                        <i class="bx bx-user"></i>
+                        <h6>Farzand biriktirilmagan</h6>
+                        <p class="mb-0">O‘quv markazi administratoriga murojaat qiling.</p>
+                    </div>
+                </div>
             </div>
-        @else
-            <div class="table-responsive">
-                <table class="table table-hover" id="myTable">
-                    <thead>
-                    <tr>
-                        <th>Sana</th>
-                        <th>Farzand</th>
-                        <th>Izoh</th>
-                        <th class="text-end">Summa</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($payments as $payment)
-                        <tr>
-                            <td>{{ optional($payment->date ? \Carbon\Carbon::parse($payment->date) : $payment->created_at)->format('d.m.Y') }}</td>
-                            <td class="fw-semibold">{{ $payment->user->name ?? $payment->name }}</td>
-                            <td class="text-muted">{{ $payment->description ?: '—' }}</td>
-                            <td class="text-end fw-semibold text-success">
-                                {{ number_format($payment->payment, 0, '.', ' ') }} so‘m
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer d-flex justify-content-end">
-                {{ $payments->links() }}
-            </div>
-        @endif
+        @endforelse
     </div>
 
 @endsection

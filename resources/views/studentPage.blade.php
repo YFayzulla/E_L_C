@@ -216,55 +216,14 @@
             </div>
         </div>
 
-        {{-- Payments --}}
+        {{-- Payments: faqat shu oyning holati. To'lov tarixi talabaga
+             ko'rsatilmaydi — u admin ishi. --}}
         <div class="col-lg-5">
             <div class="card">
                 <div class="card-header">To‘lovlarim</div>
-                <div class="card-body pb-0">
-                    <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                        <span class="text-muted">Oylik to‘lov</span>
-                        <span class="fw-semibold">
-                            {{ $student->should_pay ? number_format($student->should_pay, 0, '.', ' ') . ' so‘m' : '—' }}
-                        </span>
-                    </div>
-                    @if($student->deptStudent && $student->deptStudent->dept > 0)
-                        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                            <span class="text-muted">Qarzdorlik</span>
-                            <span class="fw-semibold text-danger">
-                                {{ number_format($student->deptStudent->dept, 0, '.', ' ') }} so‘m
-                            </span>
-                        </div>
-                    @endif
+                <div class="card-body py-2">
+                    @include('partials.payment-status', ['student' => $student])
                 </div>
-
-                @if($payments->isEmpty())
-                    <div class="empty-state py-4">
-                        <i class="bx bx-receipt"></i>
-                        <h6>To‘lov yo‘q</h6>
-                        <p class="mb-0">Hozircha to‘lov qayd etilmagan.</p>
-                    </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Sana</th>
-                                <th class="text-end">Summa</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($payments as $payment)
-                                <tr>
-                                    <td>{{ optional($payment->date ? \Carbon\Carbon::parse($payment->date) : $payment->created_at)->format('d.m.Y') }}</td>
-                                    <td class="text-end fw-semibold text-success">
-                                        {{ number_format($payment->payment, 0, '.', ' ') }} so‘m
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
             </div>
         </div>
     </div>

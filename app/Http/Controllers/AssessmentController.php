@@ -48,13 +48,31 @@ class AssessmentController extends Controller
                 // Admin sees all groups
                 $groups = Group::orderBy('name')->get(); // Added pagination
                 return view('admin.assessment.index', compact('groups'));
-            } else {
-                // Teacher sees only their groups
-                $groups = GroupTeacher::where('teacher_id', $user->id)
-                    ->with('group')->orderby('name')
-                    ->get(); // Added pagination
-                return view('teacher.assessment.index', compact('groups'));
             }
+
+            // Talaba — o'z natijalari. Ilgari u quyidagi o'qituvchi
+            // tarmog'iga tushib, "Guruhlarni yuklashda xatolik" olardi.
+            if ($user->hasRole('student')) {
+                $results = Assessment::where('assessments.user_id', $user->id)
+                    ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
+                    ->select('assessments.*', 'lesson_and_histories.name as test_name')
+                    ->orderByDesc('assessments.created_at')
+                    ->paginate(20);
+
+                return view('student.results', compact('results'));
+            }
+
+            // Teacher sees only their groups. Saralash guruh nomi bo'yicha
+            // PHP'da: `group_teachers` da `name` ustuni yo'q, SQL'dagi
+            // orderBy('name') aynan shu sahifani yiqitardi.
+            $groups = GroupTeacher::where('teacher_id', $user->id)
+                ->with('group')
+                ->get()
+                ->filter(fn ($link) => $link->group !== null)
+                ->sortBy(fn ($link) => $link->group->name)
+                ->values();
+
+            return view('teacher.assessment.index', compact('groups'));
         } catch (\Exception $e) {
             Log::error('AssessmentController@index error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Guruhlarni yuklashda xatolik yuz berdi.');

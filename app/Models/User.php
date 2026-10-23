@@ -400,6 +400,33 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Joriy oy holatiga ko'ra qolgan qarz (so'm). To'langan bo'lsa — 0.
+     *
+     * `dept_students.dept` QARZ EMAS, oylik summa; `dept_students.payed` —
+     * shu oyga qisman to'langani; `users.status` — to'langan oylar
+     * hisoblagichi (manfiy bo'lsa necha oy qarz). To'lovlar sahifasi
+     * "Debt: |status| month(s)" deb ko'rsatadi, 0 esa bitta oy qarz.
+     */
+    public function currentDebt(): int
+    {
+        if ($this->isPaidThisMonth()) {
+            return 0;
+        }
+
+        $monthly = (int) ($this->deptStudent?->dept ?: $this->should_pay);
+        $months = max(1, abs((int) $this->status));
+        $paidPart = (int) ($this->deptStudent?->payed ?? 0);
+
+        return max(0, $months * $monthly - $paidPart);
+    }
+
+    /** Qarz necha oyga to'g'ri keladi (0 — qarz yo'q). */
+    public function debtMonths(): int
+    {
+        return $this->currentDebt() > 0 ? max(1, abs((int) $this->status)) : 0;
+    }
+
+    /**
      * Absence / late records. A row is only written when a student was NOT
      * present (0 = absent, 2 = late) — see TeacherAdminPanel@attendance_submit.
      */

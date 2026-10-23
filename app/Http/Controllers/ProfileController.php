@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
@@ -69,51 +68,6 @@ class ProfileController extends Controller
             Log::error('ProfileController@update error: ' . $e->getMessage());
 
             return Redirect::back()->with('error', 'Profilni yangilashda xatolik yuz berdi. Iltimos qaytadan urining.');
-        }
-    }
-
-    /**
-     * Foydalanuvchi hisobini o'chiradi.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current-password'],
-        ]);
-
-        $user = $request->user();
-
-        DB::beginTransaction();
-
-        try {
-            // Quyidagi Auth::logout() remember-token'ni yangilaydi, buni esa
-            // EloquentUserProvider::updateRememberToken() save() orqali qiladi.
-            // delete() dan keyin modelning `exists` bayrog'i false bo'ladi, ya'ni
-            // o'sha save() INSERT ga aylanadi va o'chirilgan hisobni eski id
-            // bilan qaytarib qo'yadi. Tokenni qator hali turganda tozalasak,
-            // logout() uni umuman yangilamaydi.
-            $user->forceFill(['remember_token' => null])->saveQuietly();
-
-            // Agar User modelida "Cascading Delete" sozlanmagan bo'lsa,
-            // unga bog'liq ma'lumotlarni shu yerda qo'lda o'chirish kerak bo'lishi mumkin.
-            $user->delete();
-
-            DB::commit();
-
-            // Bazadan muvaffaqiyatli o'chirilgandan so'ng, sessiyani tozalaymiz.
-            // Tartib muhim: agar DB da xato bo'lsa, foydalanuvchi log out bo'lmasligi kerak.
-            Auth::logout();
-
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return Redirect::to('/');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('ProfileController@destroy error: ' . $e->getMessage());
-
-            return Redirect::route('profile.edit')->with('error', 'Hisobni o\'chirishda xatolik yuz berdi. Iltimos keyinroq urining.');
         }
     }
 }

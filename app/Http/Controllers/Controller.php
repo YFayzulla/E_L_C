@@ -343,10 +343,6 @@ class Controller extends BaseController
                 ->whereYear('created_at', now()->year)
                 ->count(),
             'test_results' => $testResults,
-            'payments' => HistoryPayments::where('user_id', $student->id)
-                ->orderByDesc('created_at')
-                ->limit(6)
-                ->get(),
         ];
     }
 

@@ -37,7 +37,6 @@
                 @php
                     $rate = $child->attendance_rate;
                     $rateTone = $rate >= 90 ? 'success' : ($rate >= 75 ? 'warning' : 'danger');
-                    $paid = $child->isPaidThisMonth();
                 @endphp
 
                 <div class="col-xl-4 col-md-6">
@@ -84,21 +83,9 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="text-muted" style="font-size: .85rem;">Oylik to‘lov</span>
-                                <span class="badge bg-label-{{ $paid ? 'success' : 'danger' }}">
-                                    {{ $paid ? 'To‘langan' : 'To‘lanmagan' }}
-                                </span>
+                            <div class="mb-3" style="font-size: .9rem;">
+                                @include('partials.payment-status', ['student' => $child])
                             </div>
-
-                            @if($child->deptStudent && $child->deptStudent->dept > 0)
-                                <div class="d-flex align-items-center justify-content-between mb-3">
-                                    <span class="text-muted" style="font-size: .85rem;">Qarzdorlik</span>
-                                    <span class="fw-semibold text-danger">
-                                        {{ number_format($child->deptStudent->dept, 0, '.', ' ') }} so‘m
-                                    </span>
-                                </div>
-                            @endif
 
                             <a href="{{ route('parent.child', $child->id) }}"
                                class="btn btn-primary w-100 mt-auto">

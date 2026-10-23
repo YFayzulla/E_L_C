@@ -227,43 +227,13 @@
             </div>
         </div>
 
-        {{-- Payments --}}
+        {{-- Payments: faqat shu oyning holati, tarix yo'q. --}}
         <div class="col-lg-5">
             <div class="card">
-                <div class="card-header">So‘nggi to‘lovlar</div>
-                @if($payments->isEmpty())
-                    <div class="empty-state">
-                        <i class="bx bx-receipt"></i>
-                        <h6>To‘lov yo‘q</h6>
-                        <p class="mb-0">Hozircha to‘lov qayd etilmagan.</p>
-                    </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Sana</th>
-                                <th class="text-end">Summa</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($payments as $payment)
-                                <tr>
-                                    <td>
-                                        {{ optional($payment->date ? \Carbon\Carbon::parse($payment->date) : $payment->created_at)->format('d.m.Y') }}
-                                        @if($payment->description)
-                                            <div class="text-muted" style="font-size: .78rem;">{{ $payment->description }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="text-end fw-semibold text-success">
-                                        {{ number_format($payment->payment, 0, '.', ' ') }} so‘m
-                                    </td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                <div class="card-header">To‘lov holati</div>
+                <div class="card-body py-2">
+                    @include('partials.payment-status', ['student' => $child])
+                </div>
             </div>
         </div>
     </div>

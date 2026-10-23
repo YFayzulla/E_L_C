@@ -24,7 +24,7 @@
         })();
     </script>
 
-    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandLogo() }}"/>
+    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandIcon() }}"/>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}"/>
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}"/>

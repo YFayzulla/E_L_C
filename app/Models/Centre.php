@@ -213,6 +213,18 @@ class Centre extends Model
         return static::current()?->logoUrl() ?? asset('logos/main.png');
     }
 
+    /**
+     * Brauzer tabidagi belgi (favicon).
+     *
+     * Standart logotip keng — tabda o'qib bo'lmas darajada kichrayadi,
+     * shuning uchun undan faqat "A" belgisi kesib olingan. Markaz o'z
+     * logotipini yuklagan bo'lsa, o'sha ishlatiladi.
+     */
+    public static function brandIcon(): string
+    {
+        return static::current()?->logoUrl() ?? asset('logos/icon.png');
+    }
+
     /** Sahifalarda ko'rsatiladigan nom (alt matni va sarlavhalar uchun). */
     public static function brandName(): string
     {

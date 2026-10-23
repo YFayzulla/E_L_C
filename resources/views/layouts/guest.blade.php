@@ -22,7 +22,7 @@
         })();
     </script>
 
-    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandLogo() }}"/>
+    <link rel="icon" type="image/png" href="{{ \App\Models\Centre::brandIcon() }}"/>
 
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>

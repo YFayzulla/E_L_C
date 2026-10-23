@@ -98,7 +98,9 @@ html[data-theme="dark"] {
     --app-shadow-md: 0 4px 14px rgba(0, 0, 0, .48), 0 2px 4px rgba(0, 0, 0, .32);
     --app-shadow-lg: 0 18px 40px rgba(0, 0, 0, .55), 0 4px 12px rgba(0, 0, 0, .38);
 
-    --app-logo-filter: invert(1) brightness(1.6) contrast(.92);
+    /* Rangli logotipni teskari qilish (invert) ko'kni to'q sariqqa
+       aylantiradi — tungi rejimda logotip oq rangda ko'rsatiladi. */
+    --app-logo-filter: brightness(0) invert(1);
     --app-scheme: dark;
 }
 

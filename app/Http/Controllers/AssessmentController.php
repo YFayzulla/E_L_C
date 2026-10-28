@@ -46,7 +46,7 @@ class AssessmentController extends Controller
 
             if ($user->hasRole('admin')) {
                 // Admin sees all groups
-                $groups = Group::orderBy('name')->get(); // Added pagination
+                $groups = Group::orderBy('name')->orderBy('id')->get();
                 return view('admin.assessment.index', compact('groups'));
             }
 
@@ -57,6 +57,7 @@ class AssessmentController extends Controller
                     ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
                     ->select('assessments.*', 'lesson_and_histories.name as test_name')
                     ->orderByDesc('assessments.created_at')
+                    ->orderByDesc('assessments.id')
                     ->paginate(20);
 
                 return view('student.results', compact('results'));
@@ -66,10 +67,11 @@ class AssessmentController extends Controller
             // PHP'da: `group_teachers` da `name` ustuni yo'q, SQL'dagi
             // orderBy('name') aynan shu sahifani yiqitardi.
             $groups = GroupTeacher::where('teacher_id', $user->id)
+                ->orderBy('id')
                 ->with('group')
                 ->get()
                 ->filter(fn ($link) => $link->group !== null)
-                ->sortBy(fn ($link) => $link->group->name)
+                ->sortBy(fn ($link) => mb_strtolower($link->group->name), SORT_NATURAL)
                 ->values();
 
             return view('teacher.assessment.index', compact('groups'));
@@ -103,9 +105,10 @@ class AssessmentController extends Controller
                     $query->where('groups.id', $id);
                 })
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get();
 
-            $allGroups = Group::orderBy('name')->get();
+            $allGroups = Group::orderBy('name')->orderBy('id')->get();
 
             return view('teacher.assessment.make_markes', [
                 'students' => $students,
@@ -133,6 +136,13 @@ class AssessmentController extends Controller
         $this->assertTeachesGroup((int) $id);
 
         $skills = (array) config('grading.skills');
+        $overallSkills = array_values(array_intersect(
+            ['reading', 'listening', 'writing', 'speaking'],
+            $skills
+        ));
+        if ($overallSkills === []) {
+            $overallSkills = array_values(array_diff($skills, ['grammar']));
+        }
 
         /*
          * The form is a grid — one row per student, one column per skill —
@@ -141,10 +151,9 @@ class AssessmentController extends Controller
          *     score[<student id>][<skill>] = 0..100
          *     comment[<student id>]        = free text
          *
-         * One `assessments` row is written per filled cell, so the overall is
-         * simply the mean of those rows. It is NOT stored: a sixth "overall"
-         * row would make every average that reads this table count the same
-         * marks twice, including the progress figure.
+         * One `assessments` row is written per filled cell. The displayed and
+         * student-card overall is derived from the four core skills (or the
+         * configured single score); grammar remains a separate assessment.
          */
         $request->validate([
             'student'      => 'required|array',
@@ -194,7 +203,7 @@ class AssessmentController extends Controller
                     continue;
                 }
 
-                $given = [];
+                $givenOverall = [];
 
                 foreach ($skills as $skill) {
                     $raw = $scores[$userId][$skill] ?? null;
@@ -209,7 +218,9 @@ class AssessmentController extends Controller
                     }
 
                     $mark    = (int) $raw;
-                    $given[] = $mark;
+                    if (in_array($skill, $overallSkills, true)) {
+                        $givenOverall[] = $mark;
+                    }
 
                     $assessments[] = [
                         'get_mark'   => $mark,
@@ -223,10 +234,10 @@ class AssessmentController extends Controller
                     ];
                 }
 
-                // users.mark is the "latest mark" on the student card, so it
-                // gets the overall — the plain mean of whatever was scored.
-                if ($given !== []) {
-                    $studentsToUpdate[$userId] = (int) round(array_sum($given) / count($given));
+                // Grammar remains a separate score; only the four core skills
+                // (or the configured single overall score) feed users.mark.
+                if ($givenOverall !== []) {
+                    $studentsToUpdate[$userId] = (int) round(array_sum($givenOverall) / count($givenOverall));
                 }
             }
 

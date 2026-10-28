@@ -114,6 +114,7 @@ class GroupExtraController extends Controller
                 // Guruh nomini olish uchun relationshipni yuklaymiz
                 ->with('groups:id,name')
                 ->orderBy('name')
+                ->orderBy('id')
                 ->select('id', 'name', 'phone', 'status') // group_id olib tashlandi
                 ->get();
                 

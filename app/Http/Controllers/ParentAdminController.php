@@ -25,8 +25,9 @@ class ParentAdminController extends Controller
         try {
             $parents = User::role('parent')
                 ->withCount('children')
-                ->with('children:id,name')
+                ->with(['children' => fn($query) => $query->orderBy('users.name')->orderBy('users.id')])
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get();
 
             return view('admin.parent.index', compact('parents'));
@@ -39,7 +40,7 @@ class ParentAdminController extends Controller
 
     public function create()
     {
-        $students = User::role('student')->orderBy('name')->get(['id', 'name', 'phone']);
+        $students = User::role('student')->orderBy('name')->orderBy('id')->get(['id', 'name', 'phone']);
 
         return view('admin.parent.create', compact('students'));
     }
@@ -75,8 +76,9 @@ class ParentAdminController extends Controller
 
     public function edit($id)
     {
-        $parent = User::role('parent')->with('children:id,name')->findOrFail($id);
-        $students = User::role('student')->orderBy('name')->get(['id', 'name', 'phone']);
+        $parent = User::role('parent')->with(['children' => fn($query) => $query->orderBy('users.name')->orderBy('users.id')])
+            ->findOrFail($id);
+        $students = User::role('student')->orderBy('name')->orderBy('id')->get(['id', 'name', 'phone']);
 
         return view('admin.parent.edit', compact('parent', 'students'));
     }

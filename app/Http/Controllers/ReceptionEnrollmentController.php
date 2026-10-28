@@ -201,7 +201,7 @@ class ReceptionEnrollmentController extends Controller
 
     private function groupOptions()
     {
-        $query = Group::query()->teaching()->active()->orderBy('name');
+        $query = Group::query()->teaching()->active()->orderBy('name')->orderBy('id');
 
         if ($this->isTeacherOnly()) {
             $query->whereIn('id', $this->accessibleGroupIds());

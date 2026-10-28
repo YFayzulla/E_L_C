@@ -71,6 +71,7 @@ class StudentApiController extends ApiController
             ->whereIn('status', [0, 2])
             ->with(['group:id,name', 'lesson:id,name'])
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(100)
             ->get();
 
@@ -92,6 +93,7 @@ class StudentApiController extends ApiController
         $items = Homework::whereIn('group_id', $groupIds)
             ->with('group:id,name')
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(50)
             ->get();
 
@@ -213,6 +215,7 @@ class StudentApiController extends ApiController
         $rows = LessonSkillGrade::where('user_id', $me->id)
             ->whereNotNull('score')
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(200)
             ->get(['skill', 'score', 'created_at']);
 
@@ -241,6 +244,7 @@ class StudentApiController extends ApiController
             ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
             ->select('assessments.*', 'lesson_and_histories.name as test_name')
             ->orderByDesc('assessments.created_at')
+            ->orderByDesc('assessments.id')
             ->limit(15)
             ->get();
 
@@ -266,6 +270,7 @@ class StudentApiController extends ApiController
         $items = Certificate::where('user_id', $request->user()->id)
             ->with('group:id,name')
             ->orderByDesc('issued_at')
+            ->orderByDesc('id')
             ->get();
 
         return $this->ok($items->map(fn(Certificate $c) => [

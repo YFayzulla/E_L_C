@@ -19,6 +19,7 @@ class TestResultController extends Controller
             // 1. Test tarixlarini olish (data = 2 bu test ekanligini bildiradi)
             $testHistories = LessonAndHistory::where('data', 2)
                 ->latest() // Eng oxirgi testlar tepada turishi uchun
+                ->orderByDesc('id')
                 ->get();
 
             // 2. Top 5 talaba
@@ -26,6 +27,7 @@ class TestResultController extends Controller
             // Bu orqali View faylida talaba ismini olishda ortiqcha so'rovlar bo'lmaydi.
             $topStudents = Assessment::with('student:id,name,photo') // Faqat kerakli ustunlar
             ->orderBy('get_mark', 'desc')
+                ->orderBy('id')
                 ->take(5)
                 ->get();
 
@@ -56,6 +58,8 @@ class TestResultController extends Controller
             // OPTIMIZATSIYA: with('student') - N+1 muammosini yechish uchun
             $assessments = Assessment::where('history_id', $historyId)
                 ->with('student:id,name') // Talaba ma'lumotlarini oldindan yuklash
+                ->orderByDesc('get_mark')
+                ->orderBy('id')
                 ->get();
 
             // 3. Guruh ma'lumotlarini aniqlash

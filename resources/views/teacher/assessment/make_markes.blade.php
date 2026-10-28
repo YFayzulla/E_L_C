@@ -45,7 +45,7 @@
                                  takrorlaydi, ya'ni ortiqcha. --}}
                             <th style="min-width: 7rem;">
                                 <i class="bx bx-calculator me-1"></i>
-                                {{ config('grading.overall_label', 'Umumiy') }}
+                                {{ config('grading.skill_mode') === 'single' ? config('grading.overall_label', 'Umumiy') : '4 ko‘nikma o‘rtachasi' }}
                             </th>
                         @endif
                         <th style="min-width: 14rem;">Izoh</th>
@@ -69,6 +69,7 @@
                                            name="score[{{ $student->id }}][{{ $skill }}]"
                                            value="{{ old($field) }}"
                                            class="form-control grade-input js-score @error($field) is-invalid @enderror"
+                                           data-skill="{{ $skill }}"
                                            placeholder="—"
                                            aria-label="{{ $student->name }} — {{ $labels[$skill] ?? $skill }}">
                                     @error($field) <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -107,6 +108,7 @@
 
             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="text-muted" style="font-size: .85rem;">
+                    Umumiy ball Reading, Listening, Writing va Speaking o‘rtachasidan hisoblanadi; Grammatika alohida baholanadi.
                     Bo‘sh katak «baholanmagan» degani — u o‘rtachaga kirmaydi.
                     <strong>0</strong> esa haqiqiy baho va saqlanadi.
                 </div>
@@ -125,6 +127,7 @@
 
             function recalc(row) {
                 const values = [...row.querySelectorAll('.js-score')]
+                    .filter(i => i.dataset.skill !== 'grammar')
                     .map(i => i.value.trim())
                     .filter(v => v !== '')
                     .map(Number)

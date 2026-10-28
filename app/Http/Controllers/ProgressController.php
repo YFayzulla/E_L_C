@@ -40,6 +40,7 @@ class ProgressController extends Controller
                 ->withCount(['students as members_count'])
                 ->with('teachers')
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get();
 
             // One pass for every group — forGroup() in a loop would be eight
@@ -107,7 +108,9 @@ class ProgressController extends Controller
         $this->assertTeachesStudent($student);
 
         try {
-            $studentModel = User::inCurrentCentre()->with('groups')->findOrFail($student);
+            $studentModel = User::inCurrentCentre()
+                ->with(['groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id')])
+                ->findOrFail($student);
 
             $progress = $this->progress()->forStudent($student);
 
@@ -178,12 +181,14 @@ class ProgressController extends Controller
             )
                 ->where('assessments.user_id', $userId)
                 ->orderByDesc('assessments.created_at')
+                ->orderByDesc('assessments.id')
                 ->limit(6)
                 ->get(['assessments.*', 'lesson_and_histories.name as test_name']),
 
             'homework' => HomeworkSubmission::with('homework:id,title,max_score,due_date')
                 ->where('user_id', $userId)
                 ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->limit(6)
                 ->get(),
 
@@ -199,6 +204,7 @@ class ProgressController extends Controller
                 ->where('user_id', $userId)
                 ->whereIn('status', [0, 2])
                 ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->limit(6)
                 ->get(),
         ];

@@ -38,6 +38,7 @@ class DeptStudentController extends Controller
                 END
             ")
             ->orderBy('users.name')
+            ->orderBy('users.id')
             ->get();
 
 

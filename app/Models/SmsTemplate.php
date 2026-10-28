@@ -144,7 +144,7 @@ class SmsTemplate extends Model
 
     public function scopeOrdered(Builder $query): Builder
     {
-        return $query->orderBy('sort_order')->orderBy('name');
+        return $query->orderBy('sort_order')->orderBy('name')->orderBy('id');
     }
 
     public function eventLabel(): string

@@ -52,6 +52,7 @@ class StudentController extends Controller
                 ->with('groups')
                 ->when(! $showAll, fn($q) => $q->billable())
                 ->orderBy("name")
+                ->orderBy('id')
                 ->get();
 
             $hidden = $showAll
@@ -75,8 +76,9 @@ class StudentController extends Controller
 
             // O'qituvchi faqat o'z (faol) guruhlarini ko'radi.
             $groups = $isAdmin
-                ? Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get()
-                : Group::whereIn('id', $this->accessibleGroupIds())->teaching()->active()->orderBy('name')->get();
+                ? Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name, id")->get()
+                : Group::whereIn('id', $this->accessibleGroupIds())
+                    ->teaching()->active()->orderBy('name')->orderBy('id')->get();
 
             $selectedGroupId = (int) request()->query('group');
 
@@ -207,13 +209,17 @@ class StudentController extends Controller
         $this->assertTeachesStudent((int) $id);
 
         try {
-            $student = User::inCurrentCentre()->with('groups')->findOrFail($id);
-            $attendances = Attendance::where('user_id', $id)->latest()->paginate(10);
+            $student = User::inCurrentCentre()
+                ->with(['groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id')])
+                ->findOrFail($id);
+            $attendances = Attendance::where('user_id', $id)
+                ->latest('created_at')->orderByDesc('id')->paginate(10);
             // `actor` oldindan yuklanadi: aks holda tarixdagi har bir qator
             // uchun bittadan qo'shimcha so'rov ketardi.
             $groupHistory = StudentInformation::where('user_id', $id)
                 ->with('actor:id,name,photo')
                 ->orderBy('created_at', 'desc')
+                ->orderByDesc('id')
                 ->get();
 
             // Fetch test results (Assessments)
@@ -222,6 +228,7 @@ class StudentController extends Controller
                 ->join('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
                 ->select('assessments.*', 'lesson_and_histories.name as test_name')
                 ->latest('assessments.created_at')
+                ->orderByDesc('assessments.id')
                 ->get();
 
             $progress = app(ProgressService::class)->forStudent((int) $id);
@@ -241,8 +248,10 @@ class StudentController extends Controller
     public function edit($id)
     {
         try {
-            $student = User::inCurrentCentre()->with('groups')->findOrFail($id);
-            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name")->get();
+            $student = User::inCurrentCentre()
+                ->with(['groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id')])
+                ->findOrFail($id);
+            $groups = Group::orderByRaw("CASE WHEN name = 'Waiting Room' THEN 1 ELSE 0 END, name, id")->get();
             $guardians = $this->parents->guardiansOf($student);
 
             return view('admin.student.edit', compact('student', 'groups', 'guardians'));

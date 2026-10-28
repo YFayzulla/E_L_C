@@ -17,7 +17,8 @@ class StaffNotificationController extends Controller
     {
         $notifications = StaffNotification::for(auth()->user())
             ->with('actor:id,name')
-            ->latest()
+            ->latest('created_at')
+            ->orderByDesc('id')
             ->paginate(30);
 
         return view('notifications.index', compact('notifications'));

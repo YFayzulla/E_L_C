@@ -116,8 +116,9 @@ class AttendanceAdminController extends Controller
                 'teacherId' => $teacherId,
                 'groupOptions' => Group::whereIn('id', $accessibleIds)
                     ->orderBy('name')
+                    ->orderBy('id')
                     ->get(['id', 'name']),
-                'teacherOptions' => User::role('user')->orderBy('name')->get(['id', 'name']),
+                'teacherOptions' => User::role('user')->orderBy('name')->orderBy('id')->get(['id', 'name']),
                 'totalLessons' => $totalLessons,
                 'totalAbsent' => $totalAbsent,
                 'totalLate' => $totalLate,
@@ -188,6 +189,7 @@ class AttendanceAdminController extends Controller
                 'status' => $status,
                 'groupOptions' => Group::whereIn('id', $accessibleIds)
                     ->orderBy('name')
+                    ->orderBy('id')
                     ->get(['id', 'name']),
                 'absentTotal' => (int) ($totals->absent_total ?? 0),
                 'lateTotal' => (int) ($totals->late_total ?? 0),

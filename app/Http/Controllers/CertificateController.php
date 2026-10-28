@@ -45,7 +45,7 @@ class CertificateController extends Controller
 
             return view('admin.certificate.index', [
                 'certificates' => $certificates,
-                'groups'       => Group::orderBy('name')->get(['id', 'name']),
+                'groups'       => Group::orderBy('name')->orderBy('id')->get(['id', 'name']),
             ]);
         } catch (\Exception $e) {
             Log::error('CertificateController@index error: ' . $e->getMessage());
@@ -57,8 +57,8 @@ class CertificateController extends Controller
     public function create()
     {
         return view('admin.certificate.create', [
-            'students'  => User::role('student')->orderBy('name')->get(['id', 'name', 'phone']),
-            'groups'    => Group::orderBy('name')->get(['id', 'name']),
+            'students'  => User::role('student')->orderBy('name')->orderBy('id')->get(['id', 'name', 'phone']),
+            'groups'    => Group::orderBy('name')->orderBy('id')->get(['id', 'name']),
             'preselect' => (int) request('student_id') ?: null,
             'serial'    => Certificate::nextSerial(),
         ]);

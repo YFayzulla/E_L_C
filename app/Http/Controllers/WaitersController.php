@@ -23,6 +23,8 @@ class WaitersController extends Controller
             $groups = Group::select('id', 'name', 'room_id')
                 ->teaching()
                 ->orderBy('room_id')
+                ->orderBy('name')
+                ->orderBy('id')
                 ->get();
 
             // 2. Kutish zalidagi talabalarni olish (group_id = 1) yoki guruhsizlar
@@ -38,7 +40,8 @@ class WaitersController extends Controller
                           });
                 })
                 ->select('id', 'name', 'phone', 'parents_tel', 'created_at', 'photo') // Viewga kerakli ustunlarni yozing
-                ->latest('created_at') // Yoki ->orderBy('name')
+                ->latest('created_at')
+                ->orderByDesc('id')
                 ->get();
 
             return view('admin.waiters.index', compact('students', 'groups'));

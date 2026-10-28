@@ -35,6 +35,7 @@ class TeacherApiController extends ApiController
             ->with('room:id,room')
             ->withCount(['students as members_count'])
             ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         return $this->ok($groups->map(fn(Group $g) => [
@@ -56,6 +57,7 @@ class TeacherApiController extends ApiController
         $students = User::role('student')
             ->whereHas('groups', fn($q) => $q->where('groups.id', $group))
             ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'name', 'phone', 'photo', 'mark']);
 
         return $this->ok($students->map(fn(User $s) => [
@@ -82,6 +84,7 @@ class TeacherApiController extends ApiController
         $students = User::role('student')
             ->whereHas('groups', fn($q) => $q->where('groups.id', $group))
             ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'name', 'photo']);
 
         $lesson = LessonAndHistory::where('group', $group)
@@ -223,6 +226,7 @@ class TeacherApiController extends ApiController
                 'submissions as graded_count'    => fn($q) => $q->whereNotNull('score'),
             ])
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(50)
             ->get();
 
@@ -285,7 +289,10 @@ class TeacherApiController extends ApiController
 
         $submissions = $homework->submissions()->get()->keyBy('user_id');
 
-        $roster = $homework->roster()->get(['users.id', 'users.name', 'users.photo']);
+        $roster = $homework->roster()
+            ->orderBy('users.name')
+            ->orderBy('users.id')
+            ->get(['users.id', 'users.name', 'users.photo']);
 
         return $this->ok([
             'homework' => [
@@ -383,6 +390,7 @@ class TeacherApiController extends ApiController
             ->where('data', 1)
             ->where('created_at', '>=', now()->subDays(60))
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(30)
             ->get(['id', 'name', 'created_at']);
 
@@ -403,6 +411,7 @@ class TeacherApiController extends ApiController
         $students = User::role('student')
             ->whereHas('groups', fn($q) => $q->where('groups.id', $group))
             ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'name']);
 
         $existing = $lessonId

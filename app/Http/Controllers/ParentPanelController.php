@@ -24,8 +24,14 @@ class ParentPanelController extends Controller
             $parent = auth()->user();
 
             $children = $parent->children()
-                ->with(['groups.teachers', 'groups.room', 'deptStudent'])
+                ->with([
+                    'groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id'),
+                    'groups.teachers',
+                    'groups.room',
+                    'deptStudent',
+                ])
                 ->orderBy('name')
+                ->orderBy('users.id')
                 ->get()
                 ->map(function (User $child) {
                     $child->setAttribute('attendance_rate', $child->attendanceRate());
@@ -57,12 +63,14 @@ class ParentPanelController extends Controller
                 ->whereIn('status', [0, 2])
                 ->with(['group', 'lesson'])
                 ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->paginate(12);
 
             $testResults = Assessment::where('assessments.user_id', $child->id)
                 ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
                 ->select('assessments.*', 'lesson_and_histories.name as test_name')
                 ->orderByDesc('assessments.created_at')
+                ->orderByDesc('assessments.id')
                 ->limit(20)
                 ->get();
 
@@ -97,6 +105,7 @@ class ParentPanelController extends Controller
                 ->whereIn('status', [0, 2])
                 ->with(['user', 'group', 'lesson'])
                 ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->paginate(20);
 
             return view('parent.attendance', compact('attendances'));
@@ -114,7 +123,8 @@ class ParentPanelController extends Controller
     public function payments()
     {
         try {
-            $children = auth()->user()->children()->with('deptStudent')->orderBy('name')->get();
+            $children = auth()->user()->children()->with('deptStudent')
+                ->orderBy('name')->orderBy('users.id')->get();
 
             return view('parent.payments', compact('children'));
         } catch (\Exception $e) {
@@ -130,7 +140,11 @@ class ParentPanelController extends Controller
     private function resolveChild($id): User
     {
         $child = auth()->user()->children()
-            ->with(['groups.teachers', 'deptStudent'])
+            ->with([
+                'groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id'),
+                'groups.teachers',
+                'deptStudent',
+            ])
             ->where('users.id', $id)
             ->first();
 

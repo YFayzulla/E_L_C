@@ -63,7 +63,7 @@ class ReceptionAttendanceController extends Controller
                 'to' => $to->format('Y-m-d'),
                 'groupId' => $groupId,
                 'followStatus' => $followStatus,
-                'groups' => Group::query()->teaching()->orderBy('name')->get(['id', 'name']),
+                'groups' => Group::query()->teaching()->orderBy('name')->orderBy('id')->get(['id', 'name']),
                 'followStatuses' => AbsenceFollowUp::statuses(),
             ]);
         } catch (\Exception $e) {

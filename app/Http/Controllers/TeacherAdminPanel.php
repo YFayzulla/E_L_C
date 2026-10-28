@@ -29,10 +29,7 @@ class TeacherAdminPanel extends Controller
     public function group()
     {
         try {
-            $teacherId = auth()->id();
-            $groups = GroupTeacher::where('teacher_id', $teacherId)
-                ->with('group')
-                ->get();
+            $groups = $this->teacherGroups(Auth::id());
             return view('teacher.group', compact('groups'));
         } catch (\Exception $e) {
             Log::error('TeacherAdminPanel@group error: ' . $e->getMessage());
@@ -220,8 +217,7 @@ class TeacherAdminPanel extends Controller
 
     public function groups()
     {
-        $teacherId = Auth::id();
-        $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
+        $groups = $this->teacherGroups(Auth::id(), true);
         return view('teacher.group.index', compact('groups'));
     }
 
@@ -239,9 +235,25 @@ class TeacherAdminPanel extends Controller
 
     public function assessmentGroups()
     {
-        $teacherId = Auth::id();
-        $groups = GroupTeacher::where('teacher_id', $teacherId)->with('group')->get();
+        $groups = $this->teacherGroups(Auth::id());
         return view('teacher.assessment.index', compact('groups'));
+    }
+
+    /** Group and student rosters should be deterministic and alphabetical. */
+    private function teacherGroups(int $teacherId, bool $includeStudents = false)
+    {
+        $relations = $includeStudents
+            ? ['group.students' => fn($query) => $query->orderBy('users.name')->orderBy('users.id')]
+            : ['group'];
+
+        return GroupTeacher::query()
+            ->where('teacher_id', $teacherId)
+            ->with($relations)
+            ->orderBy('id')
+            ->get()
+            ->filter(fn($membership) => $membership->group !== null)
+            ->sortBy(fn($membership) => mb_strtolower($membership->group->name), SORT_NATURAL)
+            ->values();
     }
 
     public function studentComment(Request $request, $id)

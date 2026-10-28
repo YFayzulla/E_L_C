@@ -254,6 +254,13 @@ class LessonSkillGradeController extends Controller
                 (array) config('grading.skills', []),
                 $rows->pluck('skill')->filter()->unique()->all()
             )));
+            $coreSkills = array_values(array_intersect(
+                ['reading', 'listening', 'writing', 'speaking'],
+                $skills
+            ));
+            $overallSkills = $coreSkills !== []
+                ? $coreSkills
+                : array_values(array_diff($skills, ['grammar']));
 
             // [user id][skill] => ['avg' => int, 'marks' => int]
             $matrix = [];
@@ -265,27 +272,33 @@ class LessonSkillGradeController extends Controller
                 ];
             }
 
-            // Per-student overall + the group average of the student averages,
-            // so one very active student cannot dominate the summary row.
+            // Per-student overall + per-skill group averages. Each student
+            // contributes once to the group overall regardless of marks count.
             $overall     = [];
             $groupTotals = array_fill_keys($skills, ['sum' => 0, 'n' => 0]);
 
             foreach ($students as $student) {
                 $values = [];
 
-                foreach ($skills as $skill) {
+                foreach ($overallSkills as $skill) {
                     if (! isset($matrix[$student->id][$skill])) {
                         continue;
                     }
 
                     $value    = $matrix[$student->id][$skill]['avg'];
                     $values[] = $value;
-
-                    $groupTotals[$skill]['sum'] += $value;
-                    $groupTotals[$skill]['n']++;
                 }
 
                 $overall[$student->id] = $values === [] ? null : (int) round(array_sum($values) / count($values));
+
+                foreach ($skills as $skill) {
+                    if (! isset($matrix[$student->id][$skill])) {
+                        continue;
+                    }
+
+                    $groupTotals[$skill]['sum'] += $matrix[$student->id][$skill]['avg'];
+                    $groupTotals[$skill]['n']++;
+                }
             }
 
             $groupAverages = [];
@@ -295,18 +308,23 @@ class LessonSkillGradeController extends Controller
                     : null;
             }
 
-            $present            = array_filter($groupAverages, fn($v) => $v !== null);
-            $groupOverall       = $present === [] ? null : (int) round(array_sum($present) / count($present));
+            $presentOverall     = array_filter($overall, fn($value) => $value !== null);
+            $groupOverall       = $presentOverall === []
+                ? null
+                : (int) round(array_sum($presentOverall) / count($presentOverall));
+            $groupGrammarAverage = $groupAverages['grammar'] ?? null;
             $totalMarks         = (int) $rows->sum('marks');
 
             return view('teacher.skills.report', [
                 'group'         => $groupModel,
                 'students'      => $students,
                 'skills'        => $skills,
+                'coreSkills'    => $coreSkills,
                 'matrix'        => $matrix,
                 'overall'       => $overall,
                 'groupAverages' => $groupAverages,
                 'groupOverall'  => $groupOverall,
+                'groupGrammarAverage' => $groupGrammarAverage,
                 'totalMarks'    => $totalMarks,
                 'from'          => $from,
                 'to'            => $to,
@@ -374,6 +392,7 @@ class LessonSkillGradeController extends Controller
         return User::role('student')
             ->whereHas('groups', fn($q) => $q->where('groups.id', $group))
             ->orderBy('users.name')
+            ->orderBy('users.id')
             ->get(['users.id', 'users.name', 'users.photo']);
     }
 

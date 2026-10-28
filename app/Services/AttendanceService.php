@@ -38,6 +38,7 @@ class AttendanceService
         $students = User::role('student')
             ->whereHas('groups', fn($query) => $query->where('groups.id', $group->id))
             ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         // id => name. Names are NOT unique, so the grid is keyed by id and the
@@ -95,6 +96,7 @@ class AttendanceService
             ->whereMonth('created_at', $month)
             ->with(['user:id,name', 'teacher:id,name', 'lesson:id,name', 'reasonWriter:id,name', 'latestFollowUp.recorder:id,name'])
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(15)
             ->appends(request()->only('date'));
 

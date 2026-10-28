@@ -70,7 +70,7 @@ class HomeworkController extends Controller
                 ->paginate(15)
                 ->withQueryString();
 
-            $groups = Group::whereIn('id', $groupIds)->orderBy('name')->get(['id', 'name']);
+            $groups = Group::whereIn('id', $groupIds)->orderBy('name')->orderBy('id')->get(['id', 'name']);
 
             return view('teacher.homework.index', [
                 'homeworks'    => $homeworks,
@@ -90,6 +90,7 @@ class HomeworkController extends Controller
         try {
             $groups = Group::whereIn('id', $this->accessibleGroupIds())
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get(['id', 'name']);
 
             if ($groups->isEmpty()) {
@@ -187,6 +188,7 @@ class HomeworkController extends Controller
         try {
             $groups = Group::whereIn('id', $this->accessibleGroupIds())
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get(['id', 'name']);
 
             return view('teacher.homework.edit', [
@@ -301,7 +303,10 @@ class HomeworkController extends Controller
         try {
             $homework->load('group:id,name');
 
-            $students = $homework->roster()->get(['users.id', 'users.name', 'users.phone', 'users.photo']);
+            $students = $homework->roster()
+                ->orderBy('users.name')
+                ->orderBy('users.id')
+                ->get(['users.id', 'users.name', 'users.phone', 'users.photo']);
 
             $submissions = $homework->submissions()->get()->keyBy('user_id');
 
@@ -432,7 +437,7 @@ class HomeworkController extends Controller
 
             return view('admin.homework.index', [
                 'homeworks'      => $homeworks,
-                'groups'         => Group::orderBy('name')->get(['id', 'name']),
+                'groups'         => Group::orderBy('name')->orderBy('id')->get(['id', 'name']),
                 'memberCounts'   => $this->memberCounts($homeworks->pluck('group_id')),
                 'filters'        => $filters,
                 'totalHomeworks' => $totalHomeworks,

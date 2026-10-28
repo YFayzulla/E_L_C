@@ -45,7 +45,7 @@ class PdfController extends Controller
                 $query->whereDate('date', $endDate);
             }
 
-            $payments = $query->latest('date')->get();
+            $payments = $query->orderByDesc('date')->orderByDesc('id')->get();
 
             $pdf = PDF::loadView('admin.pdf.payments', ['users' => $payments]);
             $fileName = 'payments_report_' . now()->format('Y-m-d_H-i') . '.pdf';
@@ -73,7 +73,8 @@ class PdfController extends Controller
             // Fetch attendances with necessary relationships
             $attendances = Attendance::where('user_id', $id)
                 ->with(['group', 'user']) // Load group and user info
-                ->latest()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->get();
 
             $pdf = PDF::loadView('admin.pdf.student_show', [
@@ -174,7 +175,11 @@ class PdfController extends Controller
             // Assessment jadvalida 'group' ustuni string bo'lgani uchun, nom bo'yicha qidiramiz
             $assessments = Assessment::where('group', $group->name)
                 ->with('user:id,name') // Eager load student name
-                ->get();
+                ->orderBy('user_id')
+                ->orderBy('id')
+                ->get()
+                ->sortBy(fn ($assessment) => mb_strtolower($assessment->user->name ?? ''), SORT_NATURAL)
+                ->values();
 
             if ($assessments->isEmpty()) {
                  return redirect()->back()->with('warning', 'Ushbu guruh uchun baholash natijalari topilmadi.');

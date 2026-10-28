@@ -312,12 +312,18 @@ class Controller extends BaseController
      */
     private function studentDashboardData(User $student): array
     {
-        $student->loadMissing(['groups.teachers', 'groups.room', 'deptStudent']);
+        $student->loadMissing([
+            'groups' => fn($query) => $query->orderBy('groups.name')->orderBy('groups.id'),
+            'groups.teachers',
+            'groups.room',
+            'deptStudent',
+        ]);
 
         $absences = Attendance::where('user_id', $student->id)
             ->whereIn('status', [0, 2])
             ->with(['group', 'lesson'])
             ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->limit(8)
             ->get();
 
@@ -325,6 +331,7 @@ class Controller extends BaseController
             ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
             ->select('assessments.*', 'lesson_and_histories.name as test_name')
             ->orderByDesc('assessments.created_at')
+            ->orderByDesc('assessments.id')
             ->limit(8)
             ->get();
 
@@ -351,7 +358,11 @@ class Controller extends BaseController
      */
     private function teacherDashboardData(User $teacher): array
     {
-        $groups = $teacher->teacherGroups()->with('students')->get();
+        $groups = $teacher->teacherGroups()
+            ->with(['students' => fn($query) => $query->orderBy('users.name')->orderBy('users.id')])
+            ->orderBy('groups.name')
+            ->orderBy('groups.id')
+            ->get();
         $groupIds = $groups->pluck('id');
 
         return [
@@ -363,10 +374,13 @@ class Controller extends BaseController
                 ->whereIn('status', [0, 2])
                 ->whereDate('created_at', Carbon::today())
                 ->with(['user:id,name', 'group:id,name'])
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->get(),
             'recent_lessons' => LessonAndHistory::whereIn('group', $groupIds)
                 ->where('data', 1)
                 ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->limit(6)
                 ->get(),
         ];

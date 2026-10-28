@@ -76,7 +76,10 @@ class AssistantHomeworkController extends Controller
 
             return view('assistant.homework.grade', [
                 'homework' => $homework,
-                'students' => $homework->roster()->get(['users.id', 'users.name', 'users.phone', 'users.photo']),
+                'students' => $homework->roster()
+                    ->orderBy('users.name')
+                    ->orderBy('users.id')
+                    ->get(['users.id', 'users.name', 'users.phone', 'users.photo']),
                 'submissions' => $homework->submissions()->get()->keyBy('user_id'),
             ]);
         } catch (\Exception $e) {

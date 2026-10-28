@@ -43,6 +43,7 @@ class TeacherController extends Controller
                 ->with(['teacherGroups:id,name', 'roles'])
                 ->withCount(['teacherGroups as groups_count'])
                 ->orderBy('name')
+                ->orderBy('id')
                 ->get();
 
             // Bitta guruhlangan so'rov - qator boshiga teacherHasStudents() chaqirmaymiz.
@@ -69,9 +70,10 @@ class TeacherController extends Controller
                 'group' => fn($q) => $q->withCount(['students as members_count']),
             ])
                 ->where('teacher_id', $teacher->id)
+                ->orderBy('id')
                 ->get()
                 ->filter(fn($link) => $link->group !== null)
-                ->sortBy(fn($link) => $link->group->name)
+                ->sortBy(fn($link) => mb_strtolower($link->group->name), SORT_NATURAL)
                 ->values();
 
             $groupIds = $groupLinks->pluck('group_id')->map(fn($v) => (int) $v)->all();
@@ -105,6 +107,7 @@ class TeacherController extends Controller
                     ->where(fn($q) => $q->whereNull('study_status')->orWhere('study_status', User::STUDY_ACTIVE))
                     ->with('groups:id,name')
                     ->orderBy('name')
+                    ->orderBy('id')
                     ->get(['users.id', 'users.name', 'users.phone'])
                     ->sortBy(fn($s) => $s->groups->reject(fn($g) => (int) $g->id === $waitingRoomId)->isEmpty() ? 0 : 1)
                     ->values();

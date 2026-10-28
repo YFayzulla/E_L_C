@@ -40,11 +40,12 @@ class GroupController extends Controller
                 ->withCount(['students as members_count'])
                 ->filter($filters)
                 ->orderBy($sortCol, $sortDir)
+                ->orderBy('groups.id')
                 ->paginate(25)
                 ->withQueryString();
 
-            $teachers = User::role('user')->orderBy('name')->get(['id', 'name']);
-            $rooms = Room::orderBy('room')->get(['id', 'room']);
+            $teachers = User::role('user')->orderBy('name')->orderBy('id')->get(['id', 'name']);
+            $rooms = Room::orderBy('room')->orderBy('id')->get(['id', 'room']);
 
             return view('admin.group.index', compact('groups', 'teachers', 'rooms'));
         } catch (\Exception $e) {

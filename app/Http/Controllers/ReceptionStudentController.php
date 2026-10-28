@@ -238,6 +238,7 @@ class ReceptionStudentController extends Controller
             ->teaching()
             ->active()
             ->orderBy('name')
+            ->orderBy('id')
             ->get(['id', 'name']);
     }
 }

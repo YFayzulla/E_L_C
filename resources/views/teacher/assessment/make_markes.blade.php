@@ -57,17 +57,17 @@
 
         <div class="card">
             <div class="table-responsive">
-                <table class="table align-middle grade-table mb-0">
+                <table class="table align-middle grade-table marks-table mb-0">
                     <thead>
                     <tr>
-                        <th style="min-width: 13rem;">Talaba</th>
+                        <th>Talaba</th>
                         @foreach($skills as $skill)
-                            <th style="min-width: 7rem;" class="js-skill-head" data-skill="{{ $skill }}">
+                            <th class="js-skill-head" data-skill="{{ $skill }}">
                                 <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
                                     <input type="checkbox" class="form-check-input mt-0 js-skill-toggle"
                                            name="skills[]" value="{{ $skill }}"
                                            @checked(in_array($skill, $selectedSkills, true))>
-                                    <i class="bx {{ $icons[$skill] ?? 'bx-star' }}"></i>
+                                    <i class="bx {{ $icons[$skill] ?? 'bx-star' }} d-none d-xxl-inline"></i>
                                     {{ $labels[$skill] ?? ucfirst($skill) }}
                                 </label>
                             </th>
@@ -76,22 +76,22 @@
                             {{-- Bitta ko'nikma bo'lsa bu ustunlar o'sha bahoni
                                  takrorlaydi, ya'ni ortiqcha. Ular serverga
                                  yuborilmaydi — faqat ko'rsatish uchun. --}}
-                            <th style="min-width: 7rem;">
+                            <th>
                                 <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
                                     <input type="checkbox" class="form-check-input mt-0 js-agg-toggle"
                                            data-agg="average" checked>
-                                    <i class="bx bx-calculator"></i> O‘rtacha
+                                    <i class="bx bx-calculator d-none d-xxl-inline"></i> O‘rtacha
                                 </label>
                             </th>
-                            <th style="min-width: 7rem;">
+                            <th>
                                 <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
                                     <input type="checkbox" class="form-check-input mt-0 js-agg-toggle"
                                            data-agg="sum" checked>
-                                    <i class="bx bx-plus-circle"></i> Yig‘indi
+                                    <i class="bx bx-plus-circle d-none d-xxl-inline"></i> Yig‘indi
                                 </label>
                             </th>
                         @endif
-                        <th style="min-width: 14rem;">Izoh</th>
+                        <th style="min-width: 8rem;">Izoh</th>
                     </tr>
                     </thead>
 
@@ -135,7 +135,7 @@
                                 <input type="text" maxlength="250"
                                        name="comment[{{ $student->id }}]"
                                        value="{{ old("comment.{$student->id}") }}"
-                                       class="form-control @error("comment.{$student->id}") is-invalid @enderror"
+                                       class="form-control form-control-sm @error("comment.{$student->id}") is-invalid @enderror"
                                        placeholder="Ixtiyoriy izoh">
                                 @error("comment.{$student->id}")
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -164,6 +164,23 @@
             </div>
         </div>
     </form>
+
+    {{-- Jadval odatiy ekranga (1280px) gorizontal scroll'siz sig'ishi uchun:
+         kataklar oralig'i va ball maydonlari ixchamroq. Faqat shu sahifa —
+         boshqa baholash jadvallari .grade-table ni o'zgarishsiz ishlatadi. --}}
+    <style>
+        html[data-theme] .marks-table th,
+        html[data-theme] .marks-table td { padding: .45rem .4rem; }
+        html[data-theme] .marks-table th:first-child,
+        html[data-theme] .marks-table td:first-child { padding-left: 1rem; width: 13rem; max-width: 13rem; }
+        /* Uzun ism ikki qatorga o'tadi — ustunni kengaytirmaydi. */
+        html[data-theme] .marks-table td:first-child .text-truncate { white-space: normal; }
+        html[data-theme] .marks-table thead th { font-size: .72rem; white-space: nowrap; }
+        html[data-theme] .marks-table thead label { justify-content: center; }
+        html[data-theme] .marks-table .grade-input { max-width: 4.2rem; min-width: 3.6rem; margin: 0 auto; padding: .35rem .25rem; }
+        html[data-theme] .marks-table td { text-align: center; }
+        html[data-theme] .marks-table td:last-child { text-align: left; }
+    </style>
 
     <script>
         (function () {

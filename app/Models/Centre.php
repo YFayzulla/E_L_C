@@ -60,6 +60,8 @@ class Centre extends Model
         // Ko'nikma baholash usuli: 'skills' yoki 'single'. Markaz uni
         // Sozlamalar sahifasidan o'zgartiradi.
         'skill_mode',
+        // Ko'nikma bo'yicha maksimal ball (grammatika 50 dan va h.k.).
+        'skill_max',
     ];
 
     protected $fillable = [

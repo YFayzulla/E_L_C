@@ -40,8 +40,8 @@
                             <th style="width: 1%;"></th>
                             <th style="width: 1%;">#</th>
                             <th>Talaba</th>
-                            @foreach($skills as $label)
-                                <th class="text-center">{{ $label }}</th>
+                            @foreach($skills as $skill => $label)
+                                <th class="text-center">{{ $label }} <span class="text-muted fw-normal">/{{ $maxes[$skill] ?? 100 }}</span></th>
                             @endforeach
                             @if(count($skills) > 1)
                                 <th class="text-center">O‘rtacha</th>
@@ -68,7 +68,7 @@
                                 @foreach($skills as $skill => $label)
                                     <td class="text-center">
                                         @if(array_key_exists($skill, $row->marks))
-                                            <span class="badge bg-label-{{ $tone($row->marks[$skill]) }}">{{ $row->marks[$skill] }}</span>
+                                            <span class="badge bg-label-{{ $tone($row->marks[$skill]['percent']) }}" title="{{ $row->marks[$skill]['percent'] }}%">{{ $row->marks[$skill]['mark'] }}</span>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -76,9 +76,9 @@
                                 @endforeach
                                 @if(count($skills) > 1)
                                     <td class="text-center">
-                                        <span class="badge bg-label-{{ $tone($row->average) }}" style="font-size: .9rem;">{{ $row->average ?? '—' }}</span>
+                                        <span class="badge bg-label-{{ $tone($row->average) }}" style="font-size: .9rem;">{{ $row->average === null ? '—' : $row->average . '%' }}</span>
                                     </td>
-                                    <td class="text-center fw-semibold">{{ $row->sum }}</td>
+                                    <td class="text-center fw-semibold">{{ $row->sum }}/{{ $row->sum_max }}</td>
                                 @endif
                                 <td class="text-end">
                                     {{-- Ko'chirish sahifasi: summa, qarzdorlik va guruh tarixini

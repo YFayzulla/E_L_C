@@ -184,9 +184,13 @@ class SmsTemplate extends Model
     {
         $student->loadMissing(['groups', 'deptStudent']);
 
+        // "45/50" — xom ball maksimumi bilan, aks holda 50 dan 45 ham "45"
+        // bo'lib ko'rinib, ota-onani chalg'itardi.
         $latestMark = Assessment::where('user_id', $student->id)
             ->orderByDesc('created_at')
-            ->value('get_mark');
+            ->orderByDesc('id')
+            ->first()
+            ?->fraction();
 
         $absencesThisMonth = Attendance::where('user_id', $student->id)
             ->whereIn('status', [0, 2])

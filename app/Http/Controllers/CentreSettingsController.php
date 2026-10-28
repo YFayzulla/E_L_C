@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centre;
+use App\Services\ScoreScale;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +21,7 @@ use Illuminate\Validation\Rule;
 class CentreSettingsController extends Controller
 {
     /** Faqat shu kalitlar shu sahifadan boshqariladi. */
-    private const EDITABLE = ['skill_mode'];
+    private const EDITABLE = ['skill_mode', 'skill_max'];
 
     public function edit()
     {
@@ -34,6 +35,8 @@ class CentreSettingsController extends Controller
             // Namuna sifatida ko'rsatish uchun: standart ko'nikmalar ro'yxati
             // config'da qoladi, hatto 'single' usulida ham.
             'skillList' => (array) config('grading.skill_labels', []),
+            // Ko'nikma => maksimal ball (markazniki yoki standart 100).
+            'skillMax'  => ScoreScale::maxes(array_keys((array) config('grading.skill_labels', []))),
         ]);
     }
 
@@ -43,11 +46,26 @@ class CentreSettingsController extends Controller
 
         abort_if($centre === null, 404, 'O‘quv markazi aniqlanmadi.');
 
+        $skillKeys = array_keys((array) config('grading.skill_labels', []));
+        $limit = (int) config('grading.skill_max_limit', 1000);
+
         $data = $request->validate([
-            'skill_mode' => ['required', Rule::in(['skills', 'single'])],
+            'skill_mode'  => ['required', Rule::in(['skills', 'single'])],
+            'skill_max'   => ['nullable', 'array'],
+            'skill_max.*' => ['nullable', 'integer', 'min:1', "max:{$limit}"],
         ], [
-            'skill_mode.in' => 'Baholash usuli noto‘g‘ri.',
+            'skill_mode.in'       => 'Baholash usuli noto‘g‘ri.',
+            'skill_max.*.integer' => 'Maksimal ball butun son bo‘lishi kerak.',
+            'skill_max.*.min'     => 'Maksimal ball kamida 1 bo‘lishi kerak.',
+            'skill_max.*.max'     => "Maksimal ball {$limit} dan oshmasligi kerak.",
         ]);
+
+        // Faqat ma'lum ko'nikmalar; bo'sh qoldirilgani standart (100) ga qaytadi.
+        $data['skill_max'] = collect((array) ($data['skill_max'] ?? []))
+            ->only($skillKeys)
+            ->filter(fn ($value) => filled($value))
+            ->map(fn ($value) => (int) $value)
+            ->all();
 
         // Faqat ruxsat etilgan kalitlar yoziladi va qolgan sozlamalar
         // saqlanadi — settings JSON boshqa narsalarni ham tutadi.
@@ -67,7 +85,7 @@ class CentreSettingsController extends Controller
 
         return redirect()->route('settings.edit')->with(
             'success',
-            "Baholash usuli saqlandi: {$label}. Eski baholar o‘z joyida qoldi."
+            "Sozlamalar saqlandi. Baholash usuli: {$label}. Eski baholar o‘z joyida qoldi."
         );
     }
 }

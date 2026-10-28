@@ -20,7 +20,8 @@
                 <i class="bx bx-arrow-back"></i>
             </a>
             <div class="page-sub mb-0">
-                {{ $from->format('d.m.Y') }} – {{ $to->format('d.m.Y') }} oralig‘idagi o‘rtacha baholar
+                {{ $from->format('d.m.Y') }} – {{ $to->format('d.m.Y') }} oralig‘idagi o‘rtacha baholar,
+                <strong>foizda</strong> — ball / maksimal ball (50 dan 50 = 100)
             </div>
         </div>
         <div class="d-flex gap-2">

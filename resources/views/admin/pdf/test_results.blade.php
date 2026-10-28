@@ -11,8 +11,8 @@
         <tr>
             <th>#</th>
             <th>Talaba</th>
-            @foreach($skills as $label)
-                <th style="text-align: center;">{{ $label }}</th>
+            @foreach($skills as $skill => $label)
+                <th style="text-align: center;">{{ $label }} /{{ $maxes[$skill] ?? 100 }}</th>
             @endforeach
             @if(count($skills) > 1)
                 <th style="text-align: center;">O‘rtacha</th>
@@ -25,11 +25,11 @@
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $row->name }}</td>
                 @foreach($skills as $skill => $label)
-                    <td style="text-align: center;">{{ $row->marks[$skill] ?? '—' }}</td>
+                    <td style="text-align: center;">{{ isset($row->marks[$skill]) ? $row->marks[$skill]['mark'] : '—' }}</td>
                 @endforeach
                 @if(count($skills) > 1)
-                    <td style="text-align: center;"><strong>{{ $row->average ?? '—' }}</strong></td>
-                    <td style="text-align: center;">{{ $row->sum }}</td>
+                    <td style="text-align: center;"><strong>{{ $row->average === null ? '—' : $row->average . '%' }}</strong></td>
+                    <td style="text-align: center;">{{ $row->sum }}/{{ $row->sum_max }}</td>
                 @endif
             </tr>
         @endforeach

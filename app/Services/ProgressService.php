@@ -19,12 +19,12 @@ use Illuminate\Support\Facades\DB;
  *               L = lesson_and_histories (data = 1) rows in the month for the
  *               groups the student belongs to. Present is implicit — only
  *               status 0 (absent) and 2 (late) rows exist.
- *   tests       mean of assessments.get_mark in the month. READ ONLY.
+ *   tests       mean of assessments.get_mark as a percent of max_score. READ ONLY.
  *   homework    100 * SUM(score) / SUM(homeworks.max_score) over submissions
  *               whose homework's COALESCE(due_date, created_at) falls in the
  *               month. status = 0 counts as score 0; an ungraded row
  *               (score NULL, status <> 0) is excluded entirely.
- *   skills      mean of the non-null lesson_skill_grades.score in the month.
+ *   skills      mean of lesson_skill_grades.score as a percent of max_score.
  *
  * The weights in config('grading.progress_weights') are RENORMALISED over the
  * components that actually carry data in that month, so a centre that has not
@@ -357,7 +357,7 @@ class ProgressService
             ->whereIn('user_id', $userIds)
             ->whereNotNull('get_mark')
             ->whereBetween('created_at', [$start, $end])
-            ->get(['user_id', 'get_mark', 'created_at']);
+            ->get(['user_id', 'get_mark', 'max_score', 'created_at']);
 
         foreach ($rows as $row) {
             $key = $this->monthKey($row->created_at);
@@ -365,7 +365,8 @@ class ProgressService
                 continue;
             }
             $uid = (int) $row->user_id;
-            $tests[$uid][$key]['sum'] = ($tests[$uid][$key]['sum'] ?? 0) + (int) $row->get_mark;
+            // Foizda: 50/50 — 100 (ScoreScale). Xom ball turli maksimumlarni aralashtirardi.
+            $tests[$uid][$key]['sum'] = ($tests[$uid][$key]['sum'] ?? 0) + ScoreScale::percent($row->get_mark, $row->max_score);
             $tests[$uid][$key]['n']   = ($tests[$uid][$key]['n'] ?? 0) + 1;
         }
 
@@ -418,7 +419,7 @@ class ProgressService
             ->whereIn('user_id', $userIds)
             ->whereNotNull('score')
             ->whereBetween('created_at', [$start, $end])
-            ->get(['user_id', 'score', 'created_at']);
+            ->get(['user_id', 'score', 'max_score', 'created_at']);
 
         foreach ($rows as $row) {
             $key = $this->monthKey($row->created_at);
@@ -426,7 +427,7 @@ class ProgressService
                 continue;
             }
             $uid = (int) $row->user_id;
-            $skills[$uid][$key]['sum'] = ($skills[$uid][$key]['sum'] ?? 0) + (int) $row->score;
+            $skills[$uid][$key]['sum'] = ($skills[$uid][$key]['sum'] ?? 0) + ScoreScale::percent($row->score, $row->max_score);
             $skills[$uid][$key]['n']   = ($skills[$uid][$key]['n'] ?? 0) + 1;
         }
 

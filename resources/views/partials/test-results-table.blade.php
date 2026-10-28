@@ -49,14 +49,14 @@
                             @foreach($test->marks as $item)
                                 <span class="badge bg-label-secondary fw-normal text-nowrap">
                                     {{ $item['label'] }}
-                                    <strong class="text-{{ $tone($item['mark']) }} ms-1">{{ $item['mark'] }}</strong>
+                                    <strong class="text-{{ $tone($item['percent']) }} ms-1" title="{{ $item['percent'] }}%">{{ $item['mark'] }}/{{ $item['max'] }}</strong>
                                 </span>
                             @endforeach
                         </div>
                     </td>
                     <td class="text-center">
                         <span class="badge bg-label-{{ $tone($test->average) }}" style="font-size: .9rem;">
-                            {{ $test->average ?? '—' }}
+                            {{ $test->average === null ? '—' : $test->average . '%' }}
                         </span>
                     </td>
                     <td class="text-end text-nowrap">{{ $test->date?->format('d.m.Y') }}</td>

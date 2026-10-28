@@ -16,7 +16,7 @@
                 <th>{{$loop->index+1}}</th>
                 <th>{{$group->student->name}}</th>
                 <th>{{$group->group}}</th>
-                <th>{{$group->get_mark}}</th>
+                <th>{{ $group->fraction() }}</th>
                 <th>{{ $group->skillLabel() }}</th>
                 <th>{{$group->rec_group}}</th>
             </tr>

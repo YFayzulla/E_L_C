@@ -10,6 +10,7 @@ use App\Models\Homework;
 use App\Models\HomeworkSubmission;
 use App\Models\LessonSkillGrade;
 use App\Services\ProgressService;
+use App\Services\ScoreScale;
 use App\Tenancy\TenantStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -217,20 +218,23 @@ class StudentApiController extends ApiController
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->limit(200)
-            ->get(['skill', 'score', 'created_at']);
+            ->get(['skill', 'score', 'max_score', 'created_at']);
 
-        $averages = $rows->groupBy('skill')->map(fn($g) => (int) round($g->avg('score')));
+        // O'rtacha foizda: 50/50 — 100 (ScoreScale).
+        $averages = $rows->groupBy('skill')->map(fn($g) => (int) round($g->avg(fn($r) => $r->percent())));
 
         return $this->ok([
             'averages' => collect((array) config('grading.skills'))->map(fn($s) => [
                 'key'   => $s,
                 'label' => $labels[$s] ?? $s,
-                'score' => $averages[$s] ?? null,
+                'score' => $averages[$s] ?? null,   // foiz
             ])->values(),
             'recent' => $rows->take(30)->map(fn($r) => [
-                'skill' => $labels[$r->skill] ?? $r->skill,
-                'score' => $r->score,
-                'date'  => $r->created_at?->format('d.m.Y'),
+                'skill'     => $labels[$r->skill] ?? $r->skill,
+                'score'     => $r->score,           // xom ball
+                'max_score' => ScoreScale::clampMax($r->max_score),
+                'percent'   => $r->percent(),
+                'date'      => $r->created_at?->format('d.m.Y'),
             ])->values(),
         ]);
     }
@@ -257,7 +261,9 @@ class StudentApiController extends ApiController
             'components' => $p['components'],
             'tests'      => $tests->map(fn($t) => [
                 'name'  => $t->test_name ?? 'Test',
-                'mark'  => $t->get_mark,
+                'mark'  => $t->get_mark,                       // xom ball
+                'max_score' => ScoreScale::clampMax($t->max_score),
+                'percent'   => $t->percent(),
                 'skill' => $t->skill,
                 'for'   => $t->skillLabel(),
                 'date'  => $t->created_at?->format('d.m.Y'),

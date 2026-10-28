@@ -96,6 +96,7 @@ class TestResultController extends Controller
             return view('assessment.index', [
                 'assessments' => $assessments,
                 'skills'      => $results['skills'],
+                'maxes'     => $results['maxes'],
                 'students'    => $results['rows'],
                 'groups'      => $allGroups,
                 'id'          => $group ? $group->id : null,

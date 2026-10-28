@@ -26,13 +26,27 @@ class LessonSkillGrade extends Model
         'user_id',
         'skill',
         'score',
+        'max_score',
         'comment',
         'graded_by',
     ];
 
     protected $casts = [
-        'score' => 'integer',
+        'score'     => 'integer',
+        'max_score' => 'integer',
     ];
+
+    /** Foizdagi natija — taqqoslash va rang shundan (ScoreScale). */
+    public function percent(): ?int
+    {
+        return \App\Services\ScoreScale::percent($this->score, $this->max_score);
+    }
+
+    /** "45/50". */
+    public function fraction(): string
+    {
+        return \App\Services\ScoreScale::fraction($this->score, $this->max_score);
+    }
 
     public function lesson(): BelongsTo
     {

@@ -64,6 +64,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Ko'nikma bo'yicha maksimal ball
+    |--------------------------------------------------------------------------
+    | Test har doim ham 100 balldan emas: grammatika 50 savollik, o'qish 25
+    | savollik bo'lishi mumkin. O'qituvchi xom ballni yozadi ("50"), u shu
+    | maksimum bilan birga saqlanadi (max_score), barcha o'rtacha va
+    | o'zlashtirish esa foizda hisoblanadi: ball / max * 100.
+    |
+    | Markaz bu qiymatlarni Sozlamalardan o'zgartiradi; o'qituvchi esa bitta
+    | test/dars uchun formada o'zgartira oladi. Yozilgan baho o'z maksimumini
+    | saqlab qoladi, ya'ni keyingi o'zgarish eski ballarni qayta talqin
+    | qilmaydi.
+    */
+    'skill_max' => [
+        'grammar'   => 100,
+        'reading'   => 100,
+        'listening' => 100,
+        'writing'   => 100,
+        'speaking'  => 100,
+        'overall'   => 100,
+    ],
+
+    // Formada yoki Sozlamalarda ruxsat etilgan maksimum chegarasi.
+    'skill_max_limit' => 1000,
+
+    /*
+    |--------------------------------------------------------------------------
     | Homework
     |--------------------------------------------------------------------------
     */

@@ -11,6 +11,7 @@ use App\Models\LessonAndHistory;
 use App\Models\LessonSkillGrade;
 use App\Models\User;
 use App\Services\ProgressService;
+use App\Services\ScoreScale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -415,8 +416,19 @@ class TeacherApiController extends ApiController
         $skills = (array) config('grading.skills');
         $labels = (array) config('grading.skill_labels');
 
+        // Ustun maksimumi: dars baholangan bo'lsa — o'sha baholarniki,
+        // aks holda markaz sozlamasi (ScoreScale).
+        $maxes = ScoreScale::maxes($skills);
+        foreach ($existing->flatten() as $row) {
+            $maxes[$row->skill] = ScoreScale::clampMax($row->max_score);
+        }
+
         return $this->ok([
-            'skills' => array_map(fn($s) => ['key' => $s, 'label' => $labels[$s] ?? $s], $skills),
+            'skills' => array_map(fn($s) => [
+                'key'       => $s,
+                'label'     => $labels[$s] ?? $s,
+                'max_score' => $maxes[$s] ?? ScoreScale::DEFAULT_MAX,
+            ], $skills),
             'students' => $students->map(function (User $s) use ($existing, $skills) {
                 $rows = $existing->get($s->id, collect())->keyBy('skill');
 
@@ -441,9 +453,22 @@ class TeacherApiController extends ApiController
             'grades'              => ['required', 'array', 'min:1'],
             'grades.*.user_id'    => ['required', 'integer'],
             'grades.*.skill'      => ['required', 'string', Rule::in((array) config('grading.skills'))],
-            'grades.*.score'      => ['nullable', 'integer', 'min:0', 'max:100'],
+            // Ball xom holida; chegarasi — max_score (yuborilmasa markaz
+            // sozlamasi). Pastda har bir baho alohida tekshiriladi.
+            'grades.*.score'      => ['nullable', 'integer', 'min:0'],
+            'grades.*.max_score'  => ['nullable', 'integer', 'min:1', 'max:' . (int) config('grading.skill_max_limit', 1000)],
             'grades.*.comment'    => ['nullable', 'string', 'max:255'],
         ]);
+
+        foreach ($data['grades'] as $i => $g) {
+            $max = ScoreScale::clampMax(($g['max_score'] ?? null) ?: ScoreScale::max($g['skill']));
+
+            if (($g['score'] ?? null) !== null && (int) $g['score'] > $max) {
+                return $this->fail("Ball {$max} dan oshmasligi kerak.", 422, ["grades.{$i}.score" => ["Ball {$max} dan oshmasligi kerak."]]);
+            }
+
+            $data['grades'][$i]['max_score'] = $max;
+        }
 
         // The lesson must belong to THIS group, otherwise a teacher could graft
         // grades onto another group's lesson.
@@ -480,6 +505,7 @@ class TeacherApiController extends ApiController
                 'user_id'    => (int) $g['user_id'],
                 'skill'      => $g['skill'],
                 'score'      => (int) $g['score'],
+                'max_score'  => $g['max_score'],
                 'comment'    => $g['comment'] ?? null,
                 'graded_by'  => auth()->id(),
                 'created_at' => $now,
@@ -495,7 +521,7 @@ class TeacherApiController extends ApiController
             LessonSkillGrade::upsert(
                 $rows,
                 ['lesson_id', 'user_id', 'skill'],
-                ['score', 'comment', 'graded_by', 'updated_at']
+                ['score', 'max_score', 'comment', 'graded_by', 'updated_at']
             );
 
             return $this->ok(['saved' => count($rows)], count($rows) . ' ta baho saqlandi.');

@@ -92,8 +92,10 @@ class TestResultsPageTest extends TestCase
         $this->assertSame(1, substr_count($html, '>Boynazarova Marjona<'));
         // O'rtachalar: (50+41+48+53+55)/5 = 49, (70+80+90)/3 = 80; 80 tepada.
         $this->assertLessThan(strpos($html, 'Abduraxmonova Havojon'), strpos($html, 'Boynazarova Marjona'));
-        $this->assertStringContainsString('>49<', $html);
-        $this->assertStringContainsString('>80<', $html);
+        // O'rtacha foizda, yig'indi "olingan/maksimum".
+        $this->assertStringContainsString('>49%<', $html);
+        $this->assertStringContainsString('>80%<', $html);
+        $this->assertStringContainsString('247/500', $html);
     }
 
     public function test_test_list_shows_group_name(): void

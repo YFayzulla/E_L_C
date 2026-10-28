@@ -70,6 +70,16 @@
                                     <i class="bx {{ $icons[$skill] ?? 'bx-star' }} d-none d-xxl-inline"></i>
                                     {{ $labels[$skill] ?? ucfirst($skill) }}
                                 </label>
+                                {{-- Shu test/dars uchun maksimal ball: 50 dan 50 — 100%. --}}
+                                <div class="d-flex align-items-center justify-content-center gap-1 mt-1 fw-normal">
+                                    <span class="text-muted">/</span>
+                                    <input type="number" min="1" max="{{ config('grading.skill_max_limit', 1000) }}" step="1"
+                                           name="max[{{ $skill }}]" data-skill="{{ $skill }}"
+                                           value="{{ old('max.' . $skill, $skillMaxes[$skill] ?? 100) }}"
+                                           class="form-control form-control-sm text-center js-skill-max @error('max.' . $skill) is-invalid @enderror"
+                                           style="width: 3.6rem; padding: .15rem .2rem;"
+                                           aria-label="{{ $labels[$skill] ?? $skill }} — maksimal ball">
+                                </div>
                             </th>
                         @endforeach
                         @if($hasAggregates)
@@ -108,7 +118,7 @@
                                     $field = "score.{$student->id}.{$skill}";
                                 @endphp
                                 <td>
-                                    <input type="number" inputmode="numeric" min="0" max="100" step="1"
+                                    <input type="number" inputmode="numeric" min="0" max="{{ $skillMaxes[$skill] ?? 100 }}" step="1"
                                            name="score[{{ $student->id }}][{{ $skill }}]"
                                            value="{{ old($field) }}"
                                            class="form-control grade-input js-score @error($field) is-invalid @enderror"
@@ -156,8 +166,9 @@
             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="text-muted" style="font-size: .85rem;">
                     Ustun tepasidagi belgi — test shu ko‘nikmani o‘z ichiga oladimi: faqat belgilangan
-                    ustunlarga ball yoziladi va o‘rtacha hamda yig‘indi faqat ular bo‘yicha hisoblanadi.
-                    Talaba kartasidagi «Oxirgi ball» — belgilangan ustunlar o‘rtachasi.
+                    ustunlarga ball yoziladi. Ball sarlavhadagi maksimumdan qo‘yiladi (masalan 50 dan 45);
+                    o‘rtacha foizda, yig‘indi «olingan / maksimum» ko‘rinishida.
+                    Talaba kartasidagi «Oxirgi ball» — belgilangan ustunlar foizlari o‘rtachasi.
                     Bo‘sh katak «baholanmagan» degani — hisobga kirmaydi; <strong>0</strong> esa haqiqiy baho.
                 </div>
                 <button type="submit" class="btn btn-primary">Saqlash</button>

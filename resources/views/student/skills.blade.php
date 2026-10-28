@@ -104,8 +104,8 @@
                                 @if($mark->score === null)
                                     <span class="text-muted">—</span>
                                 @else
-                                    <span class="badge bg-label-{{ \App\Models\LessonSkillGrade::tone($mark->score) }}">
-                                        {{ $mark->score }}
+                                    <span class="badge bg-label-{{ \App\Models\LessonSkillGrade::tone($mark->percent()) }}">
+                                        {{ $mark->fraction() }}
                                     </span>
                                 @endif
                             </td>

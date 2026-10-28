@@ -190,6 +190,7 @@ class PdfController extends Controller
 
         $pdf = PDF::loadView('admin.pdf.test_results', [
             'skills'    => $results['skills'],
+            'maxes'     => $results['maxes'],
             'students'  => $results['rows'],
             'groupName' => $groupName,
             'testName'  => $history->name,

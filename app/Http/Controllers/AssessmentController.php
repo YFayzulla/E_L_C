@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\GroupTeacher;
 use App\Models\LessonAndHistory;
 use App\Models\User;
+use App\Services\ScoreScale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -117,7 +118,9 @@ class AssessmentController extends Controller
                 'students' => $students,
                 'id' => $id,
                 'groups' => $groupOptions,
-                'groupName' => $group->name
+                'groupName' => $group->name,
+                // Ustun sarlavhasidagi maksimum — markaz sozlamasidan.
+                'skillMaxes' => ScoreScale::maxes((array) config('grading.skills', [])),
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return redirect()->route('assessment.index')->with('error', 'Guruh topilmadi.');
@@ -145,7 +148,8 @@ class AssessmentController extends Controller
          * exactly like the Ko‘nikmalar page:
          *
          *     skills[]                     = ustun tepasida belgilangan ko'nikmalar
-         *     score[<student id>][<skill>] = 0..100
+         *     max[<skill>]                 = shu testdagi maksimal ball (standart — Sozlamalar)
+         *     score[<student id>][<skill>] = 0..max (xom ball)
          *     comment[<student id>]        = free text
          *
          * Test har doim ham to'rt ko'nikmani qamramaydi: guruh faqat Writing
@@ -154,25 +158,43 @@ class AssessmentController extends Controller
          * faqat ular bo'yicha hisoblanadi (Grammatika belgilangan bo'lsa u ham
          * kiradi). One `assessments` row is written per filled cell.
          */
-        $request->validate([
+        // Har bir ko'nikmaning shu testdagi maksimumi: formadan, bo'lmasa
+        // markaz sozlamasidan. Ball shu maksimumdan oshmasligi kerak.
+        $maxes = [];
+        foreach ($allSkills as $skill) {
+            $maxes[$skill] = ScoreScale::clampMax($request->input("max.{$skill}") ?: ScoreScale::max($skill));
+        }
+
+        $limit = (int) config('grading.skill_max_limit', 1000);
+        $rules = [
             'student'      => 'required|array',
             'student.*'    => 'required|integer',
             'skills'       => 'required|array|min:1',
             'skills.*'     => ['string', Rule::in($allSkills)],
+            'max'          => 'nullable|array',
+            'max.*'        => "nullable|integer|min:1|max:{$limit}",
             'score'        => 'array',
             'score.*'      => 'array',
-            'score.*.*'    => 'nullable|integer|min:0|max:100',
+            'score.*.*'    => 'nullable|integer|min:0',
             'comment'      => 'array',
             'comment.*'    => 'nullable|string|max:250',
             'lesson'       => 'nullable|string|max:255',
-        ], [
+        ];
+        $messages = [
             'skills.required'   => 'Kamida bitta ko‘nikma ustunini belgilang.',
             'skills.min'        => 'Kamida bitta ko‘nikma ustunini belgilang.',
             'skills.*.in'       => 'Noma’lum ko‘nikma tanlandi.',
+            'max.*.min'         => 'Maksimal ball kamida 1 bo‘lishi kerak.',
+            'max.*.max'         => "Maksimal ball {$limit} dan oshmasligi kerak.",
             'score.*.*.integer' => 'Ball butun son bo‘lishi kerak.',
-            'score.*.*.max'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
-            'score.*.*.min'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
-        ]);
+            'score.*.*.min'     => 'Ball manfiy bo‘lishi mumkin emas.',
+        ];
+        foreach ($maxes as $skill => $max) {
+            $rules["score.*.{$skill}"] = "nullable|integer|min:0|max:{$max}";
+            $messages["score.*.{$skill}.max"] = "Ball {$max} dan oshmasligi kerak.";
+        }
+
+        $request->validate($rules, $messages);
 
         // Config tartibida — belgilanmagan ustunning balli (qo'lda yuborilgan
         // bo'lsa ham) saqlanmaydi.
@@ -226,10 +248,11 @@ class AssessmentController extends Controller
                     }
 
                     $mark = (int) $raw;
-                    $givenOverall[] = $mark;
+                    $givenOverall[] = ScoreScale::percent($mark, $maxes[$skill]);
 
                     $assessments[] = [
                         'get_mark'   => $mark,
+                        'max_score'  => $maxes[$skill],
                         'skill'      => $skill,
                         'user_id'    => $userId,
                         'for_what'   => $comments[$userId] ?? null,
@@ -240,8 +263,8 @@ class AssessmentController extends Controller
                     ];
                 }
 
-                // users.mark ("Oxirgi ball") — belgilangan ustunlar o'rtachasi,
-                // 0–100 shkalada. Yig'indi faqat jadvalda ko'rinadi.
+                // users.mark ("Oxirgi ball") — belgilangan ustunlar foizlari
+                // o'rtachasi (50/50 — 100). Yig'indi faqat jadvalda ko'rinadi.
                 if ($givenOverall !== []) {
                     $studentsToUpdate[$userId] = (int) round(array_sum($givenOverall) / count($givenOverall));
                 }

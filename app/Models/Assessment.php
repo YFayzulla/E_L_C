@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ScoreScale;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,9 +13,21 @@ class Assessment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'get_mark', 'skill', 'group', 'overall_result',
+        'user_id', 'get_mark', 'max_score', 'skill', 'group', 'overall_result',
         'for_what', 'rec_group', 'history_id',
     ];
+
+    /** Foizdagi natija: get_mark / max_score * 100 (ScoreScale). */
+    public function percent(): ?int
+    {
+        return ScoreScale::percent($this->get_mark, $this->max_score);
+    }
+
+    /** "45/50". */
+    public function fraction(): string
+    {
+        return ScoreScale::fraction($this->get_mark, $this->max_score);
+    }
 
     public function student()
     {
@@ -68,9 +81,13 @@ class Assessment extends Model
      * Qatorlar `test_name` bilan kelishi kutiladi (lesson_and_histories
      * join), tartib — chaqiruvchiniki (odatda eng yangisi tepada).
      *
+     * Ball xom holida (45/50) va foizda; o'rtacha — foizlar o'rtachasi,
+     * yig'indi — olingan ballar / maksimumlar yig'indisi.
+     *
      * @param  iterable<self>  $rows
      * @return \Illuminate\Support\Collection<int, object{test_name: string, group: ?string, date: ?\Illuminate\Support\Carbon,
-     *         marks: array<int, array{skill: ?string, label: string, mark: int}>, average: ?int, comment: ?string}>
+     *         marks: array<int, array{skill: ?string, label: string, mark: int, max: int, percent: int}>,
+     *         average: ?int, sum: int, sum_max: int, comment: ?string}>
      */
     public static function groupByTest(iterable $rows)
     {
@@ -85,21 +102,25 @@ class Assessment extends Model
                 $marks = $items
                     ->sortBy(fn (self $row) => [$order[$row->skill] ?? PHP_INT_MAX, $row->id])
                     ->map(fn (self $row) => [
-                        'skill' => $row->skill,
-                        'label' => filled($row->skill) ? $row->skillLabel() : 'Umumiy',
-                        'mark'  => (int) $row->get_mark,
+                        'skill'   => $row->skill,
+                        'label'   => filled($row->skill) ? $row->skillLabel() : 'Umumiy',
+                        'mark'    => (int) $row->get_mark,
+                        'max'     => ScoreScale::clampMax($row->max_score),
+                        'percent' => (int) $row->percent(),
                     ])
                     ->values()
                     ->all();
 
-                $values = array_column($marks, 'mark');
+                $percents = array_column($marks, 'percent');
 
                 return (object) [
                     'test_name' => $first->test_name ?? 'Test',
                     'group'     => $first->group,
                     'date'      => $items->max('created_at'),
                     'marks'     => $marks,
-                    'average'   => $values === [] ? null : (int) round(array_sum($values) / count($values)),
+                    'average'   => $percents === [] ? null : (int) round(array_sum($percents) / count($percents)),
+                    'sum'       => array_sum(array_column($marks, 'mark')),
+                    'sum_max'   => array_sum(array_column($marks, 'max')),
                     // Yangi formada for_what — o'qituvchi izohi; skill bor
                     // qatorlarda u izoh, aks holda eski "maqsad" matni.
                     'comment'   => $items->first(fn (self $row) => filled($row->skill) && filled($row->for_what))?->for_what,
@@ -117,7 +138,7 @@ class Assessment extends Model
      * o'chirish bitta belgi bilan hammasini oladi.
      *
      * @param  iterable<self>  $rows  `student` munosabati yuklangan bo'lsin
-     * @return array{skills: array<string, string>, rows: \Illuminate\Support\Collection<int, object>}
+     * @return array{skills: array<string, string>, maxes: array<string, int>, rows: \Illuminate\Support\Collection<int, object>}
      */
     public static function byStudent(iterable $rows): array
     {
@@ -131,18 +152,32 @@ class Assessment extends Model
             ->mapWithKeys(fn ($skill) => [$skill => $skill === 'overall' ? 'Umumiy' : ($labels[$skill] ?? $skill)])
             ->all();
 
+        // Ustun sarlavhasidagi "/ 50": shu testda shu ko'nikma qaysi
+        // maksimumdan qo'yilgan (odatda hammaga bir xil).
+        $maxes = [];
+        foreach ($rows as $row) {
+            $maxes[$key($row)] ??= ScoreScale::clampMax($row->max_score);
+        }
+
         $students = $rows->groupBy('user_id')
             ->map(function ($items) use ($key) {
                 $first = $items->first();
                 // Bitta ko'nikma ikki marta yozilgan bo'lsa — oxirgisi.
-                $marks = $items->sortBy('id')->mapWithKeys(fn (self $row) => [$key($row) => (int) $row->get_mark])->all();
+                $marks = $items->sortBy('id')->mapWithKeys(fn (self $row) => [$key($row) => [
+                    'mark'    => (int) $row->get_mark,
+                    'max'     => ScoreScale::clampMax($row->max_score),
+                    'percent' => (int) $row->percent(),
+                ]])->all();
+
+                $percents = array_column($marks, 'percent');
 
                 return (object) [
                     'user_id' => (int) $first->user_id,
                     'name'    => $first->student->name ?? '—',
                     'marks'   => $marks,
-                    'average' => $marks === [] ? null : (int) round(array_sum($marks) / count($marks)),
-                    'sum'     => array_sum($marks),
+                    'average' => $percents === [] ? null : (int) round(array_sum($percents) / count($percents)),
+                    'sum'     => array_sum(array_column($marks, 'mark')),
+                    'sum_max' => array_sum(array_column($marks, 'max')),
                     'ids'     => $items->pluck('id')->map(fn ($id) => (int) $id)->all(),
                     'comment' => $items->first(fn (self $row) => filled($row->skill) && filled($row->for_what))?->for_what,
                     'rec_group' => $items->first(fn (self $row) => filled($row->rec_group))?->rec_group,
@@ -151,7 +186,7 @@ class Assessment extends Model
             ->sortBy(fn ($student) => [-($student->average ?? -1), mb_strtolower($student->name)])
             ->values();
 
-        return ['skills' => $skills, 'rows' => $students];
+        return ['skills' => $skills, 'maxes' => $maxes, 'rows' => $students];
     }
 
     /** Only the marks that measured a named skill. */

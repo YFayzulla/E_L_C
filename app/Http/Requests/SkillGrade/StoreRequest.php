@@ -3,6 +3,7 @@
 namespace App\Http\Requests\SkillGrade;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Services\ScoreScale;
 use Illuminate\Validation\Rule;
 
 /**
@@ -10,7 +11,8 @@ use Illuminate\Validation\Rule;
  *
  * Shape:
  *   lesson_id                       an EXISTING lesson_and_histories row
- *   score[<user id>][<skill>]       0-100, or blank meaning "not assessed"
+ *   max[<skill>]                    maksimal ball (standart — markaz sozlamasi)
+ *   score[<user id>][<skill>]       0..max, or blank meaning "not assessed"
  *   comment[<user id>]              free text, one per student
  *
  * Authorisation lives in the controller (assertTeachesGroup + a check that the
@@ -61,12 +63,33 @@ class StoreRequest extends FormRequest
             'posted_skills.*' => [Rule::in(config('grading.skills', []))],
         ];
 
-        // One rule per known skill: score[<user>][<skill>] must be 0-100 or blank.
-        foreach ((array) config('grading.skills', []) as $skill) {
-            $rules['score.*.' . $skill] = ['nullable', 'integer', 'min:0', 'max:100'];
+        $limit = (int) config('grading.skill_max_limit', 1000);
+        $rules['max']   = ['nullable', 'array'];
+        $rules['max.*'] = ['nullable', 'integer', 'min:1', "max:{$limit}"];
+
+        // One rule per known skill: score[<user>][<skill>] must be 0..max or
+        // blank. Maksimum — ustun sarlavhasidagi, bo'lmasa markaz sozlamasi.
+        foreach ($this->maxes() as $skill => $max) {
+            $rules['score.*.' . $skill] = ['nullable', 'integer', 'min:0', "max:{$max}"];
         }
 
         return $rules;
+    }
+
+    /**
+     * Ko'nikma => shu dars uchun maksimal ball.
+     *
+     * @return array<string, int>
+     */
+    public function maxes(): array
+    {
+        $out = [];
+
+        foreach ((array) config('grading.skills', []) as $skill) {
+            $out[$skill] = ScoreScale::clampMax($this->input("max.{$skill}") ?: ScoreScale::max($skill));
+        }
+
+        return $out;
     }
 
     /**
@@ -83,7 +106,8 @@ class StoreRequest extends FormRequest
             'posted_skills.*.in' => 'Noma’lum ko‘nikma yuborildi.',
             'score.*.*.integer'  => 'Baho butun son bo‘lishi kerak.',
             'score.*.*.min'      => 'Baho 0 dan kichik bo‘lmasligi kerak.',
-            'score.*.*.max'      => 'Baho 100 dan katta bo‘lmasligi kerak.',
+            'score.*.*.max'      => 'Baho shu ustunning maksimal balidan oshmasligi kerak.',
+            'max.*.min'          => 'Maksimal ball kamida 1 bo‘lishi kerak.',
             'comment.*.max'      => 'Izoh 250 belgidan oshmasligi kerak.',
         ];
     }

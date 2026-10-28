@@ -43,7 +43,7 @@
                             </td>
                             <th>{{$loop->index+1}}</th>
                             <th>{{$assessment->student->name}}</th>
-                            <th>{{$assessment->get_mark}}</th>
+                            <th>{{ $assessment->fraction() }}</th>
                             <th>{{ $assessment->skillLabel() }}</th>
                             <th>
                                 <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"

@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\LessonAndHistory;
 use App\Models\LessonSkillGrade;
 use App\Models\User;
+use App\Services\ScoreScale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -100,10 +101,14 @@ class LessonSkillGradeController extends Controller
             // [user id][skill] => score, plus one comment per student.
             $scores   = [];
             $comments = [];
+            // Ustun maksimumi: dars allaqachon baholangan bo'lsa — o'sha
+            // baholarniki, aks holda markaz sozlamasi.
+            $skillMaxes = ScoreScale::maxes((array) config('grading.skills', []));
 
             if ($lessonId) {
                 foreach (LessonSkillGrade::where('lesson_id', $lessonId)->get() as $row) {
                     $scores[(int) $row->user_id][$row->skill] = $row->score;
+                    $skillMaxes[$row->skill] = ScoreScale::clampMax($row->max_score);
 
                     if (filled($row->comment)) {
                         $comments[(int) $row->user_id] = $row->comment;
@@ -127,6 +132,7 @@ class LessonSkillGradeController extends Controller
                 'scores'   => $scores,
                 'comments' => $comments,
                 'selectedSkills' => $selectedSkills,
+                'skillMaxes' => $skillMaxes,
             ]);
         } catch (\Exception $e) {
             Log::error('LessonSkillGradeController@grade error: ' . $e->getMessage());
@@ -164,6 +170,7 @@ class LessonSkillGradeController extends Controller
             (array) config('grading.skills', []),
             (array) $request->input('skills', [])
         ));
+        $maxes    = $request->maxes();
         $comments = (array) $request->input('comment', []);
         $graderId = auth()->id();
         $now      = now();
@@ -195,7 +202,8 @@ class LessonSkillGradeController extends Controller
                     'group_id'   => $group,
                     'user_id'    => $userId,
                     'skill'      => $skill,
-                    'score'      => max(0, min(100, (int) $score)),
+                    'score'      => max(0, min($maxes[$skill], (int) $score)),
+                    'max_score'  => $maxes[$skill],
                     'comment'    => $comment,
                     'graded_by'  => $graderId,
                     'created_at' => $now,
@@ -216,7 +224,7 @@ class LessonSkillGradeController extends Controller
                 LessonSkillGrade::upsert(
                     $chunk,
                     ['lesson_id', 'user_id', 'skill'],
-                    ['score', 'comment', 'graded_by', 'updated_at']
+                    ['score', 'max_score', 'comment', 'graded_by', 'updated_at']
                 );
             }
 
@@ -255,7 +263,9 @@ class LessonSkillGradeController extends Controller
             $rows = LessonSkillGrade::where('group_id', $group)
                 ->whereNotNull('score')
                 ->whereBetween('created_at', [$from, $to])
-                ->select('user_id', 'skill', DB::raw('AVG(score) as avg_score'), DB::raw('COUNT(*) as marks'))
+                // Foizda: 50/50 — 100. Xom ballning o'rtachasi turli maksimumli
+                // baholarni aralashtirib yuborardi.
+                ->select('user_id', 'skill', DB::raw('AVG(' . ScoreScale::sqlPercent() . ') as avg_score'), DB::raw('COUNT(*) as marks'))
                 ->groupBy('user_id', 'skill')
                 ->get();
 
@@ -363,7 +373,7 @@ class LessonSkillGradeController extends Controller
 
             $rows = LessonSkillGrade::where('user_id', $user->id)
                 ->whereNotNull('score')
-                ->select('skill', DB::raw('AVG(score) as avg_score'), DB::raw('COUNT(*) as marks'))
+                ->select('skill', DB::raw('AVG(' . ScoreScale::sqlPercent() . ') as avg_score'), DB::raw('COUNT(*) as marks'))
                 ->groupBy('skill')
                 ->get();
 

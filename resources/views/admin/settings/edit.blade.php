@@ -54,6 +54,29 @@
                         @error('skill_mode')
                             <div class="text-danger mt-2" style="font-size: .84rem;">{{ $message }}</div>
                         @enderror
+
+                        <hr class="my-4">
+
+                        {{-- Ko'nikma bo'yicha maksimal ball. O'qituvchi formada xom
+                             ballni yozadi, hisob-kitob foizda: ball / maksimum. --}}
+                        <div class="fw-semibold mb-1">Ko‘nikma bo‘yicha maksimal ball</div>
+                        <p class="text-muted" style="font-size: .84rem;">
+                            Masalan grammatika testi 50 savollik bo‘lsa — 50 yozing: 50 dan 50 olgan
+                            talaba 100% natija oladi. O‘qituvchi bitta test uchun buni formada
+                            o‘zgartira oladi. Allaqachon qo‘yilgan baholar o‘z maksimumi bilan saqlanib qoladi.
+                        </p>
+                        <div class="row g-2">
+                            @foreach($skillList as $skill => $label)
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label mb-1" for="skill_max_{{ $skill }}" style="font-size: .82rem;">{{ $label }}</label>
+                                    <input type="number" min="1" max="{{ config('grading.skill_max_limit', 1000) }}" step="1"
+                                           id="skill_max_{{ $skill }}" name="skill_max[{{ $skill }}]"
+                                           value="{{ old('skill_max.' . $skill, $skillMax[$skill] ?? 100) }}"
+                                           class="form-control form-control-sm @error('skill_max.' . $skill) is-invalid @enderror">
+                                    @error('skill_max.' . $skill) <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="card-footer d-flex justify-content-end">

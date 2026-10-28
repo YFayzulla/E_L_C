@@ -138,11 +138,11 @@
                             </thead>
                             <tbody>
                             @foreach($evidence['tests'] as $test)
-                                @php $mark = (int) $test->get_mark; @endphp
+                                @php $mark = $test->percent(); @endphp
                                 <tr>
                                     <td>{{ $test->test_name ?? 'Test' }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-label-{{ $tone($mark) }}">{{ $mark }}</span>
+                                        <span class="badge bg-label-{{ $tone($mark) }}" title="{{ $mark }}%">{{ $test->fraction() }}</span>
                                     </td>
                                     <td class="text-end text-muted">{{ optional($test->created_at)->format('d.m.Y') }}</td>
                                 </tr>
@@ -247,8 +247,8 @@
                                         <div style="font-size: .75rem;">{{ optional($mark->created_at)->format('d.m.Y') }}</div>
                                     </td>
                                     <td class="text-end">
-                                        <span class="badge bg-label-{{ \App\Models\LessonSkillGrade::tone($mark->score) }}">
-                                            {{ $mark->score }}
+                                        <span class="badge bg-label-{{ \App\Models\LessonSkillGrade::tone($mark->percent()) }}">
+                                            {{ $mark->fraction() }}
                                         </span>
                                     </td>
                                 </tr>

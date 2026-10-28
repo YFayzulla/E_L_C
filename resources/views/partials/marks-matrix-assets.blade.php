@@ -5,6 +5,7 @@
     Jadvalga kerak bo'lgan belgilar:
       table.marks-table, tbody#myTable tr[data-student]
       input.js-skill-toggle[value=<skill>]   — ustun belgisi (name="skills[]")
+      input.js-skill-max[data-skill]         — ustunning maksimal balli (name="max[<skill>]")
       th.js-skill-head[data-skill]           — ustun sarlavhasi
       input.js-score[data-skill]             — ball katagi
       input.js-agg-toggle[data-agg=average|sum], .js-average, .js-sum
@@ -38,6 +39,13 @@
         const selectedSkills = () => skillToggles.filter(t => t.checked).map(t => t.value);
         const aggEnabled = (name) => aggToggles.some(t => t.dataset.agg === name && t.checked);
 
+        // Ustun sarlavhasidagi maksimal ball (bo'lmasa 100).
+        const maxFor = (skill) => {
+            const input = document.querySelector(`.js-skill-max[data-skill="${skill}"]`);
+            const value = parseInt(input ? input.value : '', 10);
+            return Number.isFinite(value) && value > 0 ? value : 100;
+        };
+
         function paint(el, value, tone) {
             if (!el) { return; }
             el.textContent = value === null ? '—' : value;
@@ -46,26 +54,37 @@
         }
 
         // Bo'sh kataklar hisobga kirmaydi — server ham shunday qiladi.
+        // O'rtacha — foizda (50/50 = 100%), yig'indi — xom: "olingan / maksimum".
         function recalc(row) {
             const active = selectedSkills();
-            const values = [...row.querySelectorAll('.js-score')]
-                .filter(i => active.includes(i.dataset.skill))
-                .map(i => i.value.trim())
-                .filter(v => v !== '')
-                .map(Number)
-                .filter(n => Number.isFinite(n));
+            const marks = [...row.querySelectorAll('.js-score')]
+                .filter(i => active.includes(i.dataset.skill) && i.value.trim() !== '')
+                .map(i => ({ value: Number(i.value), max: maxFor(i.dataset.skill) }))
+                .filter(m => Number.isFinite(m.value));
 
-            const has = values.length > 0;
-            const sum = values.reduce((a, b) => a + b, 0);
-            const mean = has ? Math.round(sum / values.length) : null;
+            const has = marks.length > 0;
+            const sum = marks.reduce((a, m) => a + m.value, 0);
+            const sumMax = marks.reduce((a, m) => a + m.max, 0);
+            const mean = has
+                ? Math.round(marks.reduce((a, m) => a + m.value * 100 / m.max, 0) / marks.length)
+                : null;
 
             paint(row.querySelector('.js-average'),
-                aggEnabled('average') ? mean : null,
+                aggEnabled('average') && has ? mean + '%' : null,
                 mean >= 80 ? 'success' : mean >= 60 ? 'warning' : 'danger');
             paint(row.querySelector('.js-sum'),
-                aggEnabled('sum') && has ? sum : null,
+                aggEnabled('sum') && has ? sum + '/' + sumMax : null,
                 'primary');
         }
+
+        // Maksimum o'zgarsa — kataklar chegarasi va hisob yangilanadi.
+        document.querySelectorAll('.js-skill-max').forEach(input => {
+            input.addEventListener('input', () => {
+                document.querySelectorAll(`.js-score[data-skill="${input.dataset.skill}"]`)
+                    .forEach(score => { score.max = maxFor(input.dataset.skill); });
+                rows.forEach(recalc);
+            });
+        });
 
         function applySkillState() {
             const active = selectedSkills();
@@ -78,6 +97,9 @@
             });
             document.querySelectorAll('.js-skill-head').forEach(th => {
                 th.style.opacity = active.includes(th.dataset.skill) ? '' : '.55';
+            });
+            document.querySelectorAll('.js-skill-max').forEach(input => {
+                input.disabled = !active.includes(input.dataset.skill);
             });
             rows.forEach(recalc);
         }

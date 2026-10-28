@@ -289,11 +289,7 @@
                                     <td>{{ optional($item->created_at)->format('d.m.Y') }}</td>
                                     <td class="text-muted">{{ $item->group->name ?? '—' }}</td>
                                     <td class="text-end">
-                                        @if((int) $item->status === 2)
-                                            <span class="badge bg-label-warning">Kechikdim</span>
-                                        @else
-                                            <span class="badge bg-label-danger">Kelmadim</span>
-                                        @endif
+                                        <span class="badge bg-label-{{ $item->kindTone() }}">{{ $item->kindLabelForStudent() }}</span>
                                     </td>
                                 </tr>
                             @endforeach

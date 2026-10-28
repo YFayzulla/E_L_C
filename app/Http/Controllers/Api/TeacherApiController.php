@@ -93,13 +93,8 @@ class TeacherApiController extends ApiController
             ->first();
 
         // Rows exist only for absent(0) / late(2); present is implicit.
-        $marked = $lesson
-            ? Attendance::where('lesson_id', $lesson->id)
-                ->pluck('status', 'user_id')
-            : collect();
-        $reasons = $lesson
-            ? Attendance::where('lesson_id', $lesson->id)
-                ->pluck('reason', 'user_id')
+        $rows = $lesson
+            ? Attendance::where('lesson_id', $lesson->id)->get()->keyBy('user_id')
             : collect();
 
         return $this->ok([
@@ -111,9 +106,13 @@ class TeacherApiController extends ApiController
                 'id'     => $s->id,
                 'name'   => $s->name,
                 'photo'  => $s->photo ? asset('storage/' . $s->photo) : null,
-                // 1 = present (default), 0 = absent, 2 = late
-                'status' => (int) ($marked[$s->id] ?? 1),
-                'reason' => $reasons[$s->id] ?? null,
+                // 1 = present (default), 0 = absent, 2 = late — eski ilova
+                // uchun o'zgarmagan. `excused` — kelmaganda sababli bo'lsa
+                // true; `form_status` — to'rt tugmali qiymat (3 = sababli).
+                'status'      => (int) ($rows[$s->id]->status ?? 1),
+                'excused'     => isset($rows[$s->id]) ? $rows[$s->id]->isExcused() : false,
+                'form_status' => isset($rows[$s->id]) ? $rows[$s->id]->formValue() : Attendance::FORM_PRESENT,
+                'reason'      => $rows[$s->id]->reason ?? null,
             ]),
         ]);
     }
@@ -128,7 +127,7 @@ class TeacherApiController extends ApiController
 
         $data = $request->validate([
             'statuses'   => ['required', 'array', 'min:1'],
-            'statuses.*' => ['required', 'integer', Rule::in([0, 1, 2])],
+            'statuses.*' => ['required', 'integer', Rule::in(Attendance::FORM_VALUES)],
             'reasons'    => ['nullable', 'array'],
             'reasons.*'  => ['nullable', 'string', 'max:500'],
             'lesson'     => ['nullable', 'string', 'max:255'],
@@ -174,7 +173,11 @@ class TeacherApiController extends ApiController
                     continue;
                 }
 
-                if ((int) $status === 1) {
+                // Web bilan bir xil qoida (Attendance::attributesFromForm):
+                // 1 keldi · 3 sababli · 0 sababsiz · 2 kechikdi; izoh uchalasida.
+                $attributes = Attendance::attributesFromForm((int) $status, $reasons[$userId] ?? null, auth()->id());
+
+                if ($attributes === null) {
                     Attendance::where('user_id', $userId)
                         ->where('lesson_id', $lesson->id)
                         ->delete();
@@ -182,23 +185,12 @@ class TeacherApiController extends ApiController
                     continue;
                 }
 
-                // The web and API flows use the same rule: a reason belongs
-                // to an absence only; an empty value is shown as "Sababsiz".
-                $reason = (int) $status === 0 ? trim((string) ($reasons[$userId] ?? '')) : '';
-
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],
-                    [
-                        'group_id'          => $group,
-                        'who_checked'       => auth()->id(),
-                        'status'            => (int) $status,
-                        'reason'            => $reason !== '' ? $reason : null,
-                        'reason_written_by' => $reason !== '' ? auth()->id() : null,
-                        'reason_written_at' => $reason !== '' ? now() : null,
-                    ]
+                    ['group_id' => $group, 'who_checked' => auth()->id()] + $attributes
                 );
 
-                (int) $status === 2 ? $late++ : $absent++;
+                $attributes['status'] === 2 ? $late++ : $absent++;
             }
 
             DB::commit();

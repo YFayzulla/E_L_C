@@ -101,11 +101,7 @@
                                 <div class="fw-semibold">{{ $record->user?->name ?? '—' }}</div>
                                 <div class="small text-muted">{{ $record->created_at?->format('d.m.Y H:i') ?? '—' }}</div>
                             </div>
-                            @if((int) $record->status === 2)
-                                <span class="badge bg-label-warning">Kechikdi</span>
-                            @else
-                                <span class="badge bg-label-danger">Kelmadi</span>
-                            @endif
+                            <span class="badge bg-label-{{ $record->kindTone() }}">{{ $record->kindLabel() }}</span>
                         </div>
 
                         <div class="mt-3">
@@ -115,17 +111,7 @@
 
                         <div class="mt-3">
                             <div class="small text-muted">Sabab</div>
-                            @if((int) $record->status === 0)
-                                <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
-                            @else
-                                <span class="text-muted">—</span>
-                            @endif
-                            @if($record->hasAbsenceReason() && ($record->reasonWriter || $record->reason_written_at))
-                                <small class="text-muted">
-                                    Sababni {{ $record->reasonWriter?->name ?? '—' }} yozgan
-                                    @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif
-                                </small>
-                            @endif
+                            @include('partials.attendance-reason', ['record' => $record])
                         </div>
 
                         <div class="mt-3">
@@ -206,14 +192,7 @@
                             </td>
                             <td class="text-muted">{{ $record->lesson?->name ?? '—' }}</td>
                             <td>
-                                @if((int) $record->status === 0)
-                                    <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
-                                    @if($record->hasAbsenceReason())
-                                        <small class="text-muted d-block mt-1">{{ $record->reasonWriter?->name ?? '—' }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
+                                @include('partials.attendance-reason', ['record' => $record, 'withTime' => false])
                             </td>
                             <td>
                                 @if($record->latestFollowUp)
@@ -233,11 +212,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if((int) $record->status === 2)
-                                    <span class="badge bg-label-warning">Kechikdi</span>
-                                @else
-                                    <span class="badge bg-label-danger">Kelmadi</span>
-                                @endif
+                                <span class="badge bg-label-{{ $record->kindTone() }}">{{ $record->kindLabel() }}</span>
                             </td>
                             <td class="text-muted">{{ $record->teacher?->name ?? '—' }}</td>
                         </tr>

@@ -174,7 +174,9 @@
                         <tbody>
                         @foreach($students as $student)
                             @php
-                                $current = $markedToday ? (int) ($data[$student->id][$todayDay] ?? 1) : 1;
+                                // To'rt tugma: 1 keldi · 3 sababli · 0 sababsiz · 2 kechikdi.
+                                $current = (int) old('status.' . $student->id,
+                                    $markedToday ? ($formValues[$student->id][$todayDay] ?? 1) : 1);
                                 $currentReason = old('reason.' . $student->id, $markedToday ? ($reasons[$student->id][$todayDay] ?? '') : '');
                             @endphp
                             <tr>
@@ -198,21 +200,28 @@
                                         <label class="btn btn-outline-secondary" for="st-1-{{ $student->id }}">Keldi</label>
 
                                         <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
+                                               id="st-3-{{ $student->id }}" value="3" @checked($current === 3)>
+                                        <label class="btn btn-outline-primary" for="st-3-{{ $student->id }}">Sababli</label>
+
+                                        <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
                                                id="st-0-{{ $student->id }}" value="0" @checked($current === 0)>
-                                        <label class="btn btn-outline-danger" for="st-0-{{ $student->id }}">Kelmadi</label>
+                                        <label class="btn btn-outline-danger" for="st-0-{{ $student->id }}">Sababsiz</label>
 
                                         <input type="radio" class="btn-check" name="status[{{ $student->id }}]"
                                                id="st-2-{{ $student->id }}" value="2" @checked($current === 2)>
                                         <label class="btn btn-outline-warning" for="st-2-{{ $student->id }}">Kechikdi</label>
                                     </div>
-                                    <div class="absence-reason mt-2 {{ $current === 0 ? '' : 'd-none' }}"
+                                    {{-- Izoh sababli, sababsiz va kechikdi uchun; "Keldi"da yashiriladi
+                                         va yuborilmaydi. --}}
+                                    <div class="absence-reason mt-2 {{ $current === 1 ? 'd-none' : '' }}"
                                          data-absence-reason>
                                         <input type="text"
                                                name="reason[{{ $student->id }}]"
                                                class="form-control form-control-sm @error('reason.' . $student->id) is-invalid @enderror"
                                                value="{{ $currentReason }}"
                                                maxlength="500"
-                                               placeholder="Sabab yozing (bo‘sh qoldirilsa: Sababsiz)">
+                                               @disabled($current === 1)
+                                               placeholder="Izoh (ixtiyoriy)">
                                     </div>
                                     @error('reason.' . $student->id)
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -244,7 +253,8 @@
             <span>{{ $monthLabel }} — davomat jadvali</span>
             <div class="d-flex align-items-center flex-wrap gap-3" style="font-size: .78rem;">
                 <span><span class="badge bg-label-success"><i class="bx bx-check"></i></span> keldi</span>
-                <span><span class="badge bg-label-danger"><i class="bx bx-x"></i></span> kelmadi</span>
+                <span><span class="badge bg-label-primary"><i class="bx bx-x"></i></span> sababli</span>
+                <span><span class="badge bg-label-danger"><i class="bx bx-x"></i></span> sababsiz</span>
                 <span><span class="badge bg-label-warning"><i class="bx bx-time"></i></span> kechikdi</span>
             </div>
         </div>
@@ -273,8 +283,10 @@
                             @foreach($lessonDays as $day)
                                 @php $status = $data[$student->id][$day] ?? null; @endphp
                                 <td>
-                                    @if($status === 0)
-                                        <span class="badge bg-label-danger" title="Kelmadi"><i class="bx bx-x"></i></span>
+                                    @if($status === 0 && ($excused[$student->id][$day] ?? false))
+                                        <span class="badge bg-label-primary" title="Sababli"><i class="bx bx-x"></i></span>
+                                    @elseif($status === 0)
+                                        <span class="badge bg-label-danger" title="Sababsiz"><i class="bx bx-x"></i></span>
                                     @elseif($status === 2)
                                         <span class="badge bg-label-warning" title="Kechikdi"><i class="bx bx-time"></i></span>
                                     @elseif($status === 1)
@@ -327,16 +339,7 @@
                             <td class="fw-semibold">{{ $attendance->user?->name ?? '—' }}</td>
                             <td class="text-muted">{{ $attendance->lesson?->name ?? '—' }}</td>
                             <td class="text-muted">{{ $attendance->teacher?->name ?? '—' }}</td>
-                            <td>
-                                @if((int) $attendance->status === 0)
-                                    <span class="badge bg-label-{{ $attendance->absenceReasonTone() }}">{{ $attendance->absenceReasonLabel() }}</span>
-                                    @if($attendance->hasAbsenceReason() && $attendance->reasonWriter)
-                                        <small class="text-muted d-block mt-1">{{ $attendance->reasonWriter->name }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
+                            <td>@include('partials.attendance-reason', ['record' => $attendance, 'withBadge' => false])</td>
                             <td>
                                 @if($attendance->latestFollowUp)
                                     <span class="badge bg-label-{{ $attendance->latestFollowUp->statusTone() }}">{{ $attendance->latestFollowUp->statusLabel() }}</span>
@@ -349,11 +352,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if((int) $attendance->status === 2)
-                                    <span class="badge bg-label-warning">Kechikdi</span>
-                                @else
-                                    <span class="badge bg-label-danger">Kelmadi</span>
-                                @endif
+                                <span class="badge bg-label-{{ $attendance->kindTone() }}">{{ $attendance->kindLabel() }}</span>
                             </td>
                             <td class="text-end">
                                 <form action="{{ route('attendance.delete', $attendance->id) }}" method="post"
@@ -384,7 +383,11 @@
             input.addEventListener('change', () => {
                 const row = input.closest('tr');
                 const reason = row?.querySelector('[data-absence-reason]');
-                if (reason) reason.classList.toggle('d-none', input.value !== '0' || !input.checked);
+                if (!reason || !input.checked) return;
+                const present = input.value === '1';
+                reason.classList.toggle('d-none', present);
+                const field = reason.querySelector('input');
+                if (field) field.disabled = present;
             });
         });
     </script>

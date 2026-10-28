@@ -77,6 +77,10 @@ class AttendanceService
         $absentCount = 0;
         $lateCount = 0;
         $reasons = [];
+        // Yo'qlama formasidagi tugma (Attendance::FORM_*) va jadvaldagi
+        // sababli belgisi uchun. $data o'zgarmaydi — Excel eksport uni o'qiydi.
+        $formValues = [];
+        $excused = [];
         foreach ($absentLateRecords as $record) {
             $day = (int) $record->created_at->format('d');
             $status = (int) $record->status;
@@ -84,6 +88,8 @@ class AttendanceService
             if (isset($data[$record->user_id])) {
                 $data[$record->user_id][$day] = $status;
                 $reasons[$record->user_id][$day] = $record->reason;
+                $formValues[$record->user_id][$day] = $record->formValue();
+                $excused[$record->user_id][$day] = $record->isExcused();
             }
 
             $status === 2 ? $lateCount++ : $absentCount++;
@@ -119,6 +125,8 @@ class AttendanceService
             'today' => now()->day,
             'data' => $data,
             'reasons' => $reasons,
+            'formValues' => $formValues,
+            'excused' => $excused,
             'year' => $year,
             'month' => $month,
             'date' => $date,

@@ -307,11 +307,7 @@
                                     <td class="text-muted">{{ $item->group->name ?? '—' }}</td>
                                     <td class="text-muted">{{ $item->lesson->name ?? '—' }}</td>
                                     <td class="text-end">
-                                        @if((int) $item->status === 2)
-                                            <span class="badge bg-label-warning">Kechikdi</span>
-                                        @else
-                                            <span class="badge bg-label-danger">Kelmadi</span>
-                                        @endif
+                                        <span class="badge bg-label-{{ $item->kindTone() }}">{{ $item->kindLabel() }}</span>
                                     </td>
                                 </tr>
                             @endforeach

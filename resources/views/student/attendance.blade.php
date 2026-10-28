@@ -82,11 +82,7 @@
                             </td>
                             <td class="text-muted">{{ $attendance->lesson?->name ?? '—' }}</td>
                             <td class="text-end">
-                                @if((int) $attendance->status === 2)
-                                    <span class="badge bg-label-warning">Kechikdim</span>
-                                @else
-                                    <span class="badge bg-label-danger">Kelmadim</span>
-                                @endif
+                                <span class="badge bg-label-{{ $attendance->kindTone() }}">{{ $attendance->kindLabelForStudent() }}</span>
                             </td>
                         </tr>
                     @endforeach

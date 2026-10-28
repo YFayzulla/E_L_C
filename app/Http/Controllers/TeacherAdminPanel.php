@@ -67,7 +67,8 @@ class TeacherAdminPanel extends Controller
         $request->validate([
             'lesson' => 'nullable|string|max:255',
             'status' => 'required|array',
-            'status.*' => ['required', 'integer', Rule::in([0, 1, 2])],
+            // 1 keldi · 3 sababli · 0 sababsiz · 2 kechikdi (Attendance::FORM_*)
+            'status.*' => ['required', 'integer', Rule::in(Attendance::FORM_VALUES)],
             'reason' => 'nullable|array',
             'reason.*' => 'nullable|string|max:500',
         ]);
@@ -119,38 +120,28 @@ class TeacherAdminPanel extends Controller
                     continue;
                 }
 
-                $status = (int) $statusValue;
+                // Sababli / sababsiz / kechikdi — izoh uchalasida ham yoziladi.
+                $attributes = Attendance::attributesFromForm(
+                    (int) $statusValue,
+                    $reasons[$userId] ?? null,
+                    $checkerId
+                );
 
                 // Present is implicit: drop any stale absent/late row so a
                 // mis-click can actually be undone from the UI.
-                if ($status === 1) {
+                if ($attributes === null) {
                     Attendance::where('user_id', $userId)
                         ->where('lesson_id', $lesson->id)
                         ->delete();
                     continue;
                 }
 
-                if (! in_array($status, [0, 2], true)) {
-                    continue;
-                }
-
-                // Sabab faqat "kelmadi" uchun yoziladi. Bo'sh qolsa null
-                // saqlanadi va barcha jurnallarda "Sababsiz" deb ko'rsatiladi.
-                $reason = $status === 0 ? trim((string) ($reasons[$userId] ?? '')) : '';
-
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],
-                    [
-                        'group_id' => $group->id,
-                        'who_checked' => $checkerId,
-                        'status' => $status,
-                        'reason' => $reason !== '' ? $reason : null,
-                        'reason_written_by' => $reason !== '' ? $checkerId : null,
-                        'reason_written_at' => $reason !== '' ? now() : null,
-                    ]
+                    ['group_id' => $group->id, 'who_checked' => $checkerId] + $attributes
                 );
 
-                $status === 2 ? $late++ : $absent++;
+                $attributes['status'] === 2 ? $late++ : $absent++;
             }
 
             DB::commit();

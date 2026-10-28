@@ -96,6 +96,20 @@ class TestResultsPageTest extends TestCase
         $this->assertStringContainsString('>80<', $html);
     }
 
+    public function test_test_list_shows_group_name(): void
+    {
+        Centre::for($this->centre, function () {
+            $other = Group::create(['name' => '26-7 Elementary', 'monthly_payment' => 0]);
+            LessonAndHistory::create(['name' => 'Oylik test — Oktabr 2026', 'data' => 2, 'group' => $other->id]);
+        });
+
+        $this->actingAs($this->admin)
+            ->get(route('test'))
+            ->assertOk()
+            ->assertSee('26-4 Pre Intermediate')
+            ->assertSee('26-7 Elementary');
+    }
+
     public function test_selecting_a_row_deletes_all_its_marks(): void
     {
         $ids = Centre::for($this->centre, fn () => Assessment::where('user_id', $this->second->id)->pluck('id')->implode(','));

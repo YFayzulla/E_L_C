@@ -41,6 +41,7 @@
                         <thead>
                         <tr>
                             <td>Test Name</td>
+                            <td>Guruh</td>
                             <td>Data</td>
                             <td>show</td>
                         </tr>
@@ -50,6 +51,15 @@
                         @foreach($data as $item)
                             <tr>
                                 <td>{{$item->name}}</td>
+                                {{-- Bir oyda bir nechta guruh bir xil nomli test topshiradi —
+                                     guruhsiz ularni ajratib bo'lmasdi. --}}
+                                <td>
+                                    @if($item->group_name)
+                                        <span class="badge bg-label-info">{{ $item->group_name }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
                                 <td>{{$item->created_at->format('d-m-Y')}}</td>
                                 <td>
                                     <a href="{{route('test.show', $item->id)}}" class="btn btn-info"><i

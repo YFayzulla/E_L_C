@@ -31,6 +31,25 @@ class TestResultController extends Controller
                 ->take(5)
                 ->get();
 
+            // Har bir test qaysi guruhniki. lesson_and_histories.group — guruh
+            // id si; guruh o'chirilgan bo'lsa, ballarda saqlangan nomga
+            // tushamiz (assessments.group — guruh nomi).
+            $groupNames = Group::whereIn('id', $testHistories->pluck('group')->filter()->unique())
+                ->pluck('name', 'id');
+
+            $markedGroups = Assessment::whereIn('history_id', $testHistories->pluck('id'))
+                ->whereNotNull('group')
+                ->select('history_id', 'group')
+                ->distinct()
+                ->get()
+                ->groupBy('history_id')
+                ->map(fn ($rows) => $rows->pluck('group')->implode(', '));
+
+            $testHistories->each(fn ($history) => $history->setAttribute(
+                'group_name',
+                $groupNames[$history->group] ?? $markedGroups[$history->id] ?? null
+            ));
+
             return view('assessment.main', [
                 'data'        => $testHistories,
                 'topStudents' => $topStudents

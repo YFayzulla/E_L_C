@@ -165,6 +165,20 @@ class ParentAccountService
             ];
         }
 
+        // Old student rows can have parents_name / parents_tel but no row in
+        // parent_student yet. Show that information in the edit form so the
+        // next save creates the parent account and its student link instead of
+        // silently replacing the visible values with blanks.
+        if (! isset($out['ota']) && filled($student->parents_tel)) {
+            $out['ota'] = [
+                'id'       => 0,
+                'name'     => (string) ($student->parents_name ?? ''),
+                'phone'    => User::normalizePhone($student->parents_tel),
+                'email'    => null,
+                'verified' => false,
+            ];
+        }
+
         return $out;
     }
 

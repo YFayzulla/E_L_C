@@ -104,9 +104,9 @@ class StudentEnrollmentService
             // Ota / ona (va ixtiyoriy vasiy) hisoblari bir yo'la yaratiladi va
             // users.parents_name / parents_tel birlamchi vasiy bo'yicha
             // yangilanadi.
-            if ($guardians !== []) {
-                $this->parents->syncGuardians($user, $guardians);
-            }
+            // Always pass through the guardian synchroniser. It also mirrors
+            // the primary parent's name and phone onto the legacy columns.
+            $this->parents->syncGuardians($user, $guardians);
 
             return $user;
         });

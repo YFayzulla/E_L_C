@@ -10,6 +10,10 @@
         $labels     = (array) config('grading.skill_labels', []);
         $icons      = (array) config('grading.skill_icons', []);
         $lessonName = optional($lessons->firstWhere('id', $lessonId));
+        // Xato bilan qaytilganda tanlov saqlanadi; aks holda controller beradi
+        // (darsda baholangan ko'nikmalar yoki hammasi).
+        $selectedSkills = (array) old('skills', $selectedSkills ?? $skills);
+        $hasAggregates  = count($skills) > 1;
     @endphp
 
     <div class="page-head">
@@ -82,7 +86,7 @@
             </div>
         </form>
 
-        <form method="POST" action="{{ route('skills.store', $group->id) }}">
+        <form method="POST" action="{{ route('skills.store', $group->id) }}" id="skillsForm">
             @csrf
             <input type="hidden" name="lesson_id" value="{{ $lessonId }}">
 
@@ -95,36 +99,51 @@
                     <span class="badge bg-label-primary">0 – 100</span>
                 </div>
 
+                @error('skills')
+                    <div class="alert alert-danger mx-3 mt-3 mb-0 py-2">{{ $message }}</div>
+                @enderror
+
                 <div class="table-responsive">
-                    <table class="table table-hover grade-table mb-0">
+                    <table class="table table-hover grade-table marks-table mb-0">
                         <thead>
                         <tr>
-                            <th style="min-width: 12rem;">Talaba</th>
+                            <th>Talaba</th>
                             @foreach($skills as $skill)
-                                <th style="min-width: 7rem;">
-                                    <i class="bx {{ $icons[$skill] ?? 'bx-star' }} me-1"></i>
-                                    {{ $labels[$skill] ?? ucfirst($skill) }}
+                                <th class="js-skill-head" data-skill="{{ $skill }}">
+                                    <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
+                                        <input type="checkbox" class="form-check-input mt-0 js-skill-toggle"
+                                               name="skills[]" value="{{ $skill }}"
+                                               @checked(in_array($skill, $selectedSkills, true))>
+                                        <i class="bx {{ $icons[$skill] ?? 'bx-star' }} d-none d-xxl-inline"></i>
+                                        {{ $labels[$skill] ?? ucfirst($skill) }}
+                                    </label>
                                 </th>
                             @endforeach
-                            @if(count($skills) > 1)
-                                {{-- Bitta ko'nikma bo'lsa bu ustun o'sha bahoni
-                                     takrorlaydi, ya'ni ortiqcha. --}}
-                                <th style="min-width: 7rem;">
-                                    <i class="bx bx-calculator me-1"></i>
-                                    {{ config('grading.skill_mode') === 'single' ? config('grading.overall_label', 'Umumiy') : '4 ko‘nikma o‘rtachasi' }}
+                            @if($hasAggregates)
+                                {{-- Serverga yuborilmaydi — faqat ko'rsatish uchun. --}}
+                                <th>
+                                    <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
+                                        <input type="checkbox" class="form-check-input mt-0 js-agg-toggle"
+                                               data-agg="average" checked>
+                                        <i class="bx bx-calculator d-none d-xxl-inline"></i> O‘rtacha
+                                    </label>
+                                </th>
+                                <th>
+                                    <label class="d-flex align-items-center gap-1 mb-0" style="cursor: pointer;">
+                                        <input type="checkbox" class="form-check-input mt-0 js-agg-toggle"
+                                               data-agg="sum" checked>
+                                        <i class="bx bx-plus-circle d-none d-xxl-inline"></i> Yig‘indi
+                                    </label>
                                 </th>
                             @endif
-                            <th style="min-width: 16rem;">Izoh</th>
+                            <th style="min-width: 8rem;">Izoh</th>
                         </tr>
                         </thead>
                         <tbody id="myTable">
                         @foreach($students as $student)
                             <tr data-student="{{ $student->id }}">
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <x-avatar :user="$student" />
-                                        <span class="fw-semibold">{{ $student->name }}</span>
-                                    </div>
+                                    <x-avatar :user="$student" label class="fw-semibold" />
                                 </td>
 
                                 @foreach($skills as $skill)
@@ -139,15 +158,19 @@
                                                class="form-control grade-input js-score @error($field) is-invalid @enderror"
                                                data-skill="{{ $skill }}"
                                                placeholder="—"
+                                               @disabled(! in_array($skill, $selectedSkills, true))
                                                aria-label="{{ $student->name }} — {{ $labels[$skill] ?? $skill }}">
                                         @error($field) <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </td>
                                 @endforeach
 
-                                @if(count($skills) > 1)
+                                @if($hasAggregates)
                                     <td>
                                         {{-- Derived on the fly; nothing is posted or stored for it. --}}
-                                        <span class="badge bg-label-secondary js-overall" style="font-size: .9rem;">—</span>
+                                        <span class="badge bg-label-secondary js-average" style="font-size: .9rem;">—</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-secondary js-sum" style="font-size: .9rem;">—</span>
                                     </td>
                                 @endif
 
@@ -155,7 +178,7 @@
                                     <input type="text" maxlength="250"
                                            name="comment[{{ $student->id }}]"
                                            value="{{ old("comment.{$student->id}", $comments[$student->id] ?? '') }}"
-                                           class="form-control @error("comment.{$student->id}") is-invalid @enderror"
+                                           class="form-control form-control-sm @error("comment.{$student->id}") is-invalid @enderror"
                                            placeholder="Ixtiyoriy izoh"
                                            aria-label="{{ $student->name }} — izoh">
                                     @error("comment.{$student->id}")
@@ -170,7 +193,8 @@
 
                 <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <span class="text-muted" style="font-size: .82rem;">
-                        Umumiy ball Reading, Listening, Writing va Speaking o‘rtachasidan hisoblanadi; Grammatika alohida baholanadi.
+                        Ustun tepasidagi belgi — dars shu ko‘nikmani o‘z ichiga oladimi: faqat belgilangan
+                        ustunlar saqlanadi va o‘rtacha hamda yig‘indi faqat ular bo‘yicha hisoblanadi.
                         Bo‘sh qoldirilgan katak saqlanmaydi — 0 ball sifatida yozilmaydi.
                     </span>
                     <button type="submit" class="btn btn-primary">
@@ -180,42 +204,7 @@
             </div>
         </form>
 
-        @if(count($skills) > 1)
-        {{-- Bitta ustunda hisoblanadigan o'rtacha o'sha bahoning o'zi — ortiqcha. --}}
-        <script>
-            // Live arithmetic mean per row. Blank cells are "not assessed" and
-            // stay out of it, matching how the server treats them.
-            (function () {
-                document.querySelectorAll('#myTable tr[data-student]').forEach(function (row) {
-                    const out = row.querySelector('.js-overall');
-                    if (!out) { return; }
-
-                    function recalc() {
-                        const values = [...row.querySelectorAll('.js-score')]
-                            .filter(i => i.dataset.skill !== 'grammar')
-                            .map(i => i.value.trim())
-                            .filter(v => v !== '')
-                            .map(Number)
-                            .filter(n => Number.isFinite(n));
-
-                        if (values.length === 0) {
-                            out.textContent = '—';
-                            out.className = 'badge bg-label-secondary js-overall';
-                            return;
-                        }
-
-                        const mean = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-                        out.textContent = mean;
-                        out.className = 'badge js-overall bg-label-'
-                            + (mean >= 80 ? 'success' : mean >= 60 ? 'warning' : 'danger');
-                    }
-
-                    row.querySelectorAll('.js-score').forEach(i => i.addEventListener('input', recalc));
-                    recalc();
-                });
-            })();
-        </script>
-        @endif
+        @include('partials.marks-matrix-assets', ['formId' => 'skillsForm'])
 
     @endif
 

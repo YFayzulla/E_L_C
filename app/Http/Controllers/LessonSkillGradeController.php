@@ -111,6 +111,14 @@ class LessonSkillGradeController extends Controller
                 }
             }
 
+            // Ustun belgilari: darsga avval baho qo'yilgan bo'lsa — o'sha
+            // ko'nikmalar, aks holda hammasi.
+            $allSkills = (array) config('grading.skills', []);
+            $gradedSkills = collect($scores)->flatMap(fn ($bySkill) => array_keys($bySkill))->unique()->all();
+            $selectedSkills = $gradedSkills === []
+                ? $allSkills
+                : array_values(array_intersect($allSkills, $gradedSkills));
+
             return view('teacher.skills.grade', [
                 'group'    => $groupModel,
                 'lessons'  => $lessons,
@@ -118,6 +126,7 @@ class LessonSkillGradeController extends Controller
                 'lessonId' => $lessonId,
                 'scores'   => $scores,
                 'comments' => $comments,
+                'selectedSkills' => $selectedSkills,
             ]);
         } catch (\Exception $e) {
             Log::error('LessonSkillGradeController@grade error: ' . $e->getMessage());
@@ -149,7 +158,12 @@ class LessonSkillGradeController extends Controller
         }
 
         $roster   = $this->roster($group)->pluck('id')->flip();
-        $skills   = (array) config('grading.skills', []);
+        // Faqat ustun tepasida belgilangan ko'nikmalar — belgilanmagan
+        // ustunning balli (qo'lda yuborilgan bo'lsa ham) yozilmaydi.
+        $skills   = array_values(array_intersect(
+            (array) config('grading.skills', []),
+            (array) $request->input('skills', [])
+        ));
         $comments = (array) $request->input('comment', []);
         $graderId = auth()->id();
         $now      = now();

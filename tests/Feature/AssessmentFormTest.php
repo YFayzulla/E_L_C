@@ -6,6 +6,8 @@ use App\Models\Assessment;
 use App\Models\Centre;
 use App\Models\Group;
 use App\Models\GroupTeacher;
+use App\Models\LessonAndHistory;
+use App\Models\LessonSkillGrade;
 use App\Models\User;
 use App\Services\CentreMembershipService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -123,6 +125,70 @@ class AssessmentFormTest extends TestCase
 
         $this->assertSame(['writing' => 65], $this->marks());
         $this->assertSame(65, (int) $this->student->fresh()->mark);
+    }
+
+    /* ===================================== Ko'nikmalar sahifasi ham shunday */
+
+    private function lesson(): LessonAndHistory
+    {
+        return Centre::for($this->centre, fn () => LessonAndHistory::create([
+            'name' => 'Dars: 24.10.2026', 'data' => 1, 'group' => $this->mine->id,
+        ]));
+    }
+
+    private function skillMarks(int $lessonId): array
+    {
+        return Centre::for($this->centre, fn () => LessonSkillGrade::where('lesson_id', $lessonId)
+            ->where('user_id', $this->student->id)
+            ->orderBy('skill')
+            ->pluck('score', 'skill')
+            ->map(fn ($score) => (int) $score)
+            ->all());
+    }
+
+    public function test_skills_page_saves_only_selected_columns(): void
+    {
+        $lesson = $this->lesson();
+
+        $this->actingAs($this->teacher)
+            ->get(route('skills.grade', $this->mine->id))
+            ->assertOk()
+            ->assertSee('name="skills[]"', false)
+            ->assertSee('Yig‘indi', false);
+
+        $this->actingAs($this->teacher)
+            ->post(route('skills.store', $this->mine->id), [
+                'lesson_id' => $lesson->id,
+                'skills'    => ['reading', 'writing'],
+                'score'     => [$this->student->id => ['reading' => 70, 'writing' => 90, 'speaking' => 5]],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertSame(['reading' => 70, 'writing' => 90], $this->skillMarks($lesson->id));
+
+        // Qayta ochilganda faqat baholangan ustunlar belgilangan.
+        $html = $this->actingAs($this->teacher)
+            ->get(route('skills.grade', ['group' => $this->mine->id, 'lesson' => $lesson->id]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/value="reading"\s+checked/', $html);
+        $this->assertDoesNotMatchRegularExpression('/value="speaking"\s+checked/', $html);
+    }
+
+    public function test_skills_page_requires_a_selected_column(): void
+    {
+        $lesson = $this->lesson();
+
+        $this->actingAs($this->teacher)
+            ->post(route('skills.store', $this->mine->id), [
+                'lesson_id' => $lesson->id,
+                'score'     => [$this->student->id => ['reading' => 70]],
+            ])
+            ->assertSessionHasErrors('skills');
+
+        $this->assertSame([], $this->skillMarks($lesson->id));
     }
 
     public function test_at_least_one_skill_must_be_selected(): void

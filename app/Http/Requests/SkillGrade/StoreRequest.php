@@ -51,6 +51,9 @@ class StoreRequest extends FormRequest
     {
         $rules = [
             'lesson_id'       => ['required', 'integer', 'exists:lesson_and_histories,id'],
+            // Ustun tepasidagi belgilar: dars qaysi ko'nikmalarni qamradi.
+            'skills'          => ['required', 'array', 'min:1'],
+            'skills.*'        => [Rule::in(config('grading.skills', []))],
             'score'           => ['nullable', 'array'],
             'comment'         => ['nullable', 'array'],
             'comment.*'       => ['nullable', 'string', 'max:250'],
@@ -74,6 +77,9 @@ class StoreRequest extends FormRequest
         return [
             'lesson_id.required' => 'Darsni tanlang.',
             'lesson_id.exists'   => 'Tanlangan dars topilmadi.',
+            'skills.required'    => 'Kamida bitta ko‘nikma ustunini belgilang.',
+            'skills.min'         => 'Kamida bitta ko‘nikma ustunini belgilang.',
+            'skills.*.in'        => 'Noma’lum ko‘nikma tanlandi.',
             'posted_skills.*.in' => 'Noma’lum ko‘nikma yuborildi.',
             'score.*.*.integer'  => 'Baho butun son bo‘lishi kerak.',
             'score.*.*.min'      => 'Baho 0 dan kichik bo‘lmasligi kerak.',

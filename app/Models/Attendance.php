@@ -75,7 +75,7 @@ class Attendance extends Model
 
     public function absenceReasonTone(): string
     {
-        return $this->hasAbsenceReason() ? 'success' : 'danger';
+        return $this->hasAbsenceReason() ? 'primary' : 'danger';
     }
 
 }

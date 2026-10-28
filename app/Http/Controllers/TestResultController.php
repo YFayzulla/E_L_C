@@ -70,11 +70,18 @@ class TestResultController extends Controller
             // Sidebar uchun barcha guruhlar ro'yxati (select name, id yetarli)
             $allGroups = Group::select('id', 'name')->orderBy('name')->get();
 
+            // Har bir ko'nikma alohida qator — sahifada bitta talaba bitta
+            // qatorga yig'iladi, ko'nikmalar ustun bo'lib turadi.
+            $results = Assessment::byStudent($assessments);
+
             return view('assessment.index', [
                 'assessments' => $assessments,
+                'skills'      => $results['skills'],
+                'students'    => $results['rows'],
                 'groups'      => $allGroups,
                 'id'          => $group ? $group->id : null,
                 'groupName'   => $groupName,
+                'testName'    => $history->name,
                 'historyId'   => $historyId
             ]);
 

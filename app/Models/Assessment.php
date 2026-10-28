@@ -108,6 +108,52 @@ class Assessment extends Model
             ->values();
     }
 
+    /**
+     * Bitta testning natijalari: bitta talaba — bitta qator.
+     *
+     * Ustunlar — shu testda haqiqatan baholangan ko'nikmalar (config
+     * tartibida); ko'nikmasiz eski qatorlar "Umumiy" ustuniga tushadi.
+     * `ids` — talabaning shu testdagi barcha `assessments` qatorlari,
+     * o'chirish bitta belgi bilan hammasini oladi.
+     *
+     * @param  iterable<self>  $rows  `student` munosabati yuklangan bo'lsin
+     * @return array{skills: array<string, string>, rows: \Illuminate\Support\Collection<int, object>}
+     */
+    public static function byStudent(iterable $rows): array
+    {
+        $rows = collect($rows);
+        $order = array_flip((array) config('grading.skills'));
+        $labels = (array) config('grading.skill_labels');
+        $key = fn (self $row) => filled($row->skill) ? $row->skill : 'overall';
+
+        $skills = $rows->map($key)->unique()
+            ->sortBy(fn ($skill) => $order[$skill] ?? PHP_INT_MAX)
+            ->mapWithKeys(fn ($skill) => [$skill => $skill === 'overall' ? 'Umumiy' : ($labels[$skill] ?? $skill)])
+            ->all();
+
+        $students = $rows->groupBy('user_id')
+            ->map(function ($items) use ($key) {
+                $first = $items->first();
+                // Bitta ko'nikma ikki marta yozilgan bo'lsa — oxirgisi.
+                $marks = $items->sortBy('id')->mapWithKeys(fn (self $row) => [$key($row) => (int) $row->get_mark])->all();
+
+                return (object) [
+                    'user_id' => (int) $first->user_id,
+                    'name'    => $first->student->name ?? '—',
+                    'marks'   => $marks,
+                    'average' => $marks === [] ? null : (int) round(array_sum($marks) / count($marks)),
+                    'sum'     => array_sum($marks),
+                    'ids'     => $items->pluck('id')->map(fn ($id) => (int) $id)->all(),
+                    'comment' => $items->first(fn (self $row) => filled($row->skill) && filled($row->for_what))?->for_what,
+                    'rec_group' => $items->first(fn (self $row) => filled($row->rec_group))?->rec_group,
+                ];
+            })
+            ->sortBy(fn ($student) => [-($student->average ?? -1), mb_strtolower($student->name)])
+            ->values();
+
+        return ['skills' => $skills, 'rows' => $students];
+    }
+
     /** Only the marks that measured a named skill. */
     public function scopeForSkill($query, string $skill)
     {

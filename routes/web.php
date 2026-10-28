@@ -285,6 +285,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::controller(TestResultController::class)->prefix('Test')->group(function () {
         Route::get('/', 'index')->name('test');
         Route::get('/{id}/show', 'showResults')->name('test.show');
+        // Shu test bo'yicha PDF: bitta talaba — bitta qator.
+        Route::get('/{history}/report', [PdfController::class, 'testReport'])
+            ->whereNumber('history')->name('test.report');
         Route::delete('/{id}/delete', 'destroyAll')->name('test.destroy.all');
     });
 

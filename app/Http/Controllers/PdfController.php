@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\HistoryPayments;
+use App\Models\LessonAndHistory;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -167,18 +168,51 @@ class PdfController extends Controller
     /**
      * Group assessment PDF.
      */
+    /**
+     * Bitta test bo'yicha hisobot: bitta talaba — bitta qator, ko'nikmalar
+     * ustunlarda, o'rtacha va yig'indi bilan (Test natijalari sahifasi kabi).
+     */
+    public function testReport(int $historyId)
+    {
+        $history = LessonAndHistory::findOrFail($historyId);
+
+        $assessments = Assessment::where('history_id', $history->id)
+            ->with('student:id,name')
+            ->orderBy('id')
+            ->get();
+
+        if ($assessments->isEmpty()) {
+            return redirect()->back()->with('warning', 'Bu test uchun natija topilmadi.');
+        }
+
+        $results = Assessment::byStudent($assessments);
+        $groupName = (string) $assessments->first()->group;
+
+        $pdf = PDF::loadView('admin.pdf.test_results', [
+            'skills'    => $results['skills'],
+            'students'  => $results['rows'],
+            'groupName' => $groupName,
+            'testName'  => $history->name,
+            'date'      => $history->created_at,
+        ]);
+
+        return $pdf->download('test_' . str_replace(' ', '_', $groupName) . '_' . $history->id . '.pdf');
+    }
+
     public function Assessment($id)
     {
         try {
             $group = Group::findOrFail($id);
             
             // Assessment jadvalida 'group' ustuni string bo'lgani uchun, nom bo'yicha qidiramiz
+            // Assessment da `user` munosabati yo'q — `student`. Ilgari bu
+            // yerda with('user') bo'lgani uchun hisobot har safar yiqilardi.
             $assessments = Assessment::where('group', $group->name)
-                ->with('user:id,name') // Eager load student name
+                ->with('student:id,name')
                 ->orderBy('user_id')
                 ->orderBy('id')
                 ->get()
-                ->sortBy(fn ($assessment) => mb_strtolower($assessment->user->name ?? ''), SORT_NATURAL)
+                ->sortBy(fn ($assessment) => mb_strtolower($assessment->student->name ?? ''), SORT_NATURAL)
                 ->values();
 
             if ($assessments->isEmpty()) {

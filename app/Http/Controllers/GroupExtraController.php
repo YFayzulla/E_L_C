@@ -32,10 +32,15 @@ class GroupExtraController extends Controller
         $request->validate(['selectedItems' => 'required|array']);
 
         try {
-            $selectedItems = $request->input('selectedItems');
+            // Test natijalari sahifasida bitta belgi — talabaning shu testdagi
+            // barcha qatorlari ("12,13,14"), shuning uchun vergul bilan ajratiladi.
+            $selectedItems = collect($request->input('selectedItems'))
+                ->flatMap(fn ($item) => explode(',', (string) $item))
+                ->map(fn ($item) => trim($item))
+                ->all();
 
             // Xavfsizlik: Faqat raqamli ID larni ajratib olish
-            $validatedItems = array_filter($selectedItems, 'is_numeric');
+            $validatedItems = array_filter($selectedItems, 'ctype_digit');
 
             if (!empty($validatedItems)) {
                 // Tranzaksiya shart emas (bitta query), lekin try-catch muhim

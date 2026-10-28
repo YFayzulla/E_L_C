@@ -1,112 +1,132 @@
 @extends('template.master')
+
+@section('title', 'Test natijalari')
+@section('subtitle', trim(($groupName ?? '') . ' · ' . ($testName ?? ''), ' ·'))
+
 @section('content')
 
-    <div class="p-4 m-4 sm:p-8 bg-white shadow sm:rounded-lg ">
+    @php
+        $tone = fn (?int $mark) => $mark === null ? 'secondary' : ($mark >= 80 ? 'success' : ($mark >= 60 ? 'warning' : 'danger'));
+    @endphp
 
-        @if($assessments->isNotEmpty())
-            {{-- Ma'lumotlar mavjud bo'lsa, jadvalni ko'rsatish --}}
-            <h1>{{ $groupName }}</h1>
+    @if($students->isNotEmpty())
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h5 class="mb-0">{{ $groupName }}</h5>
+                    <small class="text-muted">{{ $testName }} · {{ $students->count() }} ta talaba</small>
+                </div>
+                <a href="{{ route('test.report', $historyId) }}" class="btn btn-sm btn-outline-danger">
+                    <i class="bx bxs-file-pdf me-1"></i> Hisobot (PDF)
+                </a>
+            </div>
 
-            <a href="{{ URL::to('/assessment/pdf', $historyId)}}" class="btn btn-danger mb-3 float-end"> Report </a>
-
-            <form action="{{route('deleteMultiple')}}" method="post">
+            <form action="{{ route('deleteMultiple') }}" method="post"
+                  onsubmit="return confirm('Belgilangan talabalarning shu testdagi barcha ballari o‘chirilsinmi?');">
                 @csrf
                 @method('DELETE')
 
-                <button type="button" id="selectAllBtn" class="btn btn-primary mb-3 me-1">Select All</button>
-                <button class="btn btn-danger mb-3 text-white">Delete specified data</button>
+                <div class="d-flex gap-2 px-4 pb-3">
+                    <button type="button" id="selectAllBtn" class="btn btn-sm btn-outline-primary">Hammasini belgilash</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Belgilanganlarni o‘chirish</button>
+                </div>
 
-                <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
-                        <thead class="table-active">
+                {{-- Bitta talaba — bitta qator. Ustunlar — shu testda baholangan
+                     ko'nikmalar; belgi talabaning shu testdagi barcha ballarini oladi. --}}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 results-table">
+                        <thead>
                         <tr>
-                            <td>+</td>
-                            <th>id</th>
-                            <th>name</th>
-                            <th>GOT MARK</th>
-                            <th>information</th>
-                            <th>change group</th>
+                            <th style="width: 1%;"></th>
+                            <th style="width: 1%;">#</th>
+                            <th>Talaba</th>
+                            @foreach($skills as $label)
+                                <th class="text-center">{{ $label }}</th>
+                            @endforeach
+                            @if(count($skills) > 1)
+                                <th class="text-center">O‘rtacha</th>
+                                <th class="text-center">Yig‘indi</th>
+                            @endif
+                            <th class="text-end">Guruh</th>
                         </tr>
                         </thead>
-                        @foreach($assessments as $assessment)
-                            <tbody id="myTable" class="table-group-divider">
+                        <tbody id="myTable">
+                        @foreach($students as $row)
                             <tr>
                                 <td>
-                                    <input type="checkbox" class="checkbox" name="selectedItems[]"
-                                           value="{{ $assessment->id }}">
+                                    <input type="checkbox" class="form-check-input js-row-check" name="selectedItems[]"
+                                           value="{{ implode(',', $row->ids) }}"
+                                           aria-label="{{ $row->name }}">
                                 </td>
-                                <th>{{$loop->index+1}}</th>
-                                <th>{{$assessment->student->name}}</th>
-                                <th>{{$assessment->get_mark}}</th>
-                                <th>{{ $assessment->skillLabel() }}</th>
-                                <th>
-                                    <button type="button" class="btn-outline-success btn m-2" data-bs-toggle="modal"
-                                            data-bs-target="#exampleModal{{$assessment->user_id}}"
-                                            data-bs-whatever="@mdo">
-                                        submit
-                                    </button>
-                                </th>
+                                <td class="text-muted">{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ $row->name }}</div>
+                                    @if($row->comment)
+                                        <small class="text-muted">{{ $row->comment }}</small>
+                                    @endif
+                                </td>
+                                @foreach($skills as $skill => $label)
+                                    <td class="text-center">
+                                        @if(array_key_exists($skill, $row->marks))
+                                            <span class="badge bg-label-{{ $tone($row->marks[$skill]) }}">{{ $row->marks[$skill] }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
+                                @endforeach
+                                @if(count($skills) > 1)
+                                    <td class="text-center">
+                                        <span class="badge bg-label-{{ $tone($row->average) }}" style="font-size: .9rem;">{{ $row->average ?? '—' }}</span>
+                                    </td>
+                                    <td class="text-center fw-semibold">{{ $row->sum }}</td>
+                                @endif
+                                <td class="text-end">
+                                    {{-- Ko'chirish sahifasi: summa, qarzdorlik va guruh tarixini
+                                         to'g'ri yuritadi. Eski modal (GroupExtraController@change_group)
+                                         to'lovni nolga tushirib, butun davomatni yangi guruhga yozardi. --}}
+                                    <a href="{{ route('student.transfer.form', $row->user_id) }}"
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="bx bx-transfer"></i>
+                                        <span class="d-none d-xxl-inline ms-1">Guruhini o‘zgartirish</span>
+                                    </a>
+                                </td>
                             </tr>
-                            </tbody>
                         @endforeach
+                        </tbody>
                     </table>
                 </div>
             </form>
-        @else
-            {{-- Ma'lumotlar mavjud bo'lmasa --}}
-            <div class="text-center">
-                <h3>Ma'lumotlar topilmadi.</h3>
-                <p>Ushbu test uchun hali baholar kiritilmagan yoki barcha baholar o'chirilgan.</p>
+        </div>
+
+    @else
+        <div class="card">
+            <div class="empty-state">
+                <i class="bx bx-clipboard"></i>
+                <h6>Ma’lumotlar topilmadi</h6>
+                <p>Ushbu test uchun hali baholar kiritilmagan yoki barcha baholar o‘chirilgan.</p>
                 <form action="{{ route('test.destroy.all', $historyId) }}" method="POST"
-                      onsubmit="return confirm('Haqiqatan ham ushbu test tarixini va unga bog\'liq barcha baholarni o\'chirmoqchimisiz? Bu amalni ortga qaytarib bo\'lmaydi!');">
+                      onsubmit="return confirm('Haqiqatan ham ushbu test tarixini va unga bog‘liq barcha baholarni o‘chirmoqchimisiz? Bu amalni ortga qaytarib bo‘lmaydi!');">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger mb-3 text-white">Test tarixini o'chirish</button>
+                    <button type="submit" class="btn btn-danger">Test tarixini o‘chirish</button>
                 </form>
             </div>
-        @endif
-    </div>
-
-    <!-- Modal -->
-    @if($assessments->isNotEmpty())
-        @foreach($assessments as $assessment)
-            <div class="modal fade" id="exampleModal{{$assessment->user_id}}" tabindex="-1"
-                 aria-labelledby="exampleModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            {{$assessment->student->name}}
-                        </div>
-                        <div class="modal-body">
-                            <form action="{{route('student.change.group',$assessment->user_id)}}" method="post">
-                                @csrf
-                                <label for="recipient-name"
-                                       class="form-label"> change group </label>
-                                <select name="group_id" class="form-select">
-                                    @foreach($groups as $group)
-                                        <option value="{{$group->id}}">{{$group->name}}</option>
-                                    @endforeach
-                                </select>
-                                <div class="mt-3">
-                                    <button type="submit" class="btn btn-outline-success m-2">save
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endforeach
+        </div>
     @endif
 
+    {{-- Ko'nikma ustunlari ko'p: standart katak oralig'i (1.35rem) bilan
+         jadval odatiy ekranga sig'masdi. --}}
+    <style>
+        html[data-theme] .results-table th,
+        html[data-theme] .results-table td { padding: .6rem .55rem; }
+    </style>
+
     <script>
-        $(document).ready(function () {
-            $("#selectAllBtn").click(function () {
-                $(".checkbox").prop("checked", true);
-            });
+        document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+            const boxes = [...document.querySelectorAll('.js-row-check')];
+            const allOn = boxes.every(b => b.checked);
+            boxes.forEach(b => { b.checked = !allOn; });
         });
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 @endsection

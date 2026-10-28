@@ -182,7 +182,9 @@ class TeacherApiController extends ApiController
                     continue;
                 }
 
-                $reason = trim((string) ($reasons[$userId] ?? ''));
+                // The web and API flows use the same rule: a reason belongs
+                // to an absence only; an empty value is shown as "Sababsiz".
+                $reason = (int) $status === 0 ? trim((string) ($reasons[$userId] ?? '')) : '';
 
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],

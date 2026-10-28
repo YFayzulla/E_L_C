@@ -62,4 +62,20 @@ class Attendance extends Model
         return $this->hasOne(AbsenceFollowUp::class, 'attendance_id')->latestOfMany();
     }
 
+    /** A reason is collected only when a student is marked absent. */
+    public function hasAbsenceReason(): bool
+    {
+        return (int) $this->status === 0 && filled($this->reason);
+    }
+
+    public function absenceReasonLabel(): string
+    {
+        return $this->hasAbsenceReason() ? (string) $this->reason : 'Sababsiz';
+    }
+
+    public function absenceReasonTone(): string
+    {
+        return $this->hasAbsenceReason() ? 'success' : 'danger';
+    }
+
 }

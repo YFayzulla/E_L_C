@@ -95,8 +95,12 @@
 
                         <div class="mt-3">
                             <div class="small text-muted">Sabab</div>
-                            <div class="text-wrap">{{ filled($record->reason) ? $record->reason : 'Sabab kiritilmagan' }}</div>
-                            @if($record->reasonWriter || $record->reason_written_at)
+                            @if((int) $record->status === 0)
+                                <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                            @if($record->hasAbsenceReason() && ($record->reasonWriter || $record->reason_written_at))
                                 <small class="text-muted">
                                     Sababni {{ $record->reasonWriter?->name ?? '—' }} yozgan
                                     @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif
@@ -211,9 +215,9 @@
                             <td><span class="badge bg-label-info">{{ $record->group?->name ?? '—' }}</span></td>
                             <td>{{ $record->teacher?->name ?? '—' }}</td>
                             <td>
-                                @if(filled($record->reason))
-                                    <div>{{ $record->reason }}</div>
-                                    @if($record->reasonWriter || $record->reason_written_at)
+                                @if((int) $record->status === 0)
+                                    <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
+                                    @if($record->hasAbsenceReason() && ($record->reasonWriter || $record->reason_written_at))
                                         <small class="text-muted">
                                             {{ $record->reasonWriter?->name ?? '—' }}
                                             @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif

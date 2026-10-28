@@ -115,8 +115,12 @@
 
                         <div class="mt-3">
                             <div class="small text-muted">Sabab</div>
-                            <div class="text-wrap">{{ filled($record->reason) ? $record->reason : 'Sabab kiritilmagan' }}</div>
-                            @if($record->reasonWriter || $record->reason_written_at)
+                            @if((int) $record->status === 0)
+                                <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                            @if($record->hasAbsenceReason() && ($record->reasonWriter || $record->reason_written_at))
                                 <small class="text-muted">
                                     Sababni {{ $record->reasonWriter?->name ?? '—' }} yozgan
                                     @if($record->reason_written_at) · {{ $record->reason_written_at->format('d.m.Y H:i') }} @endif
@@ -202,9 +206,11 @@
                             </td>
                             <td class="text-muted">{{ $record->lesson?->name ?? '—' }}</td>
                             <td>
-                                @if(filled($record->reason))
-                                    <div>{{ $record->reason }}</div>
-                                    <small class="text-muted">{{ $record->reasonWriter?->name ?? '—' }}</small>
+                                @if((int) $record->status === 0)
+                                    <span class="badge bg-label-{{ $record->absenceReasonTone() }}">{{ $record->absenceReasonLabel() }}</span>
+                                    @if($record->hasAbsenceReason())
+                                        <small class="text-muted d-block mt-1">{{ $record->reasonWriter?->name ?? '—' }}</small>
+                                    @endif
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif

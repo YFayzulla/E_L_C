@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class TeacherAdminPanel extends Controller
 {
@@ -66,6 +67,7 @@ class TeacherAdminPanel extends Controller
         $request->validate([
             'lesson' => 'nullable|string|max:255',
             'status' => 'required|array',
+            'status.*' => ['required', 'integer', Rule::in([0, 1, 2])],
             'reason' => 'nullable|array',
             'reason.*' => 'nullable|string|max:500',
         ]);
@@ -132,7 +134,9 @@ class TeacherAdminPanel extends Controller
                     continue;
                 }
 
-                $reason = trim((string) ($reasons[$userId] ?? ''));
+                // Sabab faqat "kelmadi" uchun yoziladi. Bo'sh qolsa null
+                // saqlanadi va barcha jurnallarda "Sababsiz" deb ko'rsatiladi.
+                $reason = $status === 0 ? trim((string) ($reasons[$userId] ?? '')) : '';
 
                 Attendance::updateOrCreate(
                     ['user_id' => $userId, 'lesson_id' => $lesson->id],

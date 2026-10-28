@@ -205,12 +205,15 @@
                                                id="st-2-{{ $student->id }}" value="2" @checked($current === 2)>
                                         <label class="btn btn-outline-warning" for="st-2-{{ $student->id }}">Kechikdi</label>
                                     </div>
-                                    <input type="text"
-                                           name="reason[{{ $student->id }}]"
-                                           class="form-control form-control-sm mt-2 @error('reason.' . $student->id) is-invalid @enderror"
-                                           value="{{ $currentReason }}"
-                                           maxlength="500"
-                                           placeholder="Sabab (kelmagan yoki kechikkan bo‘lsa)">
+                                    <div class="absence-reason mt-2 {{ $current === 0 ? '' : 'd-none' }}"
+                                         data-absence-reason>
+                                        <input type="text"
+                                               name="reason[{{ $student->id }}]"
+                                               class="form-control form-control-sm @error('reason.' . $student->id) is-invalid @enderror"
+                                               value="{{ $currentReason }}"
+                                               maxlength="500"
+                                               placeholder="Sabab yozing (bo‘sh qoldirilsa: Sababsiz)">
+                                    </div>
                                     @error('reason.' . $student->id)
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -325,10 +328,10 @@
                             <td class="text-muted">{{ $attendance->lesson?->name ?? '—' }}</td>
                             <td class="text-muted">{{ $attendance->teacher?->name ?? '—' }}</td>
                             <td>
-                                @if(filled($attendance->reason))
-                                    <div>{{ $attendance->reason }}</div>
-                                    @if($attendance->reasonWriter)
-                                        <small class="text-muted">{{ $attendance->reasonWriter->name }}</small>
+                                @if((int) $attendance->status === 0)
+                                    <span class="badge bg-label-{{ $attendance->absenceReasonTone() }}">{{ $attendance->absenceReasonLabel() }}</span>
+                                    @if($attendance->hasAbsenceReason() && $attendance->reasonWriter)
+                                        <small class="text-muted d-block mt-1">{{ $attendance->reasonWriter->name }}</small>
                                     @endif
                                 @else
                                     <span class="text-muted">—</span>
@@ -374,6 +377,18 @@
             @endif
         @endif
     </div>
+
+    @role('user')
+    <script>
+        document.querySelectorAll('input[type="radio"][name^="status["]').forEach((input) => {
+            input.addEventListener('change', () => {
+                const row = input.closest('tr');
+                const reason = row?.querySelector('[data-absence-reason]');
+                if (reason) reason.classList.toggle('d-none', input.value !== '0' || !input.checked);
+            });
+        });
+    </script>
+    @endrole
 
     @if(($receptionStudents ?? collect())->isNotEmpty())
         <div class="card">

@@ -327,13 +327,8 @@ class Controller extends BaseController
             ->limit(8)
             ->get();
 
-        $testResults = Assessment::where('assessments.user_id', $student->id)
-            ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
-            ->select('assessments.*', 'lesson_and_histories.name as test_name')
-            ->orderByDesc('assessments.created_at')
-            ->orderByDesc('assessments.id')
-            ->limit(8)
-            ->get();
+        // So'nggi 5 ta imtihon, har biri bitta qator.
+        $testResults = Assessment::testsFor($student->id, 5);
 
         return [
             'student' => $student,

@@ -53,14 +53,10 @@ class AssessmentController extends Controller
             // Talaba — o'z natijalari. Ilgari u quyidagi o'qituvchi
             // tarmog'iga tushib, "Guruhlarni yuklashda xatolik" olardi.
             if ($user->hasRole('student')) {
-                $results = Assessment::where('assessments.user_id', $user->id)
-                    ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
-                    ->select('assessments.*', 'lesson_and_histories.name as test_name')
-                    ->orderByDesc('assessments.created_at')
-                    ->orderByDesc('assessments.id')
-                    ->paginate(20);
+                // Bitta imtihon — bitta qator (ko'nikmalari va o'rtachasi bilan).
+                $tests = Assessment::testsFor($user->id);
 
-                return view('student.results', compact('results'));
+                return view('student.results', compact('tests'));
             }
 
             // Teacher sees only their groups. Saralash guruh nomi bo'yicha

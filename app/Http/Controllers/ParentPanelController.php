@@ -66,13 +66,8 @@ class ParentPanelController extends Controller
                 ->orderByDesc('id')
                 ->paginate(12);
 
-            $testResults = Assessment::where('assessments.user_id', $child->id)
-                ->leftJoin('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
-                ->select('assessments.*', 'lesson_and_histories.name as test_name')
-                ->orderByDesc('assessments.created_at')
-                ->orderByDesc('assessments.id')
-                ->limit(20)
-                ->get();
+            // Bitta imtihon — bitta qator, so'nggi 10 tasi.
+            $testResults = Assessment::testsFor($child->id, 10);
 
             return view('parent.child', [
                 'child' => $child,

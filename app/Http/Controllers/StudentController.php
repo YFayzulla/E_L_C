@@ -222,12 +222,9 @@ class StudentController extends Controller
 
             // Fetch test results (Assessments)
             // We need to join with LessonAndHistory to get the test name
-            $testResults = Assessment::where('user_id', $id)
-                ->join('lesson_and_histories', 'assessments.history_id', '=', 'lesson_and_histories.id')
-                ->select('assessments.*', 'lesson_and_histories.name as test_name')
-                ->latest('assessments.created_at')
-                ->orderByDesc('assessments.id')
-                ->get();
+            // Har bir ko'nikma alohida qator — jadvalda bitta imtihon bitta
+            // qatorga yig'iladi (Assessment::groupByTest).
+            $testResults = Assessment::testsFor((int) $id);
 
             $progress = app(ProgressService::class)->forStudent((int) $id);
 

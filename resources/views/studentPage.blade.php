@@ -132,41 +132,7 @@
                     <span>So‘nggi test natijalari</span>
                     <a href="{{ route('assessment.index') }}" class="btn btn-sm btn-outline-secondary">Barchasi</a>
                 </div>
-                @if($test_results->isEmpty())
-                    <div class="empty-state">
-                        <i class="bx bx-clipboard"></i>
-                        <h6>Natija yo‘q</h6>
-                        <p class="mb-0">Hozircha test natijalari kiritilmagan.</p>
-                    </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Test</th>
-                                <th>Maqsad</th>
-                                <th>Ball</th>
-                                <th class="text-end">Sana</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($test_results as $result)
-                                @php $mark = (int) $result->get_mark; @endphp
-                                <tr>
-                                    <td>{{ $result->test_name ?? 'Test' }}</td>
-                                    <td class="text-muted">{{ $result->skillLabel() }}</td>
-                                    <td>
-                                        <span class="badge bg-label-{{ $mark >= 80 ? 'success' : ($mark >= 60 ? 'warning' : 'danger') }}">
-                                            {{ $result->get_mark }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end text-muted">{{ $result->created_at?->format('d.m.Y') }}</td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                @include('partials.test-results-table', ['tests' => $test_results, 'showGroup' => false])
             </div>
         </div>
 

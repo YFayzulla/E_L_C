@@ -140,41 +140,7 @@
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-header">Test natijalari</div>
-                @if($testResults->isEmpty())
-                    <div class="empty-state">
-                        <i class="bx bx-clipboard"></i>
-                        <h6>Natija yo‘q</h6>
-                        <p class="mb-0">Hozircha test natijalari kiritilmagan.</p>
-                    </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                            <tr>
-                                <th>Test</th>
-                                <th>Maqsad</th>
-                                <th>Ball</th>
-                                <th class="text-end">Sana</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($testResults as $result)
-                                @php $mark = (int) $result->get_mark; @endphp
-                                <tr>
-                                    <td>{{ $result->test_name ?? 'Test' }}</td>
-                                    <td class="text-muted">{{ $result->skillLabel() }}</td>
-                                    <td>
-                                        <span class="badge bg-label-{{ $mark >= 80 ? 'success' : ($mark >= 60 ? 'warning' : 'danger') }}">
-                                            {{ $result->get_mark }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end text-muted">{{ $result->created_at?->format('d.m.Y') }}</td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
+                @include('partials.test-results-table', ['tests' => $testResults])
             </div>
         </div>
 

@@ -115,6 +115,47 @@ class StudentParentPortalTest extends TestCase
             ->assertSee('81');
     }
 
+    public function test_one_exam_is_one_row_with_skills_and_average(): void
+    {
+        $student = $this->student(1);
+
+        Centre::for($this->centre, function () use ($student) {
+            $lesson = LessonAndHistory::create(['name' => 'Oylik test — Oktabr 2026', 'data' => 2, 'group' => $this->group->id]);
+
+            foreach (['grammar' => 55, 'reading' => 53, 'listening' => 48, 'writing' => 41, 'speaking' => 50] as $skill => $mark) {
+                Assessment::create([
+                    'user_id' => $student->id, 'get_mark' => $mark, 'skill' => $skill,
+                    'group' => 'Pre Multilevel', 'history_id' => $lesson->id,
+                ]);
+            }
+        });
+
+        $tests = Centre::for($this->centre, fn () => Assessment::testsFor($student->id));
+        $this->assertCount(1, $tests, 'Besh ko‘nikma — bitta imtihon');
+        $this->assertSame(49, $tests->first()->average);
+        $this->assertSame(
+            ['grammar', 'reading', 'listening', 'writing', 'speaking'],
+            array_column($tests->first()->marks, 'skill')
+        );
+
+        $admin = Centre::for($this->centre, fn () => $this->person('Admin', '998900000011', 'admin'));
+
+        $html = $this->actingAs($admin)
+            ->get(route('student.show', $student->id))
+            ->assertOk()
+            ->assertSee('Grammatika')
+            ->assertSee('Gapirish')
+            ->getContent();
+
+        $this->assertSame(1, substr_count($html, 'Oylik test — Oktabr 2026'), 'Test nomi bir marta chiqadi');
+
+        $this->actingAs($student)
+            ->get(route('assessment.index'))
+            ->assertOk()
+            ->assertSee('Grammatika')
+            ->assertSee('49');
+    }
+
     public function test_teacher_assessment_index_loads(): void
     {
         $this->actingAs($this->teacher)

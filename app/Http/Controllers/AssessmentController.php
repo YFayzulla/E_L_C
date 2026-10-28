@@ -108,12 +108,19 @@ class AssessmentController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $allGroups = Group::orderBy('name')->orderBy('id')->get();
+            // Sahifa tepasidagi guruh tanlash: o'qituvchi faqat o'z guruhlarini,
+            // admin hammasini ko'radi. Kutish zali — o'quv guruhi emas.
+            $groupOptions = Group::whereIn('id', $this->accessibleGroupIds())
+                ->teaching()
+                ->orderBy('id')
+                ->get(['id', 'name'])
+                ->sortBy(fn ($option) => mb_strtolower($option->name), SORT_NATURAL)
+                ->values();
 
             return view('teacher.assessment.make_markes', [
                 'students' => $students,
                 'id' => $id,
-                'groups' => $allGroups,
+                'groups' => $groupOptions,
                 'groupName' => $group->name
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -135,29 +142,27 @@ class AssessmentController extends Controller
         $this->assertGrader();
         $this->assertTeachesGroup((int) $id);
 
-        $skills = (array) config('grading.skills');
-        $overallSkills = array_values(array_intersect(
-            ['reading', 'listening', 'writing', 'speaking'],
-            $skills
-        ));
-        if ($overallSkills === []) {
-            $overallSkills = array_values(array_diff($skills, ['grammar']));
-        }
+        $allSkills = (array) config('grading.skills');
 
         /*
          * The form is a grid — one row per student, one column per skill —
          * exactly like the Ko‘nikmalar page:
          *
+         *     skills[]                     = ustun tepasida belgilangan ko'nikmalar
          *     score[<student id>][<skill>] = 0..100
          *     comment[<student id>]        = free text
          *
-         * One `assessments` row is written per filled cell. The displayed and
-         * student-card overall is derived from the four core skills (or the
-         * configured single score); grammar remains a separate assessment.
+         * Test har doim ham to'rt ko'nikmani qamramaydi: guruh faqat Writing
+         * topshirgan bo'lsa, o'qituvchi faqat Writing ustunini belgilaydi.
+         * Shuning uchun faqat belgilangan ustunlar saqlanadi va o'rtacha ham
+         * faqat ular bo'yicha hisoblanadi (Grammatika belgilangan bo'lsa u ham
+         * kiradi). One `assessments` row is written per filled cell.
          */
         $request->validate([
             'student'      => 'required|array',
             'student.*'    => 'required|integer',
+            'skills'       => 'required|array|min:1',
+            'skills.*'     => ['string', Rule::in($allSkills)],
             'score'        => 'array',
             'score.*'      => 'array',
             'score.*.*'    => 'nullable|integer|min:0|max:100',
@@ -165,10 +170,17 @@ class AssessmentController extends Controller
             'comment.*'    => 'nullable|string|max:250',
             'lesson'       => 'nullable|string|max:255',
         ], [
+            'skills.required'   => 'Kamida bitta ko‘nikma ustunini belgilang.',
+            'skills.min'        => 'Kamida bitta ko‘nikma ustunini belgilang.',
+            'skills.*.in'       => 'Noma’lum ko‘nikma tanlandi.',
             'score.*.*.integer' => 'Ball butun son bo‘lishi kerak.',
             'score.*.*.max'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
             'score.*.*.min'     => 'Ball 0 dan 100 gacha bo‘lishi kerak.',
         ]);
+
+        // Config tartibida — belgilanmagan ustunning balli (qo'lda yuborilgan
+        // bo'lsa ham) saqlanmaydi.
+        $skills = array_values(array_intersect($allSkills, (array) $request->input('skills', [])));
 
         $scores   = (array) $request->input('score', []);
         $comments = (array) $request->input('comment', []);
@@ -217,10 +229,8 @@ class AssessmentController extends Controller
                         continue;
                     }
 
-                    $mark    = (int) $raw;
-                    if (in_array($skill, $overallSkills, true)) {
-                        $givenOverall[] = $mark;
-                    }
+                    $mark = (int) $raw;
+                    $givenOverall[] = $mark;
 
                     $assessments[] = [
                         'get_mark'   => $mark,
@@ -234,8 +244,8 @@ class AssessmentController extends Controller
                     ];
                 }
 
-                // Grammar remains a separate score; only the four core skills
-                // (or the configured single overall score) feed users.mark.
+                // users.mark ("Oxirgi ball") — belgilangan ustunlar o'rtachasi,
+                // 0–100 shkalada. Yig'indi faqat jadvalda ko'rinadi.
                 if ($givenOverall !== []) {
                     $studentsToUpdate[$userId] = (int) round(array_sum($givenOverall) / count($givenOverall));
                 }

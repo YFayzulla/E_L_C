@@ -175,7 +175,7 @@ class StudentController extends Controller
      * Falls back to the legacy single parents_name/parents_tel pair so an older
      * form (or an integration) that still posts those two fields keeps working.
      *
-     * @return array<string, array{name: ?string, phone: ?string, email: ?string}>
+     * @return array<string, array{id: ?int, name: ?string, phone: ?string, email: ?string}>
      */
     private function guardianInput(Request $request): array
     {
@@ -185,6 +185,7 @@ class StudentController extends Controller
             $block = $request->input("guardians.{$relation}", []);
 
             $out[$relation] = [
+                'id'    => isset($block['id']) ? (int) $block['id'] : null,
                 'name'  => $block['name'] ?? null,
                 'phone' => $block['phone'] ?? null,
                 'email' => $block['email'] ?? null,

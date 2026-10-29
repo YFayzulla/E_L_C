@@ -100,8 +100,9 @@ class ReceptionEnrollmentController extends Controller
             'group_id.in'         => 'Bu guruhga yozish mumkin emas.',
         ]);
 
-        // users.phone 998 bilan saqlanadi, shuning uchun `unique` qoidasi emas.
-        if (User::where('phone', '998' . $data['phone'])->exists()) {
+        // Ota-onalar shu raqamdan foydalanishi mumkin; talaba telefoni faqat
+        // boshqa talabalar orasida yagona bo'lishi kerak.
+        if (User::role('student')->where('phone', '998' . $data['phone'])->exists()) {
             return redirect()->back()->withInput()
                 ->withErrors(['phone' => 'Bu telefon raqami bilan hisob allaqachon mavjud.']);
         }

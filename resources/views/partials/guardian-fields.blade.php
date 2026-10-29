@@ -55,6 +55,9 @@
                 </div>
 
                 <div class="row g-3 {{ $open ? '' : 'd-none' }}" id="guardian-{{ $relation }}-fields">
+                    @if(($saved['id'] ?? 0) > 0)
+                        <input type="hidden" name="guardians[{{ $relation }}][id]" value="{{ $saved['id'] }}">
+                    @endif
                     <div class="col-12">
                         <label class="form-label" for="guardian-{{ $relation }}-name">Ism familiya</label>
                         <input type="text"
@@ -82,7 +85,7 @@
                         @error("guardians.{$relation}.phone")
                             <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div>
                         @enderror
-                        <div class="form-text">Shu raqam bilan tizimga kiradi va SMS shu raqamga boradi.</div>
+                        <div class="form-text">Ixtiyoriy. Kiritilsa SMS va tizimga kirish uchun ishlatiladi.</div>
                     </div>
 
                     <div class="col-md-6">

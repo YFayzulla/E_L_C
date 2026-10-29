@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use App\Models\Centre;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,14 @@ class StoreRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'password' => 'nullable|string|min:8|max:16',
-            'phone' => ['required', 'digits:9', Rule::unique('users', 'phone')],
+            'phone' => [
+                'required', 'digits:9',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (User::role('student')->where('phone', User::normalizePhone((string) $value))->exists()) {
+                        $fail('Bu telefon raqami boshqa talabaga biriktirilgan.');
+                    }
+                },
+            ],
             // No ->ignore() here: this is a CREATE form, so there is no existing
             // row to exempt. The shared snippet's `?? $this->user()?->id` fallback
             // exempted the signed-in ADMIN's own row, so an admin who typed their
@@ -42,6 +50,7 @@ class StoreRequest extends FormRequest
             // Ota / ona / vasiy bloklari. Telefon bo'sh bo'lsa bloк butunlay
             // e'tiborsiz qoldiriladi, shuning uchun hammasi nullable.
             'guardians' => ['nullable', 'array'],
+            'guardians.*.id' => ['nullable', 'integer'],
             'guardians.*.name' => ['nullable', 'string', 'max:255'],
             'guardians.*.phone' => ['nullable', 'digits:9'],
             'guardians.*.email' => ['nullable', 'email', 'max:191'],

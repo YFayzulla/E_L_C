@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 
 /**
  * Admin-side CRUD for guardian accounts.
@@ -185,20 +184,14 @@ class ParentAdminController extends Controller
 
     private function validated(Request $request, ?int $ignoreId = null): array
     {
-        // Phones are stored normalised (998XXXXXXXXX); compare in that form so
-        // the unique rule catches "901234567" vs "+998 90 123 45 67".
+        // Parent phones may be shared or omitted on the student form. The
+        // standalone parent screen still requires one for login, but does not
+        // impose a global unique constraint.
         $request->merge(['phone' => User::normalizePhone($request->input('phone'))]);
 
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('users', 'phone')
-                    ->ignore($ignoreId)
-                    ->where(fn($q) => $q->whereNotNull('phone')),
-            ],
+            'phone' => ['required', 'string', 'max:20'],
             'password' => [$ignoreId ? 'nullable' : 'required', 'string', 'min:4'],
             'location' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

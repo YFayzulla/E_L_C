@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\CentreMembershipService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -36,7 +37,7 @@ class ParentAccountService
     /**
      * Synchronise every guardian of a student in one pass.
      *
-     * @param  array<string, array{name?: ?string, phone?: ?string, email?: ?string}>  $guardians
+     * @param  array<string, array{id?: ?int, name?: ?string, phone?: ?string, email?: ?string}>  $guardians
      *         keyed by relation: ['ota' => [...], 'ona' => [...]]
      * @return array<string, User>  the accounts that ended up linked, by relation
      */
@@ -48,22 +49,30 @@ class ParentAccountService
         foreach (self::RELATIONS as $relation) {
             $data  = $guardians[$relation] ?? null;
             $phone = User::normalizePhone($data['phone'] ?? null);
+            $name  = trim((string) ($data['name'] ?? ''));
+            $email = $data['email'] ?? null;
+            $id    = (int) ($data['id'] ?? 0);
 
-            if (! $phone) {
+            // A phone is optional for a guardian. A name or e-mail alone is
+            // enough to create the parent record and attach it to the student.
+            if (! $phone && $name === '' && blank($email)) {
                 continue;
             }
 
-            $parent = $this->upsertAccount(
-                $phone,
-                $data['name'] ?? null,
-                $data['email'] ?? null,
-                $relation
-            );
+            $parent = $id > 0
+                ? $student->guardians()->whereKey($id)->first()
+                : null;
 
-            if (! $parent) {
+            if ($id > 0 && ! $parent) {
                 throw ValidationException::withMessages([
-                    "guardians.{$relation}.phone" => 'Bu telefon raqami boshqa rolga tegishli. Ota-ona uchun boshqa raqam kiriting.',
+                    "guardians.{$relation}.id" => 'Ota-ona bog‘lanishi topilmadi. Sahifani yangilab qayta urinib ko‘ring.',
                 ]);
+            }
+
+            if ($parent) {
+                $this->updateGuardianAccount($parent, $name, $phone, $email);
+            } else {
+                $parent = $this->createGuardianAccount($name, $phone, $email, $relation);
             }
 
             $this->link($parent, $student, $relation);
@@ -239,6 +248,37 @@ class ParentAccountService
         app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
 
         return $parent;
+    }
+
+    /** Create a guardian from the student form; its phone is optional. */
+    private function createGuardianAccount(string $name, ?string $phone, ?string $email, string $relation): User
+    {
+        $parent = User::create([
+            'name'     => $name !== '' ? $name : (self::LABELS[$relation] ?? 'Ota-ona'),
+            'phone'    => $phone,
+            'email'    => $email ?: null,
+            // A guardian without a phone cannot use phone login until one is
+            // added later, so it receives a non-guessable initial password.
+            'password' => Hash::make($phone ? substr($phone, -9) : Str::random(40)),
+        ]);
+
+        app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
+
+        return $parent;
+    }
+
+    /** Update the exact guardian linked to this student, never by phone lookup. */
+    private function updateGuardianAccount(User $parent, string $name, ?string $phone, ?string $email): void
+    {
+        $parent->name = $name !== '' ? $name : $parent->name;
+        $parent->phone = $phone;
+
+        if ($email !== $parent->email) {
+            $parent->email = $email ?: null;
+            $parent->email_verified_at = null;
+        }
+
+        $parent->save();
     }
 
     /**

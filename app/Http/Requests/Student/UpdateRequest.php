@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use App\Models\Centre;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,16 @@ class UpdateRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'phone' => [
-                'required', 'digits:9', Rule::unique('users', 'phone')->ignore($this->route('student')),
+                'required', 'digits:9',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $studentId = (int) $this->route('student');
+                    if (User::role('student')
+                        ->where('id', '!=', $studentId)
+                        ->where('phone', User::normalizePhone((string) $value))
+                        ->exists()) {
+                        $fail('Bu telefon raqami boshqa talabaga biriktirilgan.');
+                    }
+                },
             ],
             'email' => ['nullable', 'email', 'max:191',
                 Rule::unique('users', 'email')->ignore($this->route('student') ?? $this->route('teacher') ?? $this->user()?->id)],
@@ -51,6 +61,7 @@ class UpdateRequest extends FormRequest
             // Ota / ona / vasiy bloklari. Telefon bo'sh bo'lsa bloк butunlay
             // e'tiborsiz qoldiriladi, shuning uchun hammasi nullable.
             'guardians' => ['nullable', 'array'],
+            'guardians.*.id' => ['nullable', 'integer'],
             'guardians.*.name' => ['nullable', 'string', 'max:255'],
             'guardians.*.phone' => ['nullable', 'digits:9'],
             'guardians.*.email' => ['nullable', 'email', 'max:191'],

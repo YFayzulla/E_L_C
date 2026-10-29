@@ -1,29 +1,30 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
-     * Parent and guardian contacts are optional and may be shared by several
-     * people. Student-phone uniqueness remains enforced by its request rules.
+     * A guardian is reused by phone and linked to each child through
+     * parent_student. Therefore no users-table index needs to be removed:
+     * the older 2026_07_27 migration already removed the legacy
+     * parents_tel UNIQUE index, and users.phone remains safe to keep unique.
+     *
+     * This migration previously attempted to drop indexes by assumed names.
+     * Production schemas can have different names (or the older migration may
+     * already have removed them), which made it fail. Keeping it as a safe
+     * no-op lets every existing deployment complete its migration history.
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropUnique('users_phone_unique');
-            $table->dropUnique('users_parents_tel_unique');
-        });
+        // Intentionally no schema change. See the migration note above.
     }
 
     /**
-     * This cannot safely restore the unique indexes because production may
-     * already contain shared guardian phone numbers.
+     * No schema change was made in up().
      */
     public function down(): void
     {
-        // Intentionally irreversible after shared guardian data is saved.
+        // Intentionally empty.
     }
 };

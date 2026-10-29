@@ -316,16 +316,51 @@ class StudentController extends Controller
             $student->update($updateData);
 
             $newGroupIds = $request->group_id; // Array of group IDs
-            $currentGroupIds = $student->groups->pluck('id')->toArray();
+            $student->load('groups');
+            $currentGroupIds = $student->groups->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $currentPayments = $student->groups
+                ->mapWithKeys(fn (Group $group) => [(int) $group->id => (int) ($group->pivot->payment ?? 0)])
+                ->all();
 
             // Prepare sync data including pivot payments
             $submittedPayments = $request->input('group_payment', []);
             $groupsForSync = Group::whereIn('id', $newGroupIds)->get();
             $syncData = [];
             $sumPayments = 0;
+            $paymentChangeConfirmed = $request->boolean('payment_change_confirmed');
             foreach ($groupsForSync as $group) {
-                $raw = $submittedPayments[$group->id] ?? $group->monthly_payment;
-                $paymentValue = (int)str_replace([' ', ','], '', $raw);
+                $currentPayment = $currentPayments[$group->id] ?? null;
+                $submittedPayment = $submittedPayments[$group->id] ?? null;
+
+                // The agreed monthly amount belongs to the student/group pivot.
+                // It must never be silently replaced by the group's current list
+                // price when another student field is edited.
+                if ($currentPayment !== null) {
+                    $paymentValue = $currentPayment;
+
+                    if ($paymentChangeConfirmed && filled($submittedPayment)) {
+                        $paymentValue = (int) str_replace([' ', ','], '', (string) $submittedPayment);
+                    }
+
+                    if (! $paymentChangeConfirmed && filled($submittedPayment)) {
+                        $submittedValue = (int) str_replace([' ', ','], '', (string) $submittedPayment);
+
+                        if ($submittedValue !== $currentPayment) {
+                            throw ValidationException::withMessages([
+                                'payment_change_confirmed' => 'Oylik to‘lovni o‘zgartirish uchun avval “To‘lovni o‘zgartirish” tugmasi orqali tasdiqlang.',
+                            ]);
+                        }
+                    }
+                } else {
+                    // Newly assigned groups start with their current group price.
+                    // An admin can set another amount only after the same explicit
+                    // confirmation used for existing student payments.
+                    $paymentValue = (int) $group->monthly_payment;
+                    if ($paymentChangeConfirmed && filled($submittedPayment)) {
+                        $paymentValue = (int) str_replace([' ', ','], '', (string) $submittedPayment);
+                    }
+                }
+
                 $syncData[$group->id] = ['payment' => $paymentValue];
                 $sumPayments += $paymentValue;
             }

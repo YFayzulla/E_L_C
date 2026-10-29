@@ -53,6 +53,7 @@ class UpdateRequest extends FormRequest
             'group_id.*' => ['required', 'integer', Rule::exists('groups', 'id')->where('centre_id', Centre::currentId())],
             'group_payment' => 'nullable|array',
             'group_payment.*' => 'nullable|numeric|min:0',
+            'payment_change_confirmed' => ['nullable', 'boolean'],
             'parents_name' => 'nullable|string|max:255',
             'parents_tel' => [
                 'nullable',

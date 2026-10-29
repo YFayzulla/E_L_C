@@ -128,6 +128,8 @@
                 <div class="card h-100">
                     <div class="card-header">Oylik to‘lov</div>
                     <div class="card-body d-flex flex-column">
+                        <input type="hidden" name="payment_change_confirmed" id="payment_change_confirmed"
+                               value="{{ old('payment_change_confirmed', 0) ? 1 : 0 }}">
                         <div id="group_payments_container">
                             {{-- Per-group payment inputs are injected here by JS --}}
                         </div>
@@ -137,11 +139,18 @@
                             <div class="metric-value" id="paymentsTotal">0</div>
                         </div>
 
-                        <div class="form-text mt-2">
-                            To‘lov guruhdan olinadi, kerak bo‘lsa o‘zgartiring.
+                        @error('payment_change_confirmed')
+                            <div class="text-danger small mt-2">{{ $message }}</div>
+                        @enderror
+
+                        <div class="form-text mt-2" id="paymentHelp">
+                            Bu talabaning kelishilgan oylik to‘lovi. Tasodifiy o‘zgarishning oldi olinadi.
                         </div>
 
                         <div class="mt-auto pt-4 d-grid gap-2">
+                            <button type="button" class="btn btn-outline-warning" id="unlockPaymentsButton">
+                                <i class="bx bx-edit-alt me-1"></i> To‘lovni o‘zgartirish
+                            </button>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-save me-1"></i> Saqlash
                             </button>
@@ -159,7 +168,11 @@
             var paymentsContainer = document.getElementById('group_payments_container');
             var totalEl = document.getElementById('paymentsTotal');
             var formEl = document.getElementById('studentForm');
+            var paymentChangeConfirmedInput = document.getElementById('payment_change_confirmed');
+            var unlockPaymentsButton = document.getElementById('unlockPaymentsButton');
+            var paymentHelp = document.getElementById('paymentHelp');
             var existingPayments = {!! json_encode(old('group_payment', $student->groups->pluck('pivot.payment', 'id')->toArray())) !!};
+            var paymentChangeAllowed = paymentChangeConfirmedInput.value === '1';
 
             function formatNumberWithSpaces(value) {
                 if (value === null || value === undefined || value === '') return '';
@@ -207,7 +220,8 @@
                     input.name = 'group_payment[' + gid + ']';
                     input.className = 'form-control group-payment-input';
                     input.inputMode = 'numeric';
-                    input.value = (existingPayments && existingPayments[gid])
+                    input.readOnly = !paymentChangeAllowed;
+                    input.value = (existingPayments && Object.prototype.hasOwnProperty.call(existingPayments, gid))
                         ? formatNumberWithSpaces(existingPayments[gid])
                         : formatNumberWithSpaces(opt.dataset.payment || '');
 
@@ -232,7 +246,33 @@
             });
 
             groupSelect.addEventListener('change', renderGroupPayments);
+
+            function updatePaymentLockState() {
+                paymentsContainer.querySelectorAll('.group-payment-input').forEach(function (input) {
+                    input.readOnly = !paymentChangeAllowed;
+                });
+
+                unlockPaymentsButton.disabled = paymentChangeAllowed;
+                unlockPaymentsButton.innerHTML = paymentChangeAllowed
+                    ? '<i class="bx bx-check me-1"></i> To‘lovni o‘zgartirish tasdiqlandi'
+                    : '<i class="bx bx-edit-alt me-1"></i> To‘lovni o‘zgartirish';
+                paymentHelp.textContent = paymentChangeAllowed
+                    ? 'Yangi summalarni kiriting va saqlang. Bu o‘zgarish talabaning qarzdorligiga ham qo‘llanadi.'
+                    : 'Bu talabaning kelishilgan oylik to‘lovi. Tasodifiy o‘zgarishning oldi olinadi.';
+            }
+
+            unlockPaymentsButton.addEventListener('click', function () {
+                if (!window.confirm('Talabaning oylik to‘lovini o‘zgartirmoqchimisiz? Yangi summa qarzdorlik hisobiga ham qo‘llanadi.')) {
+                    return;
+                }
+
+                paymentChangeAllowed = true;
+                paymentChangeConfirmedInput.value = '1';
+                updatePaymentLockState();
+            });
+
             renderGroupPayments();
+            updatePaymentLockState();
         });
     </script>
 

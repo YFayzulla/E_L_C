@@ -71,6 +71,18 @@ class ParentAccountService
 
             if ($parent) {
                 $this->updateGuardianAccount($parent, $name, $phone, $email);
+            } elseif ($phone) {
+                // A parent can have more than one child. When the same phone
+                // is entered on another student's form, reuse that parent's
+                // account and add a second pivot link instead of creating a
+                // duplicate login.
+                $parent = $this->upsertAccount($phone, $name ?: null, $email ?: null, $relation);
+
+                if (! $parent) {
+                    throw ValidationException::withMessages([
+                        "guardians.{$relation}.phone" => 'Bu telefon raqami ota-ona bo‘lmagan boshqa hisobga tegishli.',
+                    ]);
+                }
             } else {
                 $parent = $this->createGuardianAccount($name, $phone, $email, $relation);
             }
@@ -202,7 +214,11 @@ class ParentAccountService
      */
     private function upsertAccount(string $phone, ?string $name, ?string $email, string $relation): ?User
     {
-        $parent = User::where('phone', $phone)->first();
+        // Guardian phones are no longer globally unique. Prefer an existing
+        // parent account, so one parent can be linked to several children even
+        // if historical data contains another account with the same number.
+        $parent = User::where('phone', $phone)->role('parent')->orderBy('id')->first()
+            ?? User::where('phone', $phone)->orderBy('id')->first();
 
         if ($parent) {
             // An existing account with this number: only promote it to parent

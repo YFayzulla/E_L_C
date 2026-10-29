@@ -115,7 +115,8 @@
 
 <p class="text-muted mt-3 mb-0" style="font-size: .8rem;">
     <i class="bx bx-info-circle me-1"></i>
-    Telefon raqami kiritilgan har bir ota-ona uchun alohida hisob ochiladi — ular o‘z
-    kabinetidan farzandining davomati, baholari va to‘lovlarini ko‘ra oladi.
+    Telefon raqami kiritilsa ota-ona hisobi yaratiladi. Shu raqam boshqa studentda ham
+    kiritilsa, yangi hisob ochilmaydi: ota-ona barcha farzandining davomati, baholari va
+    to‘lovlarini bitta kabinetda ko‘ra oladi.
     Boshlang‘ich parol — telefon raqamining oxirgi 9 ta raqami.
 </p>

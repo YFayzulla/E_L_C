@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\CentreMembershipService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Keeps the `parent` user accounts in sync with the guardian details typed on
@@ -60,7 +61,9 @@ class ParentAccountService
             );
 
             if (! $parent) {
-                continue;
+                throw ValidationException::withMessages([
+                    "guardians.{$relation}.phone" => 'Bu telefon raqami boshqa rolga tegishli. Ota-ona uchun boshqa raqam kiriting.',
+                ]);
             }
 
             $this->link($parent, $student, $relation);

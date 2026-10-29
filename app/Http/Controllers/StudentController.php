@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
@@ -152,6 +153,12 @@ class StudentController extends Controller
 
             return redirect()->route('student.index')->with('success', 'Talaba muvaffaqiyatli qo\'shildi.');
 
+        } catch (ValidationException $e) {
+            if ($uploadedFilePath && Storage::disk('public')->exists($uploadedFilePath)) {
+                Storage::disk('public')->delete($uploadedFilePath);
+            }
+
+            return redirect()->back()->withInput()->withErrors($e->errors());
         } catch (\Exception $e) {
             if ($uploadedFilePath && Storage::disk('public')->exists($uploadedFilePath)) {
                 Storage::disk('public')->delete($uploadedFilePath);
@@ -367,6 +374,14 @@ class StudentController extends Controller
 
             return redirect()->route('student.index')->with('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
 
+        } catch (ValidationException $e) {
+            DB::rollBack();
+
+            if ($request->hasFile('photo') && $newPhotoPath && Storage::disk('public')->exists($newPhotoPath)) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+
+            return redirect()->back()->withInput()->withErrors($e->errors());
         } catch (\Exception $e) {
             DB::rollBack();
 

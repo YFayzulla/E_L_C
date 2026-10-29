@@ -19,14 +19,22 @@
         'vasiy' => ['Vasiy', 'bx-user',   true],   // ixtiyoriy, yig'ilgan holda
     ];
 
-    $has = fn(string $r) => filled(old("guardians.{$r}.phone", $guardians[$r]['phone'] ?? null));
 @endphp
 
 <div class="row g-4">
     @foreach($blocks as $relation => [$label, $icon, $collapsed])
         @php
             $saved = $guardians[$relation] ?? null;
-            $open  = ! $collapsed || $has($relation);
+            // A failed submit must show exactly what was typed. Only when
+            // there is no old input do we populate from the linked parent.
+            $oldGuardian = old("guardians.{$relation}");
+            $hasOldInput = is_array($oldGuardian);
+            $nameValue = $hasOldInput ? ($oldGuardian['name'] ?? '') : ($saved['name'] ?? '');
+            $phoneValue = $hasOldInput
+                ? ($oldGuardian['phone'] ?? '')
+                : (isset($saved['phone']) ? substr($saved['phone'], -9) : '');
+            $emailValue = $hasOldInput ? ($oldGuardian['email'] ?? '') : ($saved['email'] ?? '');
+            $open  = ! $collapsed || filled($phoneValue);
         @endphp
 
         <div class="col-lg-6 {{ $relation === 'vasiy' ? 'col-lg-12' : '' }}">
@@ -53,7 +61,7 @@
                                id="guardian-{{ $relation }}-name"
                                name="guardians[{{ $relation }}][name]"
                                class="form-control @error("guardians.{$relation}.name") is-invalid @enderror"
-                               value="{{ old("guardians.{$relation}.name", $saved['name'] ?? '') }}"
+                               value="{{ $nameValue }}"
                                placeholder="Masalan: Aliyev Sardor">
                         @error("guardians.{$relation}.name")
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -68,7 +76,7 @@
                                    id="guardian-{{ $relation }}-phone"
                                    name="guardians[{{ $relation }}][phone]"
                                    class="form-control @error("guardians.{$relation}.phone") is-invalid @enderror"
-                                   value="{{ old("guardians.{$relation}.phone", isset($saved['phone']) ? substr($saved['phone'], -9) : '') }}"
+                                   value="{{ $phoneValue }}"
                                    placeholder="901234567" inputmode="numeric" maxlength="9">
                         </div>
                         @error("guardians.{$relation}.phone")
@@ -83,7 +91,7 @@
                                id="guardian-{{ $relation }}-email"
                                name="guardians[{{ $relation }}][email]"
                                class="form-control @error("guardians.{$relation}.email") is-invalid @enderror"
-                               value="{{ old("guardians.{$relation}.email", $saved['email'] ?? '') }}"
+                               value="{{ $emailValue }}"
                                placeholder="misol@pochta.uz">
                         @error("guardians.{$relation}.email")
                             <div class="invalid-feedback">{{ $message }}</div>

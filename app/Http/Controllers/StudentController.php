@@ -227,9 +227,10 @@ class StudentController extends Controller
             $testResults = Assessment::testsFor((int) $id);
 
             $progress = app(ProgressService::class)->forStudent((int) $id);
+            $guardians = $this->parents->guardiansOf($student);
 
             return view('admin.student.show', compact(
-                'student', 'attendances', 'groupHistory', 'testResults', 'progress'
+                'student', 'attendances', 'groupHistory', 'testResults', 'progress', 'guardians'
             ));
         } catch (\Exception $e) {
             Log::error('StudentController@show error: ' . $e->getMessage());

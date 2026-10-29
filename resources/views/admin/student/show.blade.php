@@ -60,8 +60,6 @@
                                 <h4><b>Tel: </b>{{$student->phone}}</h4>
                                 @role ('admin')
                                 <h4><b>Location:</b> {{$student->location}}</h4>
-                                <h4><b>Parents name: </b>{{$student->parents_name}} </h4>
-                                <h4><b>Parents tel: </b> {{$student->parents_tel}}</h4>
                                 <h4><b>Last Test Result: </b>{{$student->mark}}</h4>
                                 <h4><b>Birth date </b>{{$student->date_born }}</h4>
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
@@ -108,6 +106,67 @@
             </div>
         </div>
     </div>
+
+    @role('admin')
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0">Ota-ona va vasiylar</h5>
+                <small class="text-muted">Talabaga biriktirilgan aloqador shaxslar</small>
+            </div>
+            <a href="{{ route('student.edit', $student->id) }}" class="btn btn-sm btn-outline-primary">
+                <i class="bx bx-edit-alt me-1"></i>Tahrirlash
+            </a>
+        </div>
+
+        @if(empty($guardians))
+            <div class="empty-state">
+                <i class="bx bx-user-x"></i>
+                <h6>Ota-ona ma’lumoti kiritilmagan</h6>
+                <p class="mb-0">Tahrirlash sahifasida ota, ona yoki vasiyni qo‘shing.</p>
+            </div>
+        @else
+            <div class="card-body">
+                <div class="row g-3">
+                    @foreach($guardians as $relation => $guardian)
+                        @php
+                            $label = \App\Services\ParentAccountService::LABELS[$relation] ?? 'Vasiy';
+                            $icon = $relation === 'ota' ? 'bx-male' : ($relation === 'ona' ? 'bx-female' : 'bx-user');
+                        @endphp
+                        <div class="col-md-6 col-xl-4">
+                            <div class="border rounded p-3 h-100" style="border-color: var(--app-border) !important;">
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+                                    <span class="badge bg-label-primary"><i class="bx {{ $icon }} me-1"></i>{{ $label }}</span>
+                                    @if(($guardian['id'] ?? 0) > 0)
+                                        <a href="{{ route('parents.edit', $guardian['id']) }}" class="btn btn-sm btn-outline-secondary" title="Ota-ona hisobini tahrirlash">
+                                            <i class="bx bx-edit-alt"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="fw-semibold mb-2">{{ $guardian['name'] ?: 'Ism kiritilmagan' }}</div>
+                                <div class="small text-muted mb-1">Telefon</div>
+                                @if(filled($guardian['phone']))
+                                    <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $guardian['phone']) }}">+{{ $guardian['phone'] }}</a>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                                <div class="small text-muted mt-3 mb-1">Pochta manzili</div>
+                                @if(filled($guardian['email']))
+                                    <a href="mailto:{{ $guardian['email'] }}" class="text-break">{{ $guardian['email'] }}</a>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                                @if(($guardian['id'] ?? 0) === 0)
+                                    <div class="small text-warning mt-3">Hisob hali yaratilmagan. Tahrirlab saqlang.</div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+    </div>
+    @endrole
 
     {{-- O'zlashtirish: davomat / uy vazifa / dars faoliyati / test + umumiy reyting.
          Ko'rsatkichlar talaba o'sha paytda qaysi guruhda bo'lgan bo'lsa o'shanga

@@ -72,8 +72,22 @@
                     @php
                         $latest = $record->latestFollowUp;
                         $studentPhone = $record->user?->phone;
-                        $parentPhone = $record->user?->parents_tel;
-                        $contactName = $record->user?->parents_name ?: 'Ota-ona';
+                        // Ota-onalar alohida: ota, ona, vasiy (bog'langanlar),
+                        // bo'lmasa eski parents_name / parents_tel.
+                        $contacts = collect($record->user?->guardians ?? [])
+                            ->map(fn ($g) => [
+                                'label' => \App\Services\ParentAccountService::LABELS[$g->pivot->relation ?? ''] ?? 'Ota-ona',
+                                'name'  => $g->name,
+                                'phone' => $g->phone,
+                            ])
+                            ->values();
+                        if ($contacts->isEmpty() && ($record->user?->parents_tel || $record->user?->parents_name)) {
+                            $contacts = collect([[
+                                'label' => 'Ota-ona',
+                                'name'  => $record->user->parents_name,
+                                'phone' => $record->user->parents_tel,
+                            ]]);
+                        }
                     @endphp
                     <article class="border-bottom p-3">
                         <div class="d-flex justify-content-between align-items-start gap-2">
@@ -95,21 +109,26 @@
                         </div>
 
                         <div class="mt-3">
-                            <div class="small text-muted">Telefonlar</div>
-                            <div>{{ $record->user?->name ?? 'O‘quvchi' }}:
+                            <div class="small text-muted">Talaba telefoni</div>
+                            <div>
                                 @if($studentPhone)
                                     <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $studentPhone) }}">{{ $studentPhone }}</a>
                                 @else
                                     —
                                 @endif
                             </div>
-                            <div>{{ $contactName }}:
-                                @if($parentPhone)
-                                    <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $parentPhone) }}">{{ $parentPhone }}</a>
-                                @else
-                                    —
-                                @endif
-                            </div>
+                            <div class="small text-muted mt-2">Ota-ona</div>
+                            @forelse($contacts as $contact)
+                                <div>
+                                    <span class="text-muted">{{ $contact['label'] }}:</span>
+                                    {{ $contact['name'] ?: '—' }}
+                                    @if($contact['phone'])
+                                        · <a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}">{{ $contact['phone'] }}</a>
+                                    @endif
+                                </div>
+                            @empty
+                                <div>—</div>
+                            @endforelse
                         </div>
 
                         <div class="mt-3">
@@ -152,14 +171,16 @@
             </div>
 
             <div class="d-none d-xl-block table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle absences-table">
                     <thead>
                     <tr>
                         <th>Sana</th>
                         <th>Talaba</th>
-                        <th>Telefonlar</th>
+                        <th>Talaba tel.</th>
+                        <th>Ota-ona</th>
+                        <th>Ota-ona tel.</th>
                         <th>Guruh</th>
-                        <th>Davomatni belgilagan</th>
+                        <th>Belgilagan</th>
                         <th>Sabab</th>
                         <th>Aloqa</th>
                         <th class="text-end">Amal</th>
@@ -170,8 +191,22 @@
                         @php
                             $latest = $record->latestFollowUp;
                             $studentPhone = $record->user?->phone;
-                            $parentPhone = $record->user?->parents_tel;
-                            $contactName = $record->user?->parents_name ?: 'Ota-ona';
+                            // Ota-onalar alohida: ota, ona, vasiy (bog'langanlar),
+                            // bo'lmasa eski parents_name / parents_tel.
+                            $contacts = collect($record->user?->guardians ?? [])
+                                ->map(fn ($g) => [
+                                    'label' => \App\Services\ParentAccountService::LABELS[$g->pivot->relation ?? ''] ?? 'Ota-ona',
+                                    'name'  => $g->name,
+                                    'phone' => $g->phone,
+                                ])
+                                ->values();
+                            if ($contacts->isEmpty() && ($record->user?->parents_tel || $record->user?->parents_name)) {
+                                $contacts = collect([[
+                                    'label' => 'Ota-ona',
+                                    'name'  => $record->user->parents_name,
+                                    'phone' => $record->user->parents_tel,
+                                ]]);
+                            }
                         @endphp
                         <tr>
                             <td class="text-muted">
@@ -186,15 +221,28 @@
                                     {{ $record->lesson?->name ?? 'Dars' }}
                                 </div>
                             </td>
-                            <td>
-                                <div>{{ $record->user?->name ?? 'O‘quvchi' }}:
-                                    @if($studentPhone)<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $studentPhone) }}" class="text-reset">{{ $studentPhone }}</a>@else<span>—</span>@endif
-                                </div>
-                                <div>{{ $contactName }}:
-                                    @if($parentPhone)<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $parentPhone) }}" class="text-reset">{{ $parentPhone }}</a>@else<span>—</span>@endif
-                                </div>
+                            <td class="text-nowrap">
+                                @if($studentPhone)<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $studentPhone) }}" class="text-reset">{{ $studentPhone }}</a>@else<span class="text-muted">—</span>@endif
                             </td>
-                            <td><span class="badge bg-label-info">{{ $record->group?->name ?? '—' }}</span></td>
+                            {{-- Ota va ona alohida qatorda; ism va raqam yonma-yon ustunlarda. --}}
+                            <td>
+                                @forelse($contacts as $contact)
+                                    {{-- Bir qatorda: raqam ustunidagi qator bilan tekis turishi uchun. --}}
+                                    <div class="text-truncate" style="max-width: 7.5rem;" title="{{ $contact['name'] }}"><span class="text-muted">{{ $contact['label'] }}:</span> {{ $contact['name'] ?: '—' }}</div>
+                                @empty
+                                    <span class="text-muted">—</span>
+                                @endforelse
+                            </td>
+                            <td class="text-nowrap">
+                                @forelse($contacts as $contact)
+                                    <div>
+                                        @if($contact['phone'])<a dir="ltr" href="tel:{{ preg_replace('/[^0-9+]/', '', $contact['phone']) }}" class="text-reset">{{ $contact['phone'] }}</a>@else<span class="text-muted">—</span>@endif
+                                    </div>
+                                @empty
+                                    <span class="text-muted">—</span>
+                                @endforelse
+                            </td>
+                            <td><span class="badge bg-label-info text-wrap text-start">{{ $record->group?->name ?? '—' }}</span></td>
                             <td>{{ $record->teacher?->name ?? '—' }}</td>
                             <td>
                                 @include('partials.attendance-reason', ['record' => $record])
@@ -223,9 +271,9 @@
                             </td>
                             <td class="text-end">
                                 @unless($latest)
-                                    <button type="button" class="btn btn-sm btn-primary"
+                                    <button type="button" class="btn btn-sm btn-primary text-nowrap" title="Aloqani yozish"
                                             data-bs-toggle="modal" data-bs-target="#followUp{{ $record->id }}">
-                                        <i class="bx bx-phone-call me-1"></i> Yozish
+                                        <i class="bx bx-phone-call"></i><span class="d-none d-xxl-inline ms-1">Yozish</span>
                                     </button>
                                 @else
                                     <span class="text-muted small">Yozilgan</span>
@@ -304,4 +352,14 @@
             @endif
         @endif
     </div>
+    {{-- Ustunlar ko'p (talaba, ota-ona va ularning raqamlari alohida) —
+         odatiy ekranga sig'ishi uchun kataklar ixchamroq. --}}
+    <style>
+        html[data-theme] .absences-table th,
+        html[data-theme] .absences-table td { padding: .5rem .32rem; font-size: .84rem; }
+        html[data-theme] .absences-table th:first-child,
+        html[data-theme] .absences-table td:first-child { padding-left: 1rem; }
+        html[data-theme] .absences-table thead th { font-size: .7rem; white-space: nowrap; }
+    </style>
+
 @endsection

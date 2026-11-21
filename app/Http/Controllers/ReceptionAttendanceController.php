@@ -46,6 +46,8 @@ class ReceptionAttendanceController extends Controller
                 })
                 ->with([
                     'user:id,name,phone,parents_name,parents_tel',
+                    // Ota va ona alohida — jadvalda ism va raqam ustunlari.
+                    'user.guardians:users.id,users.name,users.phone',
                     'group:id,name',
                     'lesson:id,name',
                     'teacher:id,name',

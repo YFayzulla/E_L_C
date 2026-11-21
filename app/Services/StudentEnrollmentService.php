@@ -77,7 +77,8 @@ class StudentEnrollmentService
                 $raw = filled($raw) ? $raw : $group->monthly_payment;
                 $value = (int) str_replace([' ', ','], '', (string) $raw);
 
-                $attachData[$group->id] = ['payment' => $value];
+                // Yangi talabada chegirma yo'q: to'lanadigan summa = asl narx.
+                $attachData[$group->id] = ['payment' => $value, 'base_payment' => $value];
                 $sum += $value;
 
                 StudentInformation::create([

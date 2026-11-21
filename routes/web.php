@@ -7,6 +7,7 @@ use App\Http\Controllers\CentreChoiceController;
 use App\Http\Controllers\CentreSettingsController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\DeptStudentController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\SuperAdmin\CentreAdminController;
 use App\Http\Controllers\ExtraTeacherController;
 use App\Http\Controllers\FinanceController;
@@ -318,6 +319,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         // Bir nechta talabani belgilab boshqa guruhga ko'chirish
         // (guruh talabalari va Kutish zali sahifalaridan).
         Route::post('group/students/move', 'moveStudents')->name('group.students.move');
+    });
+
+    // --- CHEGIRMALAR (foizda, doimiy yoki muddatli) ---
+    Route::controller(DiscountController::class)->group(function () {
+        Route::post('student/{student}/discounts', 'store')->whereNumber('student')->name('discounts.student.store');
+        Route::post('group/{group}/discounts', 'storeForGroup')->whereNumber('group')->name('discounts.group.store');
+        Route::post('discounts/{discount}/cancel', 'cancel')->whereNumber('discount')->name('discounts.cancel');
     });
 
     Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');

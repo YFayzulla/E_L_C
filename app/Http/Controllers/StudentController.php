@@ -10,9 +10,11 @@ use App\Models\Assessment;
 use App\Models\Attendance;
 use App\Models\DeptStudent;
 use App\Models\Group;
+use App\Models\StudentDiscount;
 use App\Models\StudentInformation;
 use App\Models\User;
 use App\Services\CentreMembershipService;
+use App\Services\DiscountService;
 use App\Services\ParentAccountService;
 use App\Services\ProgressService;
 use App\Services\StaffNotificationService;
@@ -239,8 +241,15 @@ class StudentController extends Controller
             $progress = app(ProgressService::class)->forStudent((int) $id);
             $guardians = $this->parents->guardiansOf($student);
 
+            // Chegirmalar tarixi (amaldagi, kutilayotgan, tugagan, bekor qilingan).
+            $discounts = StudentDiscount::where('user_id', $student->id)
+                ->with(['group:id,name', 'creator:id,name'])
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
+
             return view('admin.student.show', compact(
-                'student', 'attendances', 'groupHistory', 'testResults', 'progress', 'guardians'
+                'student', 'attendances', 'groupHistory', 'testResults', 'progress', 'guardians', 'discounts'
             ));
         } catch (\Exception $e) {
             Log::error('StudentController@show error: ' . $e->getMessage());
@@ -320,8 +329,10 @@ class StudentController extends Controller
             $newGroupIds = $request->group_id; // Array of group IDs
             $student->load('groups');
             $currentGroupIds = $student->groups->pluck('id')->map(fn ($id) => (int) $id)->all();
+            // Formadagi summa — ASL narx (chegirmadan oldingi); chegirma
+            // saqlangandan keyin DiscountService tomonidan qo'llanadi.
             $currentPayments = $student->groups
-                ->mapWithKeys(fn (Group $group) => [(int) $group->id => (int) ($group->pivot->payment ?? 0)])
+                ->mapWithKeys(fn (Group $group) => [(int) $group->id => (int) ($group->pivot->base_payment ?? $group->pivot->payment ?? 0)])
                 ->all();
 
             // Prepare sync data including pivot payments
@@ -363,7 +374,7 @@ class StudentController extends Controller
                     }
                 }
 
-                $syncData[$group->id] = ['payment' => $paymentValue];
+                $syncData[$group->id] = ['payment' => $paymentValue, 'base_payment' => $paymentValue];
                 $sumPayments += $paymentValue;
             }
 
@@ -397,6 +408,9 @@ class StudentController extends Controller
             // syncGuardians unlinks anyone dropped from the form itself, so the
             // old single-number prune is not needed here.
             $this->parents->syncGuardians($student, $this->guardianInput($request));
+
+            // Amaldagi chegirma bo'lsa — to'lanadigan summa asl narxdan qayta.
+            app(DiscountService::class)->recalculate($student->fresh());
 
             DB::commit();
 

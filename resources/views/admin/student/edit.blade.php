@@ -171,7 +171,8 @@
             var paymentChangeConfirmedInput = document.getElementById('payment_change_confirmed');
             var unlockPaymentsButton = document.getElementById('unlockPaymentsButton');
             var paymentHelp = document.getElementById('paymentHelp');
-            var existingPayments = {!! json_encode(old('group_payment', $student->groups->pluck('pivot.payment', 'id')->toArray())) !!};
+            // Asl narx (chegirmadan oldingi): chegirma saqlangandan keyin qo'llanadi.
+            var existingPayments = {!! json_encode(old('group_payment', $student->groups->mapWithKeys(fn ($g) => [$g->id => $g->pivot->base_payment ?? $g->pivot->payment])->toArray())) !!};
             var paymentChangeAllowed = paymentChangeConfirmedInput.value === '1';
 
             function formatNumberWithSpaces(value) {

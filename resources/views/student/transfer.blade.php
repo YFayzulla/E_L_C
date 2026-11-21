@@ -21,7 +21,8 @@
         // on a string is a fatal TypeError. Cast before touching it.
         $selected      = array_map('intval', (array) old('group_id', $defaultSelection));
         $oldPayments   = (array) old('group_payment', []);
-        $currentPay    = $student->groups->mapWithKeys(fn ($g) => [(int) $g->id => (int) ($g->pivot->payment ?? 0)]);
+        // Formaga ASL narx (chegirmadan oldingi) — ko'chirishdan keyin chegirma qayta qo'llanadi.
+        $currentPay    = $student->groups->mapWithKeys(fn ($g) => [(int) $g->id => (int) ($g->pivot->base_payment ?? $g->pivot->payment ?? 0)]);
         $lockedTotal   = $lockedGroups->sum(fn ($g) => (int) ($g->pivot->payment ?? 0));
     @endphp
 

@@ -147,7 +147,8 @@ class User extends Authenticatable implements MustVerifyEmail
         // $student->groups->pluck('pivot.payment', 'id') and silently got all
         // nulls without it, falling back to groups.monthly_payment.
         return $this->belongsToMany(Group::class, 'group_user', 'user_id', 'group_id')
-            ->withPivot('payment')
+            // payment — chegirmadan keyin to'lanadigan, base_payment — asl narx.
+            ->withPivot('payment', 'base_payment')
             // The pivot is not a model, so nothing else stamps its centre.
             ->withPivotValue('centre_id', Centre::currentId());
     }

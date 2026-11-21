@@ -172,6 +172,10 @@
     </div>
     @endrole
 
+    @role('admin')
+        @include('admin.student._discounts')
+    @endrole
+
     {{-- O'zlashtirish: davomat / uy vazifa / dars faoliyati / test + umumiy reyting.
          Ko'rsatkichlar talaba o'sha paytda qaysi guruhda bo'lgan bo'lsa o'shanga
          qarab hisoblanadi, shuning uchun guruhi o'zgargan talabaning tarixi ham

@@ -60,9 +60,13 @@ class StudentGroupService
                 ->map(fn ($id) => (int) $id)
                 ->all();
 
+            // Saqlanib qoladigan guruhlarda ASL narx olinadi (chegirmadan
+            // oldingi) — aks holda chegirma har ko'chirishda ikki marta
+            // qo'llanib, summa kamayib borardi.
             $currentPayments = DB::table('group_user')
                 ->where('user_id', $student->id)
-                ->pluck('payment', 'group_id');
+                ->get(['group_id', 'payment', 'base_payment'])
+                ->mapWithKeys(fn ($row) => [(int) $row->group_id => $row->base_payment ?? $row->payment]);
 
             // b) sync WITH the pivot payload
             $groups = Group::whereIn('id', $targetIds)->get();
@@ -79,7 +83,7 @@ class StudentGroupService
 
                 $value = (int) str_replace([' ', ','], '', (string) $raw);
 
-                $syncData[$group->id] = ['payment' => $value];
+                $syncData[$group->id] = ['payment' => $value, 'base_payment' => $value];
                 $sum += $value;
             }
 
@@ -125,6 +129,9 @@ class StudentGroupService
                 ['user_id' => $student->id],
                 ['dept' => $sum]
             );
+
+            // Amaldagi chegirma bo'lsa — to'lanadigan summa undan keyin.
+            app(DiscountService::class)->recalculate($student->fresh());
 
             // e) attendances are intentionally left alone.
 

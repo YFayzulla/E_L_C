@@ -14,6 +14,11 @@
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
             <span>Jami: <strong>{{ $students->count() }}</strong> ta talaba</span>
+            @if($students->isNotEmpty())
+                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#groupDiscountModal">
+                    <i class="bx bx-purchase-tag-alt me-1"></i> Guruhga chegirma
+                </button>
+            @endif
         </div>
 
         @if($students->isNotEmpty())
@@ -85,5 +90,32 @@
             </div>
         @endif
     </div>
+
+    {{-- Guruhdagi barcha (hozirgi) talabaga bir xil chegirma. --}}
+    @if($students->isNotEmpty())
+        <div class="modal fade" id="groupDiscountModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">«{{ $group->name }}» — guruhga chegirma</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted" style="font-size: .85rem;">
+                            Guruhdagi barcha {{ $students->count() }} ta talabaga beriladi va ularning shu guruh bo‘yicha
+                            oylik summasi qayta hisoblanadi. Keyin har bir talabaning chegirmasini uning sahifasidan
+                            alohida bekor qilish mumkin.
+                        </p>
+                        @include('partials.discount-form', [
+                            'action' => route('discounts.group.store', $group->id),
+                            'prefix' => 'group-discount',
+                            'groups' => null,
+                            'submitLabel' => 'Barchasiga chegirma berish',
+                        ])
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
 @endsection

@@ -46,7 +46,20 @@
                         <td><x-avatar :user="$student" label class="fw-semibold" /></td>
                         <td><strong>{{ $student->phone }}</strong></td>
                         <td>{{ $student->groups->isNotEmpty() ? $student->groups->pluck('name')->implode(', ') : 'No group' }}</td>
-                        <th>{{$student->should_pay}}</th>
+                        @php
+                            // Chegirma bo'lsa: asl narx va foiz (group_user.base_payment).
+                            $basePay = (int) $student->groups->sum(fn ($g) => $g->pivot->base_payment ?? $g->pivot->payment);
+                            $nowPay = (int) $student->should_pay;
+                        @endphp
+                        <th>
+                            {{$student->should_pay}}
+                            @if($basePay > $nowPay && $basePay > 0)
+                                <div class="fw-normal" style="font-size: .75rem;">
+                                    <span class="text-muted text-decoration-line-through">{{ $basePay }}</span>
+                                    <span class="badge bg-label-success">−{{ (int) round(100 - $nowPay * 100 / $basePay) }}%</span>
+                                </div>
+                            @endif
+                        </th>
                         <td>
                             @if($student->deptStudent && $student->deptStudent->payed > 0)
                                 <span class="badge bg-label-warning">Partially Paid</span>

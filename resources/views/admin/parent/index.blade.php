@@ -57,7 +57,12 @@
                                     <span class="fw-semibold">{{ $parent->name }}</span>
                                 </div>
                             </td>
-                            <td dir="ltr">+{{ $parent->phone }}</td>
+                            <td dir="ltr">
+                                {{ $parent->phone ? '+' . $parent->phone : '—' }}
+                                @if($parent->login_enabled === false)
+                                    <span class="badge bg-label-secondary ms-1" dir="ltr" title="Tizimga kirish ochilmagan">hisobsiz</span>
+                                @endif
+                            </td>
                             <td>
                                 @forelse($parent->children as $child)
                                     <a href="{{ route('student.show', $child->id) }}"

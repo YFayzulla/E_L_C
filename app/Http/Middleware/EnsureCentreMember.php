@@ -36,6 +36,23 @@ class EnsureCentreMember
             return $next($request);
         }
 
+        // Tizimga kirish huquqi olib qo'yilgan (masalan ota-onaning
+        // "hisob ochilsin" belgisi olindi) — ochiq sessiya ham yopiladi.
+        if ($user->login_enabled === false) {
+            // API (token) so'rovida sessiya yo'q — shunchaki rad etiladi.
+            if (! $request->hasSession()) {
+                abort(403, 'Bu raqam uchun tizimga kirish yopilgan.');
+            }
+
+            auth()->guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'login' => 'Bu raqam uchun tizimga kirish yopilgan. O‘quv markazi administratori bilan bog‘laning.',
+            ]);
+        }
+
         $member = $user->centres()
             ->whereKey($centre->id)
             ->wherePivot('status', Centre::MEMBER_ACTIVE)

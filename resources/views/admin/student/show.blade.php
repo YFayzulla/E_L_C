@@ -158,6 +158,10 @@
                                 @endif
                                 @if(($guardian['id'] ?? 0) === 0)
                                     <div class="small text-warning mt-3">Hisob hali yaratilmagan. Tahrirlab saqlang.</div>
+                                @elseif($guardian['account'] ?? false)
+                                    <div class="mt-3"><span class="badge bg-label-success"><i class="bx bx-log-in me-1"></i>Kabinetga kira oladi</span></div>
+                                @else
+                                    <div class="mt-3"><span class="badge bg-label-secondary"><i class="bx bx-phone me-1"></i>Faqat aloqa — hisob ochilmagan</span></div>
                                 @endif
                             </div>
                         </div>

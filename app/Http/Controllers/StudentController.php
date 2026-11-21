@@ -189,6 +189,8 @@ class StudentController extends Controller
                 'name'  => $block['name'] ?? null,
                 'phone' => $block['phone'] ?? null,
                 'email' => $block['email'] ?? null,
+                // "Hisob ochilsin" — tizimga kirish huquqi (checkbox).
+                'account' => ! empty($block['account']),
             ];
         }
 

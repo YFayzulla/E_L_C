@@ -52,8 +52,10 @@ class StoreRequest extends FormRequest
             'guardians' => ['nullable', 'array'],
             'guardians.*.id' => ['nullable', 'integer'],
             'guardians.*.name' => ['nullable', 'string', 'max:255'],
-            'guardians.*.phone' => ['nullable', 'digits:9'],
+            'guardians.*.phone' => ['required_if:guardians.*.account,1', 'nullable', 'digits:9'],
             'guardians.*.email' => ['nullable', 'email', 'max:191'],
+            // "Hisob ochilsin": tizimga kirish telefon raqami bilan, demak raqam shart.
+            'guardians.*.account' => ['nullable', 'boolean'],
             'location' => 'nullable|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             
@@ -75,6 +77,7 @@ class StoreRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'guardians.*.phone.required_if' => 'Hisob ochish uchun telefon raqamini kiriting.',
             'name.required' => 'The name field is required.',
             'phone.required' => 'The phone number is required.',
             'phone.digits' => 'The phone number must be exactly 9 digits.',

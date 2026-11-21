@@ -7,9 +7,8 @@
      * $guardians — ParentAccountService::guardiansOf() qaytargan massiv, yoki
      * yangi talaba uchun bo'sh massiv.
      *
-     * Har bir bloк alohida ota-ona hisobini yaratadi: telefon raqami login
-     * bo'ladi, pochta esa tasdiqlash uchun ishlatiladi. Telefon bo'sh bo'lsa
-     * o'sha bloк butunlay e'tiborsiz qoldiriladi.
+     * Har bir blok ota-ona yozuvini saqlaydi. Tizimga kirish (telefon — login)
+     * faqat "hisob ochilsin" belgilansa beriladi (users.login_enabled).
      */
     $guardians = $guardians ?? [];
 
@@ -34,6 +33,9 @@
                 ? ($oldGuardian['phone'] ?? '')
                 : (isset($saved['phone']) ? substr($saved['phone'], -9) : '');
             $emailValue = $hasOldInput ? ($oldGuardian['email'] ?? '') : ($saved['email'] ?? '');
+            // Tizimga kirish huquqi. Yangi ota-ona uchun standart — yo'q:
+            // ism va raqam saqlanadi, hisob esa faqat belgilansa ochiladi.
+            $accountValue = $hasOldInput ? ! empty($oldGuardian['account']) : (bool) ($saved['account'] ?? false);
             $open  = ! $collapsed || filled($phoneValue);
         @endphp
 
@@ -100,6 +102,22 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="col-12">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" value="1"
+                                   id="guardian-{{ $relation }}-account"
+                                   name="guardians[{{ $relation }}][account]"
+                                   @checked($accountValue)>
+                            <label class="form-check-label" for="guardian-{{ $relation }}-account">
+                                {{ $label }} uchun hisob ochilsin
+                                <span class="text-muted d-block" style="font-size: .78rem;">
+                                    Belgilansa, shu telefon raqami bilan ota-ona kabinetiga kira oladi.
+                                    Belgilanmasa — ism va raqam faqat saqlanadi (SMS va aloqa uchun).
+                                </span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 @if(! $open)
@@ -115,8 +133,8 @@
 
 <p class="text-muted mt-3 mb-0" style="font-size: .8rem;">
     <i class="bx bx-info-circle me-1"></i>
-    Telefon raqami kiritilsa ota-ona hisobi yaratiladi. Shu raqam boshqa studentda ham
-    kiritilsa, yangi hisob ochilmaydi: ota-ona barcha farzandining davomati, baholari va
-    to‘lovlarini bitta kabinetda ko‘ra oladi.
+    Ota-ona ismi va raqami har doim saqlanadi. Tizimga kirish hisobi faqat «hisob ochilsin»
+    belgilansa ochiladi. Shu raqam boshqa talabada ham kiritilsa, yangi hisob ochilmaydi:
+    ota-ona barcha farzandining davomati, baholari va to‘lovlarini bitta kabinetda ko‘radi.
     Boshlang‘ich parol — telefon raqamining oxirgi 9 ta raqami.
 </p>

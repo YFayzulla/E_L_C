@@ -64,8 +64,10 @@ class UpdateRequest extends FormRequest
             'guardians' => ['nullable', 'array'],
             'guardians.*.id' => ['nullable', 'integer'],
             'guardians.*.name' => ['nullable', 'string', 'max:255'],
-            'guardians.*.phone' => ['nullable', 'digits:9'],
+            'guardians.*.phone' => ['required_if:guardians.*.account,1', 'nullable', 'digits:9'],
             'guardians.*.email' => ['nullable', 'email', 'max:191'],
+            // "Hisob ochilsin": tizimga kirish telefon raqami bilan, demak raqam shart.
+            'guardians.*.account' => ['nullable', 'boolean'],
 
             'location' => 'nullable|string|max:255',
             
@@ -81,6 +83,7 @@ class UpdateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'guardians.*.phone.required_if' => 'Hisob ochish uchun telefon raqamini kiriting.',
             'name.required' => 'Please enter the name.',
             'phone.required' => 'Please enter the phone number.',
             'phone.digits' => 'The phone number must be exactly 9 digits.',

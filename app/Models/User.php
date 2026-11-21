@@ -206,6 +206,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'study_status'      => 'integer',
         'graduated_at'      => 'date',
         'is_super_admin'    => 'boolean',
+        // Ota-ona yozuvi bor, lekin tizimga kirish ochilmagan bo'lishi mumkin.
+        // Ataylab fillable emas: faqat ParentAccountService o'zgartiradi.
+        'login_enabled'     => 'boolean',
     ];
 
     /*

@@ -52,6 +52,9 @@ class ParentAccountService
             $name  = trim((string) ($data['name'] ?? ''));
             $email = $data['email'] ?? null;
             $id    = (int) ($data['id'] ?? 0);
+            // "Hisob ochilsin" — tizimga kirish huquqi. Telefonsiz kirib
+            // bo'lmaydi, shuning uchun raqam bo'lmasa belgi e'tiborsiz.
+            $account = filter_var($data['account'] ?? false, FILTER_VALIDATE_BOOLEAN) && $phone !== null;
 
             // A phone is optional for a guardian. A name or e-mail alone is
             // enough to create the parent record and attach it to the student.
@@ -71,17 +74,28 @@ class ParentAccountService
 
             if ($parent) {
                 $this->updateGuardianAccount($parent, $name, $phone, $email);
+                // Shu talabaga allaqachon bog'langan ota-ona: belgi uning
+                // hozirgi holatini ko'rsatgan, ya'ni ikkala yo'nalishda ham
+                // aniq qaror — yoqiladi yoki o'chiriladi.
+                $this->setLogin($parent, $account);
             } elseif ($phone) {
                 // A parent can have more than one child. When the same phone
                 // is entered on another student's form, reuse that parent's
                 // account and add a second pivot link instead of creating a
                 // duplicate login.
-                $parent = $this->upsertAccount($phone, $name ?: null, $email ?: null, $relation);
+                $parent = $this->upsertAccount($phone, $name ?: null, $email ?: null, $relation, $account);
 
                 if (! $parent) {
                     throw ValidationException::withMessages([
                         "guardians.{$relation}.phone" => 'Bu telefon raqami ota-ona bo‘lmagan boshqa hisobga tegishli.',
                     ]);
+                }
+
+                // Boshqa farzandi orqali allaqachon kira oladigan ota-onani
+                // bu forma (belgi qo'yilmagan bo'lsa ham) o'chirib qo'ymaydi —
+                // faqat yoqishi mumkin.
+                if ($account) {
+                    $this->setLogin($parent, true);
                 }
             } else {
                 $parent = $this->createGuardianAccount($name, $phone, $email, $relation);
@@ -186,6 +200,8 @@ class ParentAccountService
                 'phone'    => $guardian->phone,
                 'email'    => $guardian->email,
                 'verified' => $guardian->email && $guardian->email_verified_at !== null,
+                // Tizimga kira oladimi ("Hisob ochilsin" belgisi).
+                'account'  => filled($guardian->phone) && $guardian->login_enabled !== false,
             ];
         }
 
@@ -200,6 +216,7 @@ class ParentAccountService
                 'phone'    => User::normalizePhone($student->parents_tel),
                 'email'    => null,
                 'verified' => false,
+                'account'  => false,
             ];
         }
 
@@ -212,7 +229,7 @@ class ParentAccountService
      * Create the parent account, or update the one that already owns the phone.
      * Returns null when the number belongs to a non-parent account.
      */
-    private function upsertAccount(string $phone, ?string $name, ?string $email, string $relation): ?User
+    private function upsertAccount(string $phone, ?string $name, ?string $email, string $relation, bool $login = true): ?User
     {
         // Guardian phones are no longer globally unique. Prefer an existing
         // parent account, so one parent can be linked to several children even
@@ -260,10 +277,19 @@ class ParentAccountService
             'email'    => $email ?: null,
             'password' => Hash::make(substr($phone, -9)),
         ]);
+        $this->setLogin($parent, $login);
 
         app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
 
         return $parent;
+    }
+
+    /** Tizimga kirish huquqini yoqish / o'chirish (faqat o'zgargan bo'lsa yoziladi). */
+    private function setLogin(User $parent, bool $enabled): void
+    {
+        if ($parent->login_enabled !== $enabled) {
+            $parent->forceFill(['login_enabled' => $enabled])->save();
+        }
     }
 
     /** Create a guardian from the student form; its phone is optional. */
@@ -277,6 +303,8 @@ class ParentAccountService
             // added later, so it receives a non-guessable initial password.
             'password' => Hash::make($phone ? substr($phone, -9) : Str::random(40)),
         ]);
+        // Bu yo'lga faqat telefonsiz ota-ona tushadi — u kira olmaydi.
+        $this->setLogin($parent, false);
 
         app(CentreMembershipService::class)->attachToCurrent($parent, 'parent');
 

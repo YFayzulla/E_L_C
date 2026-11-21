@@ -87,7 +87,9 @@ class ReceptionEnrollmentController extends Controller
             'name'         => ['required', 'string', 'max:255'],
             'phone'        => ['required', 'digits:9'],
             'parent_name'  => ['nullable', 'string', 'max:255'],
-            'parent_phone' => ['nullable', 'digits:9'],
+            'parent_phone' => ['required_if:parent_account,1', 'nullable', 'digits:9'],
+            // Ota-ona uchun tizimga kirish hisobi ochilsinmi.
+            'parent_account' => ['nullable', 'boolean'],
             'group_id'     => ['required', 'integer', Rule::in($groupIds)],
             'payment'      => [Rule::prohibitedIf(! $isAdmin), 'nullable', 'numeric', 'min:0'],
         ], [
@@ -96,6 +98,7 @@ class ReceptionEnrollmentController extends Controller
             'phone.required'      => 'Talabaning telefon raqamini kiriting — u shu raqam bilan tizimga kiradi.',
             'phone.digits'        => 'Telefon raqami 9 ta raqamdan iborat bo‘lishi kerak (901234567).',
             'parent_phone.digits' => 'Ota-ona telefoni 9 ta raqamdan iborat bo‘lishi kerak.',
+            'parent_phone.required_if' => 'Hisob ochish uchun ota-ona telefonini kiriting.',
             'group_id.required'   => 'Guruhni tanlang.',
             'group_id.in'         => 'Bu guruhga yozish mumkin emas.',
         ]);
@@ -122,9 +125,10 @@ class ReceptionEnrollmentController extends Controller
                 $isAdmin && filled($data['payment'] ?? null) ? [$groupId => $data['payment']] : [],
                 [
                     'ota' => [
-                        'name'  => $data['parent_name'] ?? null,
-                        'phone' => $data['parent_phone'] ?? null,
-                        'email' => null,
+                        'name'    => $data['parent_name'] ?? null,
+                        'phone'   => $data['parent_phone'] ?? null,
+                        'email'   => null,
+                        'account' => ! empty($data['parent_account']),
                     ],
                 ]
             );

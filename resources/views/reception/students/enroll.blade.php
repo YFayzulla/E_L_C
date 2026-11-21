@@ -64,7 +64,17 @@
                                            placeholder="901234567">
                                 </div>
                                 @error('parent_phone') <div class="text-danger mt-1" style="font-size: .8rem;">{{ $message }}</div> @enderror
-                                <div class="form-text">Kiritilsa, ota-ona hisobi ham ochiladi.</div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                           id="parent_account" name="parent_account" @checked(old('parent_account'))>
+                                    <label class="form-check-label" for="parent_account" style="font-size: .85rem;">
+                                        Ota-ona uchun hisob ochilsin
+                                        <span class="text-muted d-block" style="font-size: .78rem;">
+                                            Belgilansa, shu raqam bilan ota-ona kabinetiga kira oladi.
+                                            Belgilanmasa — raqam faqat aloqa uchun saqlanadi.
+                                        </span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="col-12">

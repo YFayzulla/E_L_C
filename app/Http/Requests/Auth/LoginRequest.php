@@ -67,6 +67,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Ota-ona yozuvi bor, lekin unga hisob ochilmagan (talaba formasida
+        // "Hisob ochilsin" belgilanmagan). Parol to'g'ri bo'lsa ham kira olmaydi.
+        if ($user->login_enabled === false) {
+            throw ValidationException::withMessages([
+                'login' => 'Bu raqam uchun tizimga kirish hali ochilmagan. O‘quv markazi administratori bilan bog‘laning.',
+            ]);
+        }
+
         // Markaz subdomenida kirish: a'zolik AYNAN shu yerda tekshiriladi.
         //
         // Aks holda odam muvaffaqiyatli kirib, keyin har bir sahifada 403

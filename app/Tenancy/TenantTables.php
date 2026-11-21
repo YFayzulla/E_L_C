@@ -24,6 +24,7 @@ final class TenantTables
         'lesson_and_histories', 'history_payments', 'student_information',
         'assessments', 'dept_students', 'active_students', 'certificates',
         'reception_students', 'staff_notifications', 'student_discounts',
+        'olympiads', 'olympiad_participants',
     ];
 
     /**

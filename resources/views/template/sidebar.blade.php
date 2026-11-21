@@ -134,6 +134,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ $isActive('olympiads.index', 'olympiads.create', 'olympiads.show', 'olympiads.edit') }}">
+            <a href="{{ route('olympiads.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-trophy"></i>
+                <div>Olimpiadalar</div>
+            </a>
+        </li>
+
         <li class="menu-header small">Moliya</li>
 
         <li class="menu-item {{ $isActive('dept.index', 'dept.create', 'dept.edit', 'dept.show') }}">
@@ -175,6 +182,13 @@
             <a href="{{ route('reception.absences.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-phone-call"></i>
                 <div>Kelmaganlar</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ $isActive('olympiads.index', 'olympiads.create', 'olympiads.show', 'olympiads.edit') }}">
+            <a href="{{ route('olympiads.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-trophy"></i>
+                <div>Olimpiadalar</div>
             </a>
         </li>
         @endrole

@@ -17,6 +17,7 @@ use App\Http\Controllers\GroupLifecycleController;
 use App\Http\Controllers\HomeworkController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\LessonSkillGradeController;
+use App\Http\Controllers\OlympiadController;
 use App\Http\Controllers\ParentAdminController;
 use App\Http\Controllers\ParentPanelController;
 use App\Http\Controllers\PdfController;
@@ -165,6 +166,39 @@ Route::middleware(['auth', 'role:admin|reception|user'])
 Route::middleware(['auth', 'role:user'])
     ->get('teacher/reception', [ReceptionEnrollmentController::class, 'teacherIndex'])
     ->name('teacher.reception.index');
+
+/*
+|--------------------------------------------------------------------------
+| OLIMPIADA (talaba saralash)
+|--------------------------------------------------------------------------
+| Reception va admin: olimpiada, ishtirokchilar, ballar.
+| Faqat admin: qoidalar, qaror, chegirma, guruhga biriktirish, o'chirish.
+*/
+Route::middleware(['auth', 'role:admin|reception'])->controller(OlympiadController::class)->group(function () {
+    Route::get('olympiads', 'index')->name('olympiads.index');
+    Route::get('olympiads/create', 'create')->name('olympiads.create');
+    Route::post('olympiads', 'store')->name('olympiads.store');
+    Route::get('olympiads/{olympiad}', 'show')->whereNumber('olympiad')->name('olympiads.show');
+    Route::get('olympiads/{olympiad}/edit', 'edit')->whereNumber('olympiad')->name('olympiads.edit');
+    Route::put('olympiads/{olympiad}', 'update')->whereNumber('olympiad')->name('olympiads.update');
+    // Massiv shaklida: 'pdf' satri PDF facade klassi deb tushunilib qolmasin.
+    Route::get('olympiads/{olympiad}/pdf', [OlympiadController::class, 'pdf'])->whereNumber('olympiad')->name('olympiads.pdf');
+
+    Route::post('olympiads/{olympiad}/participants', 'addParticipant')->whereNumber('olympiad')->name('olympiads.participants.store');
+    Route::post('olympiads/{olympiad}/participants/reception', 'addFromReception')->whereNumber('olympiad')->name('olympiads.participants.reception');
+    Route::post('olympiads/{olympiad}/participants/students', 'addStudents')->whereNumber('olympiad')->name('olympiads.participants.students');
+    Route::delete('olympiads/{olympiad}/participants/{participant}', 'removeParticipant')
+        ->whereNumber(['olympiad', 'participant'])->name('olympiads.participants.destroy');
+
+    Route::post('olympiads/{olympiad}/scores', 'saveScores')->whereNumber('olympiad')->name('olympiads.scores');
+});
+
+Route::middleware(['auth', 'role:admin'])->controller(OlympiadController::class)->group(function () {
+    Route::post('olympiads/{olympiad}/rules', 'saveRules')->whereNumber('olympiad')->name('olympiads.rules');
+    Route::post('olympiads/{olympiad}/decisions', 'saveDecisions')->whereNumber('olympiad')->name('olympiads.decisions');
+    Route::post('olympiads/{olympiad}/enroll', 'enroll')->whereNumber('olympiad')->name('olympiads.enroll');
+    Route::delete('olympiads/{olympiad}', 'destroy')->whereNumber('olympiad')->name('olympiads.destroy');
+});
 
 /*
 |--------------------------------------------------------------------------

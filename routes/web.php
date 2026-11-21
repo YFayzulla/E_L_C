@@ -315,6 +315,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::delete('/delete-multiple', 'deleteMultiple')->name('deleteMultiple');
         Route::post('group/change/{id}', 'change_group')->name('student.change.group');
         Route::get('group/student/{id}', 'show')->name('group.students');
+        // Bir nechta talabani belgilab boshqa guruhga ko'chirish
+        // (guruh talabalari va Kutish zali sahifalaridan).
+        Route::post('group/students/move', 'moveStudents')->name('group.students.move');
     });
 
     Route::get('waiters', [WaitersController::class, 'index'])->name('waiters.index');

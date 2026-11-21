@@ -17,6 +17,10 @@
             <span class="text-muted" style="font-size: .82rem;">Guruhga biriktirilgach ro‘yxatdan chiqadi</span>
         </div>
 
+        @if($students->isNotEmpty())
+            @include('partials.bulk-move-bar', ['groups' => $groups, 'fromGroupId' => null])
+        @endif
+
         @if($students->isEmpty())
             <div class="empty-state">
                 <i class="bx bx-check-circle"></i>
@@ -28,6 +32,7 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
+                        <th style="width: 2.5rem;"></th>
                         <th style="width: 3rem;">#</th>
                         <th>Talaba</th>
                         <th>Telefon</th>
@@ -39,6 +44,10 @@
                     <tbody id="myTable">
                     @foreach($students as $student)
                         <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input js-move-check" form="bulkMoveForm"
+                                       name="student_ids[]" value="{{ $student->id }}" aria-label="{{ $student->name }}">
+                            </td>
                             <td class="text-muted">{{ $loop->iteration }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2 min-w-0">

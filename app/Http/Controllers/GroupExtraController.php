@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\StudentInformation;
 use App\Models\User;
 use App\Services\AttendanceService;
+use App\Services\StudentGroupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -53,6 +54,80 @@ class GroupExtraController extends Controller
             Log::error('GroupExtraController@deleteMultiple error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'O\'chirish jarayonida xatolik yuz berdi.');
         }
+    }
+
+    /**
+     * Belgilangan talabalarni boshqa guruhga ko'chirish.
+     *
+     * Har bir talaba `from_group_id` (va Kutish zali) dan chiqariladi va
+     * `target_group_id` ga qo'shiladi; boshqa guruhlari saqlanadi. Yozuv
+     * StudentGroupService orqali — oylik summa, qarzdorlik va guruh tarixi
+     * birga yangilanadi, eski davomat o'z guruhida qoladi.
+     */
+    public function moveStudents(Request $request, StudentGroupService $membership)
+    {
+        $data = $request->validate([
+            'student_ids'     => ['required', 'array', 'min:1'],
+            'student_ids.*'   => ['integer'],
+            'from_group_id'   => ['nullable', 'integer'],
+            'target_group_id' => ['required', 'integer'],
+        ], [
+            'student_ids.required'     => 'Kamida bitta talabani belgilang.',
+            'student_ids.min'          => 'Kamida bitta talabani belgilang.',
+            'target_group_id.required' => 'Qaysi guruhga ko‘chirishni tanlang.',
+        ]);
+
+        $target = Group::query()->teaching()->find($data['target_group_id']);
+
+        if (! $target) {
+            return redirect()->back()->with('error', 'Tanlangan guruh topilmadi.');
+        }
+
+        $fromId = (int) ($data['from_group_id'] ?? 0);
+        $waitingId = (int) Group::waitingRoomId();
+
+        $students = User::role('student')
+            ->inCurrentCentre()
+            ->whereIn('users.id', $data['student_ids'])
+            ->get();
+
+        $moved = 0;
+
+        try {
+            DB::transaction(function () use ($students, $membership, $fromId, $waitingId, $target, &$moved) {
+                foreach ($students as $student) {
+                    $current = $student->groups()->pluck('groups.id')->map(fn ($id) => (int) $id)->all();
+
+                    $targets = array_values(array_diff($current, array_filter([$fromId, $waitingId])));
+                    $targets[] = (int) $target->id;
+                    $targets = array_values(array_unique($targets));
+
+                    sort($current);
+                    $check = $targets;
+                    sort($check);
+
+                    if ($check === $current) {
+                        continue; // allaqachon shu holatda
+                    }
+
+                    $membership->transfer($student, $targets, [], auth()->id());
+                    $moved++;
+                }
+            });
+        } catch (\Throwable $e) {
+            Log::error('GroupExtraController@moveStudents error: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Talabalarni ko‘chirishda xatolik yuz berdi. O‘zgarishlar saqlanmadi.');
+        }
+
+        if ($moved === 0) {
+            return redirect()->back()->with('warning', 'Belgilangan talabalar allaqachon shu guruhda.');
+        }
+
+        return redirect()->back()->with(
+            'success',
+            "{$moved} ta talaba «{$target->name}» guruhiga ko‘chirildi. Oylik to‘lov guruh narxi bo‘yicha qayta hisoblandi."
+        );
     }
 
     /**
@@ -123,7 +198,15 @@ class GroupExtraController extends Controller
                 ->select('id', 'name', 'phone', 'status') // group_id olib tashlandi
                 ->get();
                 
-            return view('admin.group.student', compact('students'));
+            // "Belgilanganlarni ko'chirish" uchun: shu guruhdan boshqa o'quv
+            // guruhlari (Kutish zali emas).
+            $group = Group::findOrFail($id);
+            $groups = Group::query()->teaching()->active()
+                ->where('id', '!=', $group->id)
+                ->orderBy('name')->orderBy('id')
+                ->get(['id', 'name']);
+
+            return view('admin.group.student', compact('students', 'group', 'groups'));
         } catch (\Exception $e) {
             Log::error('GroupExtraController@show error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talabalar ro\'yxatini yuklashda xatolik.');

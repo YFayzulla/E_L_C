@@ -77,14 +77,17 @@ class GroupExtraController extends Controller
             'target_group_id.required' => 'Qaysi guruhga ko‘chirishni tanlang.',
         ]);
 
-        $target = Group::query()->teaching()->find($data['target_group_id']);
+        $fromId = (int) ($data['from_group_id'] ?? 0);
+        $waitingId = (int) Group::waitingRoomId();
+        $toWaiting = $waitingId > 0 && (int) $data['target_group_id'] === $waitingId;
+
+        $target = $toWaiting
+            ? Group::query()->find($waitingId)
+            : Group::query()->teaching()->find($data['target_group_id']);
 
         if (! $target) {
             return redirect()->back()->with('error', 'Tanlangan guruh topilmadi.');
         }
-
-        $fromId = (int) ($data['from_group_id'] ?? 0);
-        $waitingId = (int) Group::waitingRoomId();
 
         $students = User::role('student')
             ->inCurrentCentre()
@@ -94,12 +97,19 @@ class GroupExtraController extends Controller
         $moved = 0;
 
         try {
-            DB::transaction(function () use ($students, $membership, $fromId, $waitingId, $target, &$moved) {
+            DB::transaction(function () use ($students, $membership, $fromId, $waitingId, $target, $toWaiting, &$moved) {
                 foreach ($students as $student) {
                     $current = $student->groups()->pluck('groups.id')->map(fn ($id) => (int) $id)->all();
 
                     $targets = array_values(array_diff($current, array_filter([$fromId, $waitingId])));
-                    $targets[] = (int) $target->id;
+
+                    // Kutish zaliga: faqat boshqa o'quv guruhi qolmagan talaba
+                    // u yerga tushadi; boshqa guruhida o'qiyotgani shu guruhdan
+                    // chiqariladi xolos.
+                    if (! $toWaiting || $targets === []) {
+                        $targets[] = (int) $target->id;
+                    }
+
                     $targets = array_values(array_unique($targets));
 
                     sort($current);
@@ -122,6 +132,13 @@ class GroupExtraController extends Controller
 
         if ($moved === 0) {
             return redirect()->back()->with('warning', 'Belgilangan talabalar allaqachon shu guruhda.');
+        }
+
+        if ($toWaiting) {
+            return redirect()->back()->with(
+                'success',
+                "{$moved} ta talaba guruhdan chiqarildi. Boshqa guruhi yo‘qlari Kutish zaliga o‘tkazildi."
+            );
         }
 
         return redirect()->back()->with(
@@ -199,14 +216,17 @@ class GroupExtraController extends Controller
                 ->get();
                 
             // "Belgilanganlarni ko'chirish" uchun: shu guruhdan boshqa o'quv
-            // guruhlari (Kutish zali emas).
+            // guruhlari va (bu guruhning o'zi bo'lmasa) Kutish zali.
             $group = Group::findOrFail($id);
             $groups = Group::query()->teaching()->active()
                 ->where('id', '!=', $group->id)
                 ->orderBy('name')->orderBy('id')
                 ->get(['id', 'name']);
+            $waitingRoom = $group->isWaitingRoom()
+                ? null
+                : Group::query()->find(Group::waitingRoomId(), ['id', 'name']);
 
-            return view('admin.group.student', compact('students', 'group', 'groups'));
+            return view('admin.group.student', compact('students', 'group', 'groups', 'waitingRoom'));
         } catch (\Exception $e) {
             Log::error('GroupExtraController@show error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talabalar ro\'yxatini yuklashda xatolik.');

@@ -22,7 +22,7 @@
         </div>
 
         @if($students->isNotEmpty())
-            @include('partials.bulk-move-bar', ['groups' => $groups, 'fromGroupId' => $group->id])
+            @include('partials.bulk-move-bar', ['groups' => $groups, 'fromGroupId' => $group->id, 'waitingRoom' => $waitingRoom ?? null])
         @endif
 
         @if($students->isEmpty())

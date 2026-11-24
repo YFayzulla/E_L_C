@@ -6,6 +6,7 @@
 
     @param \Illuminate\Support\Collection $groups   tanlash mumkin bo'lgan guruhlar
     @param int|null $fromGroupId                    shu guruhdan chiqariladi (Kutish zali o'zi chiqariladi)
+    @param \App\Models\Group|null $waitingRoom      berilsa, ro'yxat boshida "Kutish zali" chiqadi
 --}}
 <form id="bulkMoveForm" action="{{ route('group.students.move') }}" method="post"
       class="d-flex align-items-center flex-wrap gap-2 px-4 py-3 border-bottom"
@@ -28,9 +29,16 @@
         <select name="target_group_id" class="form-select form-select-sm" style="width: auto; min-width: 14rem;" required
                 aria-label="Qaysi guruhga ko‘chirish">
             <option value="">— Qaysi guruhga —</option>
+            @if(! empty($waitingRoom))
+                <option value="{{ $waitingRoom->id }}">⏳ Kutish zali</option>
+                <optgroup label="Guruhlar">
+            @endif
             @foreach($groups as $option)
                 <option value="{{ $option->id }}">{{ $option->name }}</option>
             @endforeach
+            @if(! empty($waitingRoom))
+                </optgroup>
+            @endif
         </select>
         <button type="submit" class="btn btn-sm btn-primary text-nowrap">
             <i class="bx bx-transfer me-1"></i> Belgilanganlarni ko‘chirish

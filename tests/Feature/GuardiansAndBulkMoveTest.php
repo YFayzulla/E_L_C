@@ -127,6 +127,45 @@ class GuardiansAndBulkMoveTest extends TestCase
         $this->assertSame([$this->to->id], $this->groupIds($b));
     }
 
+    public function test_students_can_be_sent_back_to_waiting_room(): void
+    {
+        $a = $this->student('Qaytuvchi A', '998930000066', $this->from);
+        $b = $this->student('Ikki guruhli B', '998930000067', $this->from);
+        Centre::for($this->centre, fn () => $b->groups()->attach($this->to->id, ['payment' => 450000]));
+        $c = $this->student('Qoluvchi C', '998930000068', $this->from);
+
+        $this->actingAs($this->admin)
+            ->get(route('group.students', $this->from->id))
+            ->assertOk()
+            ->assertSee('<option value="' . $this->waiting->id . '">⏳ Kutish zali</option>', false);
+
+        $this->actingAs($this->admin)
+            ->post(route('group.students.move'), [
+                'student_ids'     => [$a->id, $b->id],
+                'from_group_id'   => $this->from->id,
+                'target_group_id' => $this->waiting->id,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $this->assertSame([$this->waiting->id], $this->groupIds($a), 'Boshqa guruhi yo‘q — Kutish zaliga');
+        $this->assertSame(0, (int) $a->fresh()->should_pay);
+        $this->assertSame([$this->to->id], $this->groupIds($b), 'Boshqa guruhi bor — faqat shu guruhdan chiqadi');
+        $this->assertSame([$this->from->id], $this->groupIds($c));
+
+        $this->actingAs($this->admin)
+            ->get(route('waiters.index'))
+            ->assertOk()
+            ->assertSee('Qaytuvchi A')
+            ->assertDontSee('Ikki guruhli B');
+
+        // Kutish zali sahifasida o'zini tanlash varianti chiqmaydi.
+        $this->actingAs($this->admin)
+            ->get(route('group.students', $this->waiting->id))
+            ->assertOk()
+            ->assertDontSee('⏳ Kutish zali', false);
+    }
+
     public function test_move_requires_selection(): void
     {
         $this->actingAs($this->admin)

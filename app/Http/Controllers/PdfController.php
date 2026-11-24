@@ -7,7 +7,11 @@ use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\HistoryPayments;
 use App\Models\LessonAndHistory;
+use App\Models\StudentDiscount;
+use App\Models\StudentInformation;
 use App\Models\User;
+use App\Services\ParentAccountService;
+use App\Services\ProgressService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -68,20 +72,41 @@ class PdfController extends Controller
             // inCurrentCentre(): `users` da centre_id yo'q, ya'ni global scope
             // bu yerga tegmaydi va id URL'dan keladi.
             $student = User::inCurrentCentre()
-                ->with('groups') // Eager load groups without column constraints
+                ->with(['groups' => fn ($q) => $q->orderBy('groups.name')->orderBy('groups.id')])
                 ->findOrFail($id);
 
-            // Fetch attendances with necessary relationships
+            // Talaba sahifasidagi barcha bo'limlar — PDF ham sahifa tartibida.
+            // Davomatda faqat kelmagan / kechikkan kunlar yoziladi (kelganlar
+            // uchun qator yo'q).
             $attendances = Attendance::where('user_id', $id)
-                ->with(['group', 'user']) // Load group and user info
+                ->with('group:id,name')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
+
+            $groupHistory = StudentInformation::where('user_id', $id)
+                ->with('actor:id,name')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->get();
+
+            $discounts = StudentDiscount::where('user_id', $student->id)
+                ->with('group:id,name')
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->get();
 
             $pdf = PDF::loadView('admin.pdf.student_show', [
-                'student'     => $student,
-                'attendances' => $attendances
-            ]);
+                'student'      => $student,
+                'attendances'  => $attendances,
+                'groupHistory' => $groupHistory,
+                'testResults'  => Assessment::testsFor((int) $id),
+                'progress'     => app(ProgressService::class)->forStudent((int) $id),
+                'guardians'    => app(ParentAccountService::class)->guardiansOf($student),
+                'discounts'    => $discounts,
+                'payments'     => $student->studenthistory()->orderByDesc('date')->orderByDesc('id')->get(),
+                'photo'        => $this->embeddedPhoto($student->photo),
+            ])->setOption('isFontSubsettingEnabled', true); // shriftdan faqat ishlatilgan harflar — fayl kichik
 
             $fileName = 'student_history_' . $student->id . '_' . now()->format('Y-m-d') . '.pdf';
 
@@ -93,6 +118,31 @@ class PdfController extends Controller
             Log::error('PdfController@history error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Talaba tarixini yuklashda xatolik.');
         }
+    }
+
+    /**
+     * Talaba rasmi PDF ichiga data URI sifatida (dompdf fayl yo'liga
+     * ishonmasin). Rasm yo'q yoki juda katta bo'lsa — null.
+     */
+    private function embeddedPhoto(?string $path): ?string
+    {
+        if (! filled($path)) {
+            return null;
+        }
+
+        $file = storage_path('app/public/' . ltrim($path, '/'));
+
+        if (! is_file($file) || filesize($file) > 3 * 1024 * 1024) {
+            return null;
+        }
+
+        $mime = mime_content_type($file) ?: '';
+
+        if (! in_array($mime, ['image/jpeg', 'image/png', 'image/gif'], true)) {
+            return null;
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($file));
     }
 
     /**

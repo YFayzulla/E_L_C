@@ -111,7 +111,7 @@ class OlympiadTest extends TestCase
         });
 
         $this->actingAs($this->reception)
-            ->post(route('olympiads.participants.store', $olympiad), ['name' => 'Yangi Bola', 'phone' => '901110004'])
+            ->post(route('olympiads.participants.store', $olympiad), ['name' => 'Yangi Bola', 'phone' => '901110004', 'school' => '45-maktab', 'grade' => '9-A'])
             ->assertSessionHasNoErrors();
         $this->actingAs($this->reception)
             ->post(route('olympiads.participants.store', $olympiad), ['name' => 'Toʻrtinchi', 'phone' => '901110005'])
@@ -127,6 +127,7 @@ class OlympiadTest extends TestCase
         $this->assertCount(4, $byName);
         $this->assertSame($record->id, $byName['Reception Bola']->reception_student_id);
         $this->assertSame($student->id, $byName['Markaz Talabasi']->user_id);
+        $this->assertSame(['45-maktab', '9-A'], [$byName['Yangi Bola']->school, $byName['Yangi Bola']->grade], 'Maktab va sinf alohida');
 
         // Max dan oshgan ball rad etiladi.
         $this->actingAs($this->reception)
@@ -155,6 +156,8 @@ class OlympiadTest extends TestCase
             ->get(route('olympiads.show', $olympiad))
             ->assertOk()
             ->assertSee('Ballarni saqlash')
+            ->assertSee('45-maktab · 9-A sinf')
+            ->assertSee('name="grade"', false)
             ->assertDontSee('Qarorlarni saqlash')
             ->assertDontSee('Chegirma qoidalari')
             ->assertDontSee('Guruhga biriktirish');

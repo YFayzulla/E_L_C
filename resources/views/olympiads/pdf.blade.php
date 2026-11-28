@@ -18,6 +18,8 @@
         <tr>
             <th>O‘rin</th>
             <th>Ishtirokchi</th>
+            <th>Maktab</th>
+            <th>Sinf</th>
             @foreach($sections as $section)
                 <th style="text-align: center;">{{ $section['label'] }} /{{ $section['max'] }}</th>
             @endforeach
@@ -32,6 +34,8 @@
             <tr>
                 <td>{{ $p->rank ?? '—' }}</td>
                 <td>{{ $p->name }}</td>
+                <td>{{ $p->school ?: '—' }}</td>
+                <td>{{ $p->grade ?: '—' }}</td>
                 @foreach($sections as $section)
                     <td style="text-align: center;">{{ $scores[$section['key']] ?? '—' }}</td>
                 @endforeach

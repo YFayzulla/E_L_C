@@ -20,7 +20,7 @@ class OlympiadParticipant extends Model
 
     protected $fillable = [
         'olympiad_id', 'user_id', 'reception_student_id', 'name', 'phone', 'parent_name',
-        'parent_phone', 'school', 'scores', 'total', 'percent', 'rank', 'status',
+        'parent_phone', 'school', 'grade', 'scores', 'total', 'percent', 'rank', 'status',
         'discount_percent', 'group_id', 'discount_id', 'enrolled_at', 'notes',
     ];
 

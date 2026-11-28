@@ -125,6 +125,7 @@ class OlympiadController extends Controller
             'parent_name'  => ['nullable', 'string', 'max:255'],
             'parent_phone' => ['nullable', 'string', 'max:32'],
             'school'       => ['nullable', 'string', 'max:255'],
+            'grade'        => ['nullable', 'string', 'max:32'],
         ], ['name.required' => 'Ishtirokchi ismini kiriting.']);
 
         $olympiad->participants()->create($data);

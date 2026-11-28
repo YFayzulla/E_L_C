@@ -50,22 +50,24 @@
     <div class="card mb-4">
         <div class="card-header">Ishtirokchi qo‘shish</div>
         <div class="card-body">
-            <div class="row g-4">
-                <div class="col-xl-5">
-                    <h6 class="mb-2">Yangi odam</h6>
-                    <form method="POST" action="{{ route('olympiads.participants.store', $olympiad) }}" class="row g-2">
-                        @csrf
-                        <div class="col-sm-6"><input type="text" name="name" required maxlength="255" class="form-control form-control-sm" placeholder="Ism familiya *"></div>
-                        <div class="col-sm-6"><input type="text" name="phone" maxlength="32" class="form-control form-control-sm" placeholder="Telefon (901234567)"></div>
-                        <div class="col-sm-6"><input type="text" name="parent_name" maxlength="255" class="form-control form-control-sm" placeholder="Ota-ona ismi"></div>
-                        <div class="col-sm-6"><input type="text" name="parent_phone" maxlength="32" class="form-control form-control-sm" placeholder="Ota-ona telefoni"></div>
-                        <div class="col-sm-8"><input type="text" name="school" maxlength="255" class="form-control form-control-sm" placeholder="Maktab / sinf"></div>
-                        <div class="col-sm-4 d-grid"><button type="submit" class="btn btn-sm btn-primary"><i class="bx bx-plus me-1"></i> Qo‘shish</button></div>
-                    </form>
-                </div>
+            {{-- Yangi odam: 1-qator — o'zi (ism, telefon, maktab, sinf),
+                 2-qator — ota-onasi va "Qo'shish". --}}
+            <h6 class="mb-2">Yangi odam</h6>
+            <form method="POST" action="{{ route('olympiads.participants.store', $olympiad) }}" class="row g-2">
+                @csrf
+                <div class="col-md-6 col-xl-4"><input type="text" name="name" required maxlength="255" class="form-control form-control-sm" placeholder="Ism familiya *" aria-label="Ism familiya"></div>
+                <div class="col-md-6 col-xl-3"><input type="text" name="phone" maxlength="32" class="form-control form-control-sm" placeholder="Telefon (901234567)" aria-label="Telefon"></div>
+                <div class="col-8 col-xl-3"><input type="text" name="school" maxlength="255" class="form-control form-control-sm" placeholder="Maktab" aria-label="Maktab"></div>
+                <div class="col-4 col-xl-2"><input type="text" name="grade" maxlength="32" class="form-control form-control-sm" placeholder="Sinf (9-A)" aria-label="Sinf"></div>
 
-                <div class="col-xl-7">
-                    <div class="row g-3">
+                <div class="col-md-6 col-xl-4"><input type="text" name="parent_name" maxlength="255" class="form-control form-control-sm" placeholder="Ota-ona ismi" aria-label="Ota-ona ismi"></div>
+                <div class="col-md-6 col-xl-3"><input type="text" name="parent_phone" maxlength="32" class="form-control form-control-sm" placeholder="Ota-ona telefoni" aria-label="Ota-ona telefoni"></div>
+                <div class="col-xl-2 ms-xl-auto d-grid"><button type="submit" class="btn btn-sm btn-primary"><i class="bx bx-plus me-1"></i> Qo‘shish</button></div>
+            </form>
+
+            {{-- Tayyor ro'yxatlardan: alohida pastki qatorda. --}}
+            <div class="border-top mt-4 pt-3">
+                <div class="row g-4">
                         <div class="col-md-6">
                             <h6 class="mb-2">Reception daftaridan</h6>
                             <form method="POST" action="{{ route('olympiads.participants.reception', $olympiad) }}">
@@ -90,7 +92,6 @@
                                 <button type="submit" class="btn btn-sm btn-outline-primary mt-2"><i class="bx bx-user-plus me-1"></i> Tanlanganlarni qo‘shish</button>
                             </form>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -223,7 +224,7 @@
                             <td style="min-width: 9rem;">
                                 <div class="fw-semibold">{{ $p->name }}</div>
                                 <div class="text-muted" style="font-size: .75rem;">
-                                    {{ $p->phone ?: 'telefon yo‘q' }}{{ $p->school ? ' · ' . $p->school : '' }}
+                                    {{ $p->phone ?: 'telefon yo‘q' }}{{ $p->school ? ' · ' . $p->school : '' }}{{ $p->grade ? ' · ' . $p->grade . ' sinf' : '' }}
                                 </div>
                                 @if($p->user_id && ! $locked)
                                     <span class="badge bg-label-primary">markazdagi talaba</span>

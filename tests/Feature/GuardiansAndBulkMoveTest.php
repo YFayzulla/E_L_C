@@ -221,6 +221,40 @@ class GuardiansAndBulkMoveTest extends TestCase
             ->assertSee('Faqat aloqa', false);
     }
 
+    public function test_teacher_sees_student_details_and_guardians_but_cannot_edit(): void
+    {
+        $student = $this->storeStudent([
+            'ota' => ['name' => 'Ataniyazov Baxtiyor', 'phone' => '991032352'],
+            'ona' => ['name' => 'Yusupova Dilfuza', 'phone' => '995024172'],
+        ], '952152352');
+        $student->forceFill(['location' => 'Yangiobod Beruniy 5', 'date_born' => '2007-10-12', 'mark' => 23])->save();
+
+        $teacher = Centre::for($this->centre, function () {
+            $t = $this->person('Ustoz', '998900000069', 'user');
+            \App\Models\GroupTeacher::create(['group_id' => $this->from->id, 'teacher_id' => $t->id]);
+
+            return $t;
+        });
+
+        $this->actingAs($teacher)
+            ->get(route('student.show', $student->id))
+            ->assertOk()
+            ->assertSee('Yangiobod Beruniy 5')
+            ->assertSee('2007-10-12')
+            ->assertSee('26-4 Pre Intermediate')
+            ->assertSee('Ota-ona va vasiylar')
+            ->assertSee('Ataniyazov Baxtiyor')
+            ->assertSee('+998995024172')
+            ->assertDontSee(route('student.edit', $student->id), false)
+            ->assertDontSee('/parents/', false)
+            ->assertDontSee('Payment History')
+            ->assertDontSee('Chegirmalar');
+
+        // Boshqa guruhdagi talaba o'qituvchiga yopiq.
+        $stranger = $this->student('Begona', '998930000069', $this->to);
+        $this->actingAs($teacher)->get(route('student.show', $stranger->id))->assertForbidden();
+    }
+
     public function test_checkbox_opens_account_for_chosen_guardian_only(): void
     {
         $student = $this->storeStudent([

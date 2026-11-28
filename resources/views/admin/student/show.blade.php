@@ -58,12 +58,13 @@
                             <div class="card-body">
                                 <h4><b>Full Name: </b>{{$student->name}}</h4>
                                 <h4><b>Tel: </b>{{$student->phone}}</h4>
-                                @role ('admin')
+                                {{-- O'qituvchi ham ko'radi (sahifa faqat o'z talabasiga ochiladi). --}}
+                                @hasanyrole('admin|user')
                                 <h4><b>Location:</b> {{$student->location}}</h4>
                                 <h4><b>Last Test Result: </b>{{$student->mark}}</h4>
                                 <h4><b>Birth date </b>{{$student->date_born }}</h4>
                                 <h4><b>Current Groups: </b> {{ $student->groups->pluck('name')->implode(', ') }}</h4>
-                                @endrole
+                                @endhasanyrole
                                 <div class="mt-4">
                                     <h5 class="text-primary mb-3"><i class="bx bx-note me-2"></i>Comments & Description
                                     </h5>
@@ -89,7 +90,7 @@
                                 </div>
                             </div>
                         </div>
-                        @role('admin')
+                        @hasanyrole('admin|user')
                         <div class="col-md-4 d-flex justify-content-center align-items-center p-3">
                             @if($student->photo)
                                 <img class="img-fluid rounded shadow-sm"
@@ -100,30 +101,33 @@
                                 <p class="text-muted">No Photo</p>
                             @endif
                         </div>
-                        @endrole
+                        @endhasanyrole
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @role('admin')
+    {{-- Ota-ona: o'qituvchi ham ko'radi va qo'ng'iroq qiladi; tahrirlash faqat adminda. --}}
+    @hasanyrole('admin|user')
     <div class="card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
                 <h5 class="mb-0">Ota-ona va vasiylar</h5>
                 <small class="text-muted">Talabaga biriktirilgan aloqador shaxslar</small>
             </div>
+            @role('admin')
             <a href="{{ route('student.edit', $student->id) }}" class="btn btn-sm btn-outline-primary">
                 <i class="bx bx-edit-alt me-1"></i>Tahrirlash
             </a>
+            @endrole
         </div>
 
         @if(empty($guardians))
             <div class="empty-state">
                 <i class="bx bx-user-x"></i>
                 <h6>Ota-ona ma’lumoti kiritilmagan</h6>
-                <p class="mb-0">Tahrirlash sahifasida ota, ona yoki vasiyni qo‘shing.</p>
+                <p class="mb-0">{{ auth()->user()->hasRole('admin') ? 'Tahrirlash sahifasida ota, ona yoki vasiyni qo‘shing.' : 'Ota-ona ma’lumotini administrator kiritadi.' }}</p>
             </div>
         @else
             <div class="card-body">
@@ -137,7 +141,7 @@
                             <div class="border rounded p-3 h-100" style="border-color: var(--app-border) !important;">
                                 <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                                     <span class="badge bg-label-primary"><i class="bx {{ $icon }} me-1"></i>{{ $label }}</span>
-                                    @if(($guardian['id'] ?? 0) > 0)
+                                    @if(($guardian['id'] ?? 0) > 0 && auth()->user()->hasRole('admin'))
                                         <a href="{{ route('parents.edit', $guardian['id']) }}" class="btn btn-sm btn-outline-secondary" title="Ota-ona hisobini tahrirlash">
                                             <i class="bx bx-edit-alt"></i>
                                         </a>
@@ -157,7 +161,7 @@
                                     <span class="text-muted">—</span>
                                 @endif
                                 @if(($guardian['id'] ?? 0) === 0)
-                                    <div class="small text-warning mt-3">Hisob hali yaratilmagan. Tahrirlab saqlang.</div>
+                                    <div class="small text-warning mt-3">Hisob hali yaratilmagan.{{ auth()->user()->hasRole('admin') ? ' Tahrirlab saqlang.' : '' }}</div>
                                 @elseif($guardian['account'] ?? false)
                                     <div class="mt-3"><span class="badge bg-label-success"><i class="bx bx-log-in me-1"></i>Kabinetga kira oladi</span></div>
                                 @else
@@ -170,7 +174,7 @@
             </div>
         @endif
     </div>
-    @endrole
+    @endhasanyrole
 
     @role('admin')
         @include('admin.student._discounts')

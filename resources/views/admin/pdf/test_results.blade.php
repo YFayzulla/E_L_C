@@ -18,6 +18,9 @@
                 <th style="text-align: center;">O‘rtacha</th>
                 <th style="text-align: center;">Yig‘indi</th>
             @endif
+            @if(\App\Services\CefrScale::enabled())
+                <th style="text-align: center;">Daraja</th>
+            @endif
         </tr>
 
         @foreach($students as $row)
@@ -30,6 +33,9 @@
                 @if(count($skills) > 1)
                     <td style="text-align: center;"><strong>{{ $row->average === null ? '—' : $row->average . '%' }}</strong></td>
                     <td style="text-align: center;">{{ $row->sum }}/{{ $row->sum_max }}</td>
+                @endif
+                @if(\App\Services\CefrScale::enabled())
+                    <td style="text-align: center;"><strong>{{ \App\Services\CefrScale::levelFor($row->average) ?? '—' }}</strong></td>
                 @endif
             </tr>
         @endforeach

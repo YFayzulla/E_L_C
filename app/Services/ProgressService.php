@@ -365,9 +365,10 @@ class ProgressService
                 continue;
             }
             $uid = (int) $row->user_id;
-            // Foizda: 50/50 — 100 (ScoreScale). Xom ball turli maksimumlarni aralashtirardi.
-            $tests[$uid][$key]['sum'] = ($tests[$uid][$key]['sum'] ?? 0) + ScoreScale::percent($row->get_mark, $row->max_score);
-            $tests[$uid][$key]['n']   = ($tests[$uid][$key]['n'] ?? 0) + 1;
+            // Ball og'irligida: oy davomidagi ballar yig'indisi / maksimumlar
+            // yig'indisi (test sahifasidagi "O'rtacha" bilan bir xil usul).
+            $tests[$uid][$key]['score'] = ($tests[$uid][$key]['score'] ?? 0) + (float) $row->get_mark;
+            $tests[$uid][$key]['max']   = ($tests[$uid][$key]['max'] ?? 0) + ScoreScale::clampMax($row->max_score);
         }
 
         // --- 5. homework -------------------------------------------------------
@@ -451,8 +452,8 @@ class ProgressService
                     $attendance = $this->clamp(100 * ($held - $missed) / $held);
                 }
 
-                $testCount = $tests[$uid][$key]['n'] ?? 0;
-                $testValue = $testCount > 0 ? $this->clamp($tests[$uid][$key]['sum'] / $testCount) : null;
+                $testMax   = $tests[$uid][$key]['max'] ?? 0;
+                $testValue = $testMax > 0 ? $this->clamp(100 * $tests[$uid][$key]['score'] / $testMax) : null;
 
                 $homeworkMax   = $homework[$uid][$key]['max'] ?? 0;
                 $homeworkValue = $homeworkMax > 0

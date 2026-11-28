@@ -54,7 +54,8 @@
         }
 
         // Bo'sh kataklar hisobga kirmaydi — server ham shunday qiladi.
-        // O'rtacha — foizda (50/50 = 100%), yig'indi — xom: "olingan / maksimum".
+        // O'rtacha — ball og'irligida: yig'indi / maksimumlar yig'indisi (47/50 +
+        // 18/25 + 21/25 → 86%), yig'indi — xom: "olingan / maksimum".
         function recalc(row) {
             const active = selectedSkills();
             const marks = [...row.querySelectorAll('.js-score')]
@@ -63,11 +64,10 @@
                 .filter(m => Number.isFinite(m.value));
 
             const has = marks.length > 0;
-            const sum = marks.reduce((a, m) => a + m.value, 0);
+            // Kasr ballar (6.5) — yaxlitlash xatosi chiqmasin.
+            const sum = Math.round(marks.reduce((a, m) => a + m.value, 0) * 100) / 100;
             const sumMax = marks.reduce((a, m) => a + m.max, 0);
-            const mean = has
-                ? Math.round(marks.reduce((a, m) => a + m.value * 100 / m.max, 0) / marks.length)
-                : null;
+            const mean = has && sumMax > 0 ? Math.round(sum * 100 / sumMax) : null;
 
             paint(row.querySelector('.js-average'),
                 aggEnabled('average') && has ? mean + '%' : null,

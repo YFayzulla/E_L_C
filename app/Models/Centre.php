@@ -62,6 +62,8 @@ class Centre extends Model
         'skill_mode',
         // Ko'nikma bo'yicha maksimal ball (grammatika 50 dan va h.k.).
         'skill_max',
+        // Test foizidan CEFR darajasi chegaralari (ro'yxat, bo'sh — o'chiq).
+        'cefr',
     ];
 
     protected $fillable = [

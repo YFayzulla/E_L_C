@@ -261,7 +261,7 @@ class StudentApiController extends ApiController
             'components' => $p['components'],
             'tests'      => $tests->map(fn($t) => [
                 'name'  => $t->test_name ?? 'Test',
-                'mark'  => $t->get_mark,                       // xom ball
+                'mark'  => ScoreScale::mark($t->get_mark),     // xom ball (6.5 ham bo'ladi)
                 'max_score' => ScoreScale::clampMax($t->max_score),
                 'percent'   => $t->percent(),
                 'skill' => $t->skill,

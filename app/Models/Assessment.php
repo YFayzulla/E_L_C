@@ -81,8 +81,8 @@ class Assessment extends Model
      * Qatorlar `test_name` bilan kelishi kutiladi (lesson_and_histories
      * join), tartib — chaqiruvchiniki (odatda eng yangisi tepada).
      *
-     * Ball xom holida (45/50) va foizda; o'rtacha — foizlar o'rtachasi,
-     * yig'indi — olingan ballar / maksimumlar yig'indisi.
+     * Ball xom holida (45/50) va foizda; o'rtacha — ball bo'yicha
+     * (ScoreScale::weighted: yig'indi / maksimumlar yig'indisi × 100).
      *
      * @param  iterable<self>  $rows
      * @return \Illuminate\Support\Collection<int, object{test_name: string, group: ?string, date: ?\Illuminate\Support\Carbon,
@@ -104,22 +104,20 @@ class Assessment extends Model
                     ->map(fn (self $row) => [
                         'skill'   => $row->skill,
                         'label'   => filled($row->skill) ? $row->skillLabel() : 'Umumiy',
-                        'mark'    => (int) $row->get_mark,
+                        'mark'    => ScoreScale::mark($row->get_mark),
                         'max'     => ScoreScale::clampMax($row->max_score),
                         'percent' => (int) $row->percent(),
                     ])
                     ->values()
                     ->all();
 
-                $percents = array_column($marks, 'percent');
-
                 return (object) [
                     'test_name' => $first->test_name ?? 'Test',
                     'group'     => $first->group,
                     'date'      => $items->max('created_at'),
                     'marks'     => $marks,
-                    'average'   => $percents === [] ? null : (int) round(array_sum($percents) / count($percents)),
-                    'sum'       => array_sum(array_column($marks, 'mark')),
+                    'average'   => ScoreScale::weighted($marks),
+                    'sum'       => ScoreScale::mark(array_sum(array_column($marks, 'mark'))),
                     'sum_max'   => array_sum(array_column($marks, 'max')),
                     // Yangi formada for_what — o'qituvchi izohi; skill bor
                     // qatorlarda u izoh, aks holda eski "maqsad" matni.
@@ -164,19 +162,17 @@ class Assessment extends Model
                 $first = $items->first();
                 // Bitta ko'nikma ikki marta yozilgan bo'lsa — oxirgisi.
                 $marks = $items->sortBy('id')->mapWithKeys(fn (self $row) => [$key($row) => [
-                    'mark'    => (int) $row->get_mark,
+                    'mark'    => ScoreScale::mark($row->get_mark),
                     'max'     => ScoreScale::clampMax($row->max_score),
                     'percent' => (int) $row->percent(),
                 ]])->all();
-
-                $percents = array_column($marks, 'percent');
 
                 return (object) [
                     'user_id' => (int) $first->user_id,
                     'name'    => $first->student->name ?? '—',
                     'marks'   => $marks,
-                    'average' => $percents === [] ? null : (int) round(array_sum($percents) / count($percents)),
-                    'sum'     => array_sum(array_column($marks, 'mark')),
+                    'average' => ScoreScale::weighted($marks),
+                    'sum'     => ScoreScale::mark(array_sum(array_column($marks, 'mark'))),
                     'sum_max' => array_sum(array_column($marks, 'max')),
                     'ids'     => $items->pluck('id')->map(fn ($id) => (int) $id)->all(),
                     'comment' => $items->first(fn (self $row) => filled($row->skill) && filled($row->for_what))?->for_what,

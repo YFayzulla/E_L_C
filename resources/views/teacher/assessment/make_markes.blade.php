@@ -118,7 +118,7 @@
                                     $field = "score.{$student->id}.{$skill}";
                                 @endphp
                                 <td>
-                                    <input type="number" inputmode="numeric" min="0" max="{{ $skillMaxes[$skill] ?? 100 }}" step="1"
+                                    <input type="number" inputmode="decimal" min="0" max="{{ $skillMaxes[$skill] ?? 100 }}" step="any"
                                            name="score[{{ $student->id }}][{{ $skill }}]"
                                            value="{{ old($field) }}"
                                            class="form-control grade-input js-score @error($field) is-invalid @enderror"

@@ -85,7 +85,9 @@ class ResolveCentre
                 // Massivlar QO'SHILADI, almashtirilmaydi: markaz faqat
                 // `bands.good` ni o'zgartirsa, `bands.ok` yo'qolib ketmasligi
                 // kerak — aks holda undan o'qiydigan kod jimgina null oladi.
-                if (is_array($value) && is_array(config("grading.{$key}"))) {
+                // Ro'yxat (masalan `cefr` chegaralari) esa butunlay
+                // almashtiriladi: aralashsa, olib tashlangan daraja qaytib kelardi.
+                if (is_array($value) && ! array_is_list($value) && is_array(config("grading.{$key}"))) {
                     $value = array_replace_recursive(config("grading.{$key}"), $value);
                 }
 

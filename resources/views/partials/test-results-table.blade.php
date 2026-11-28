@@ -28,6 +28,9 @@
                 @endif
                 <th>Ko‘nikmalar</th>
                 <th class="text-center">O‘rtacha</th>
+                @if(\App\Services\CefrScale::enabled())
+                    <th class="text-center">Daraja</th>
+                @endif
                 <th class="text-end">Sana</th>
             </tr>
             </thead>
@@ -59,6 +62,16 @@
                             {{ $test->average === null ? '—' : $test->average . '%' }}
                         </span>
                     </td>
+                    @if(\App\Services\CefrScale::enabled())
+                        @php $level = \App\Services\CefrScale::levelFor($test->average); @endphp
+                        <td class="text-center">
+                            @if($level)
+                                <span class="badge bg-{{ \App\Services\CefrScale::tone($level) }}">{{ $level }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                    @endif
                     <td class="text-end text-nowrap">{{ $test->date?->format('d.m.Y') }}</td>
                 </tr>
             @endforeach

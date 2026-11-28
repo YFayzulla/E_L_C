@@ -32,8 +32,8 @@
                                 <span class="d-block text-muted" style="font-size: .84rem;">
                                     Har bir ko‘nikmaga alohida baho:
                                     {{ $skills->implode(', ') }}.
-                                    Umumiy ball ularning o‘rta arifmetigi sifatida
-                                    avtomatik hisoblanadi.
+                                    Umumiy natija ball bo‘yicha hisoblanadi:
+                                    olingan ballar yig‘indisi / maksimal ballar yig‘indisi.
                                 </span>
                             </label>
                         </div>
@@ -77,6 +77,33 @@
                                 </div>
                             @endforeach
                         </div>
+
+                        <hr class="my-4">
+
+                        {{-- Test foizidan CEFR darajasi: har bir daraja qaysi foizdan boshlanadi. --}}
+                        <div class="fw-semibold mb-1">CEFR darajasi (oylik test)</div>
+                        <p class="text-muted" style="font-size: .84rem;">
+                            Har bir daraja testning necha foizidan boshlanishini yozing. Masalan B1 — 60:
+                            60% dan B2 chegarasigacha bo‘lgan natija B1 bo‘ladi. Kerak bo‘lmagan darajani bo‘sh
+                            qoldiring. Hammasi bo‘sh bo‘lsa, daraja ko‘rsatilmaydi.
+                        </p>
+                        <div class="row g-2">
+                            @foreach(\App\Services\CefrScale::LEVELS as $level)
+                                <div class="col-6 col-md-4">
+                                    <label class="form-label mb-1" for="cefr_{{ $level }}" style="font-size: .82rem;">{{ $level }}</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" min="0" max="100" step="1"
+                                               id="cefr_{{ $level }}" name="cefr_from[{{ $level }}]"
+                                               value="{{ old('cefr_from.' . $level, $cefrFrom[$level] ?? '') }}"
+                                               class="form-control @error('cefr_from.' . $level) is-invalid @enderror" placeholder="—">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        @foreach(\App\Services\CefrScale::LEVELS as $level)
+                            @error('cefr_from.' . $level) <div class="text-danger mt-2" style="font-size: .84rem;">{{ $message }}</div> @enderror
+                        @endforeach
                     </div>
 
                     <div class="card-footer d-flex justify-content-end">

@@ -175,7 +175,8 @@ class AssessmentController extends Controller
             'max.*'        => "nullable|integer|min:1|max:{$limit}",
             'score'        => 'array',
             'score.*'      => 'array',
-            'score.*.*'    => 'nullable|integer|min:0',
+            // Kasr ham bo'ladi (IELTS mock: 6.5), ko'pi bilan ikki xona.
+            'score.*.*'    => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(\.\d{1,2})?$/'],
             'comment'      => 'array',
             'comment.*'    => 'nullable|string|max:250',
             'lesson'       => 'nullable|string|max:255',
@@ -186,11 +187,12 @@ class AssessmentController extends Controller
             'skills.*.in'       => 'Noma’lum ko‘nikma tanlandi.',
             'max.*.min'         => 'Maksimal ball kamida 1 bo‘lishi kerak.',
             'max.*.max'         => "Maksimal ball {$limit} dan oshmasligi kerak.",
-            'score.*.*.integer' => 'Ball butun son bo‘lishi kerak.',
+            'score.*.*.numeric' => 'Ball son bo‘lishi kerak (masalan 7 yoki 6.5).',
+            'score.*.*.regex'   => 'Ball son bo‘lishi kerak, kasr qismi ko‘pi bilan ikki xona (masalan 6.5).',
             'score.*.*.min'     => 'Ball manfiy bo‘lishi mumkin emas.',
         ];
         foreach ($maxes as $skill => $max) {
-            $rules["score.*.{$skill}"] = "nullable|integer|min:0|max:{$max}";
+            $rules["score.*.{$skill}"] = ['nullable', 'numeric', 'min:0', "max:{$max}"];
             $messages["score.*.{$skill}.max"] = "Ball {$max} dan oshmasligi kerak.";
         }
 
@@ -247,8 +249,8 @@ class AssessmentController extends Controller
                         continue;
                     }
 
-                    $mark = (int) $raw;
-                    $givenOverall[] = ScoreScale::percent($mark, $maxes[$skill]);
+                    $mark = ScoreScale::mark($raw);
+                    $givenOverall[] = ['mark' => $mark, 'max' => $maxes[$skill]];
 
                     $assessments[] = [
                         'get_mark'   => $mark,
@@ -263,10 +265,10 @@ class AssessmentController extends Controller
                     ];
                 }
 
-                // users.mark ("Oxirgi ball") — belgilangan ustunlar foizlari
-                // o'rtachasi (50/50 — 100). Yig'indi faqat jadvalda ko'rinadi.
+                // users.mark ("Oxirgi ball") — belgilangan ustunlar bo'yicha
+                // o'rtacha, ball og'irligida (47/50 + 18/25 + 21/25 → 86).
                 if ($givenOverall !== []) {
-                    $studentsToUpdate[$userId] = (int) round(array_sum($givenOverall) / count($givenOverall));
+                    $studentsToUpdate[$userId] = ScoreScale::weighted($givenOverall);
                 }
             }
 

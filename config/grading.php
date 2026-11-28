@@ -139,6 +139,16 @@ return [
     // A late arrival costs this fraction of an absence when scoring attendance.
     'late_penalty' => 0.5,
 
+    // Test foizidan CEFR darajasi: har bir daraja qaysi foizdan boshlanadi.
+    // Markaz Sozlamalarda o'zgartiradi; bo'sh ro'yxat — daraja ko'rsatilmaydi.
+    'cefr' => [
+        ['level' => 'A1', 'from' => 0],
+        ['level' => 'A2', 'from' => 40],
+        ['level' => 'B1', 'from' => 60],
+        ['level' => 'B2', 'from' => 75],
+        ['level' => 'C1', 'from' => 90],
+    ],
+
     // Badge thresholds, matching the 80/60 convention already used in the views.
     'bands' => [
         'good' => 80,

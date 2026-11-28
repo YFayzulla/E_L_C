@@ -47,6 +47,9 @@
                                 <th class="text-center">O‘rtacha</th>
                                 <th class="text-center">Yig‘indi</th>
                             @endif
+                            @if(\App\Services\CefrScale::enabled())
+                                <th class="text-center">Daraja</th>
+                            @endif
                             <th class="text-end">Guruh</th>
                         </tr>
                         </thead>
@@ -79,6 +82,16 @@
                                         <span class="badge bg-label-{{ $tone($row->average) }}" style="font-size: .9rem;">{{ $row->average === null ? '—' : $row->average . '%' }}</span>
                                     </td>
                                     <td class="text-center fw-semibold">{{ $row->sum }}/{{ $row->sum_max }}</td>
+                                @endif
+                                @if(\App\Services\CefrScale::enabled())
+                                    @php $level = \App\Services\CefrScale::levelFor($row->average); @endphp
+                                    <td class="text-center">
+                                        @if($level)
+                                            <span class="badge bg-{{ \App\Services\CefrScale::tone($level) }}">{{ $level }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </td>
                                 @endif
                                 <td class="text-end">
                                     {{-- Ko'chirish sahifasi: summa, qarzdorlik va guruh tarixini

@@ -226,7 +226,7 @@
     <div class="empty">Test natijasi kiritilmagan.</div>
 @else
     <table class="grid">
-        <thead><tr><th style="width: 4%;">№</th><th>Test</th><th>Guruh</th><th>Ko‘nikmalar</th><th class="c">O‘rtacha</th><th class="r">Sana</th></tr></thead>
+        <thead><tr><th style="width: 4%;">№</th><th>Test</th><th>Guruh</th><th>Ko‘nikmalar</th><th class="c">O‘rtacha</th>@if(\App\Services\CefrScale::enabled())<th class="c">Daraja</th>@endif<th class="r">Sana</th></tr></thead>
         @foreach($testResults as $test)
             <tr>
                 <td>{{ $loop->iteration }}</td>
@@ -247,6 +247,9 @@
                         <span class="badge b-{{ $tone((int) $test->average) }}">{{ $test->average }}%</span>
                     @endif
                 </td>
+                @if(\App\Services\CefrScale::enabled())
+                    <td class="c"><strong>{{ \App\Services\CefrScale::levelFor($test->average) ?? '—' }}</strong></td>
+                @endif
                 <td class="r nowrap">{{ $test->date?->format('d.m.Y') }}</td>
             </tr>
         @endforeach

@@ -65,6 +65,31 @@ final class ScoreScale
     }
 
     /**
+     * Testning o'rtachasi — ball bo'yicha: olingan ballar yig'indisi /
+     * maksimumlar yig'indisi. Grammatika 47/50, O'qish 18/25, Tinglash 21/25
+     * → 86/100 = 86%. Har bir ko'nikma o'z bali og'irligida kiradi (foizlarning
+     * oddiy o'rtachasi 83% chiqarib, 50 ballik bo'limni kam hisoblardi).
+     *
+     * @param  iterable<array{mark: int|float|null, max: int|null}>  $marks
+     */
+    public static function weighted(iterable $marks): ?int
+    {
+        $sum = 0.0;
+        $max = 0;
+
+        foreach ($marks as $item) {
+            if (($item['mark'] ?? null) === null || $item['mark'] === '') {
+                continue;
+            }
+
+            $sum += (float) $item['mark'];
+            $max += self::clampMax($item['max'] ?? null);
+        }
+
+        return $max > 0 ? (int) round($sum * 100 / $max) : null;
+    }
+
+    /**
      * SQL ifoda — AVG() ichida ishlatish uchun. Ustunlar nomi chaqiruvchidan
      * keladi (foydalanuvchi kiritmaydi).
      */
@@ -73,9 +98,24 @@ final class ScoreScale
         return "({$scoreColumn} * 100.0 / COALESCE(NULLIF({$maxColumn}, 0), " . self::DEFAULT_MAX . '))';
     }
 
-    /** "50/50" ko'rinishi. */
+    /**
+     * Ball ko'rsatish va hisob uchun: butun bo'lsa int (47), kasr bo'lsa
+     * float (6.5). Bazadagi decimal "47.00" ni "47" qilib beradi.
+     */
+    public static function mark($score): int|float|null
+    {
+        if ($score === null || $score === '') {
+            return null;
+        }
+
+        $value = round((float) $score, 2);
+
+        return floor($value) === $value ? (int) $value : $value;
+    }
+
+    /** "50/50", "6.5/9" ko'rinishi. */
     public static function fraction($score, $max): string
     {
-        return $score === null ? '—' : ((int) $score) . '/' . ((int) $max > 0 ? (int) $max : self::DEFAULT_MAX);
+        return $score === null ? '—' : self::mark($score) . '/' . ((int) $max > 0 ? (int) $max : self::DEFAULT_MAX);
     }
 }
